@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🚀 Running pre-commit checks..."
+
+# Run lint-staged
+npx lint-staged
+
+# Run type checking
+echo "📝 Checking TypeScript types..."
+pnpm type-check
+
+# Check for console.logs in production code
+echo "🔍 Checking for console.logs..."
+! grep -r "console\.\(log\|debug\|info\|warn\|error\)" --include="*.ts" --include="*.tsx" --exclude-dir="node_modules" --exclude-dir="dist" --exclude-dir=".git" frontend/src backend/src || echo "⚠️  Warning: console statements found"
+
+echo "✅ Pre-commit checks passed!"

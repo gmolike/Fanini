@@ -1,0 +1,72 @@
+{
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true,
+        "source.organizeImports": false
+    },
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "typescript.preferences.importModuleSpecifier": "non-relative",
+    "eslint.workingDirectories": [
+        {
+            "directory": "./frontend",
+            "changeProcessCWD": true
+        },
+        {
+            "directory": "./backend",
+            "changeProcessCWD": true
+        },
+        {
+            "directory": "./shared",
+            "changeProcessCWD": true
+        }
+    ],
+    "prettier.prettierPath": "./node_modules/prettier",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/node_modules": true,
+        "**/.next": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/.turbo": true
+    },
+    "files.associations": {
+        "*.css": "tailwindcss",
+        ".env*": "properties"
+    },
+    "tailwindCSS.experimental.configFile": "./frontend/tailwind.config.ts",
+    "tailwindCSS.includeLanguages": {
+        "typescript": "javascript",
+        "typescriptreact": "javascript"
+    },
+    "emmet.includeLanguages": {
+        "typescriptreact": "html"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/build": true,
+        "**/.next": true,
+        "**/coverage": true
+    },
+    "git.ignoreLimitWarning": true,
+    "npm.packageManager": "pnpm"
+}

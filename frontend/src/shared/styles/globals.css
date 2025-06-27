@@ -1,0 +1,62 @@
+@import 'tailwindcss';
+
+/* Tailwind CSS 4 - CSS-first Konfiguration */
+@theme {
+  /* Eintracht Spandau Farben */
+  --color-primary: #1e40af;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #fbbf24;
+  --color-secondary-foreground: #1f2937;
+
+  /* Base Colors */
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --color-muted: #f8fafc;
+  --color-muted-foreground: #64748b;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #1e40af;
+
+  /* Semantic Colors */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #10b981;
+  --color-success-foreground: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-foreground: #ffffff;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Custom Breakpoints */
+  --breakpoint-xs: 20rem;
+  --breakpoint-sm: 24rem;
+  --breakpoint-md: 28rem;
+  --breakpoint-lg: 32rem;
+  --breakpoint-xl: 36rem;
+}
+
+/* Dark Mode Konfiguration für Tailwind CSS 4 */
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Dark Mode Farben */
+[data-theme='dark'] {
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  --color-border: #334155;
+  --color-input: #334155;
+  --color-primary: #3b82f6;
+  --color-secondary: #facc15;
+}
+
+/* Base Styles */
+* {
+  border-color: theme(colors.border);
+}
+
+body {
+  color: theme(colors.foreground);
+  background: theme(colors.background);
+}

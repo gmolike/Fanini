@@ -1,0 +1,48 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Root",
+      "path": "."
+    },
+    {
+      "name": "⚛️ Frontend",
+      "path": "./frontend"
+    },
+    {
+      "name": "🔧 Backend",
+      "path": "./backend"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+    "typescript.tsdk": "frontend/node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+    "files.associations": {
+      "*.css": "css",
+      "*.tsx": "typescriptreact",
+      "*.ts": "typescript"
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.next": true,
+      "**/coverage": true,
+      "pnpm-lock.yaml": true,
+      "routeTree.gen.ts": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss",
+      "ms-vscode.vscode-typescript-next",
+      "christian-kohler.path-intellisense",
+      "mikestead.dotenv",
+      "usernamehw.errorlens"
+    ]
+  }
+}

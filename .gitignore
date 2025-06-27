@@ -1,115 +1,44 @@
-# Dependencies
+# dependencies
 node_modules/
+.pnpm-store/
+pnpm-lock.yaml
 .pnp
 .pnp.js
 .yarn/install-state.gz
 
-# Testing
+# testing
 coverage/
-*.lcov
-.nyc_output
 
-# Production builds
-dist/
-dist-ssr/
+# next.js
+.next/
+out/
+
+# production
 build/
-*.user
-*.suo
-*.userosscache
-*.sln.docstates
+dist/
 
-# Environment files
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.local
+# misc
+.DS_Store
+*.pem
 
-# Logs
-logs/
-*.log
+# debug
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-# Editor directories and files
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/tasks.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-*~
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+# env files
+.env
+.env*.local
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# vercel
+.vercel
 
-# Docker
-docker/data/
-.docker/
-
-# TypeScript
+# typescript
 *.tsbuildinfo
 next-env.d.ts
 
-# Package managers
-.npm
-.eslintcache
-.stylelintcache
-.node_repl_history
-.yarn-integrity
-
-# Temporary files
-tmp/
-temp/
-.tmp/
-.temp/
-.cache/
-
-# Build tools
-.parcel-cache
-.next
-.nuxt
-.vuepress/dist
-.serverless/
-.fusebox/
-.dynamodb/
-.tern-port
-
-# MSW
-public/mockServiceWorker.js
-
-# Certificates
-*.pem
-
-# Databases
-*.sqlite
-*.sqlite3
-*.db
-
-# Misc
-.history
-.svn/
-.hg/
-.bzr/
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo

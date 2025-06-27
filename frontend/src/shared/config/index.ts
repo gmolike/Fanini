@@ -1,3 +1,3 @@
 export { queryClient } from './queryClient'
-export { apiConfig } from './api'
-export { routerConfig } from './router'
+export { apiConfig, apiFetch } from './api'
+export { router } from './router'

@@ -1,31 +1,27 @@
-// API Konfiguration
+// Basis API Konfiguration
 export const apiConfig = {
   baseUrl: import.meta.env.VITE_API_BASE_URL ?? '/api',
   timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 } as const
 
-// API Client Factory
-export function createApiClient(endpoint: string) {
-  return {
-    get: async <T>(path: string): Promise<T> => {
-      const response = await fetch(`${apiConfig.baseUrl}${endpoint}${path}`, {
-        headers: apiConfig.headers,
-      })
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-      return response.json()
+// Generischer Fetch Wrapper
+export async function apiFetch(endpoint: string, options?: RequestInit): Promise<Response> {
+  const url = `${apiConfig.baseUrl}${endpoint}`
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...options?.headers,
     },
-    post: async <T, D = unknown>(path: string, data: D): Promise<T> => {
-      const response = await fetch(`${apiConfig.baseUrl}${endpoint}${path}`, {
-        method: 'POST',
-        headers: apiConfig.headers,
-        body: JSON.stringify(data),
-      })
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
-      return response.json()
-    },
-    // weitere Methoden...
+    signal: AbortSignal.timeout(apiConfig.timeout),
+  })
+
+  if (!response.ok) {
+    const error = new Error(`API Error: ${response.statusText}`)
+    ;(error as any).status = response.status
+    throw error
   }
+
+  return response
 }

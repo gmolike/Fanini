@@ -2,14 +2,11 @@
 export * from './config'
 
 // Lib
-export * from './lib/utils'
+export * from './lib'
 
-// Types
+// Types (nur wirklich geteilte)
 export * from './types/forms'
 
 // UI Components
 export * from './shadcn'
 export * from './ui'
-
-// Hooks
-export * from './hooks'

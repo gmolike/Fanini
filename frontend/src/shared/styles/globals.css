@@ -1,62 +1,74 @@
 @import 'tailwindcss';
 
-/* Tailwind CSS 4 - CSS-first Konfiguration */
-@theme {
-  /* Eintracht Spandau Farben */
-  --color-primary: #1e40af;
+:root {
+  /* Faninitiative Spandau Hauptfarben */
+  --color-fanini-blue: #34687e;
+  --color-fanini-red: #b94f46;
+
+  /* Semantic Colors */
+  --color-primary: var(--color-fanini-blue);
   --color-primary-foreground: #ffffff;
-  --color-secondary: #fbbf24;
-  --color-secondary-foreground: #1f2937;
+  --color-secondary: var(--color-fanini-red);
+  --color-secondary-foreground: #ffffff;
 
   /* Base Colors */
   --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-muted: #f8fafc;
-  --color-muted-foreground: #64748b;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #1e40af;
+  --color-foreground: #1a2e38;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a2e38;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a2e38;
+  --color-muted: #f3f6f8;
+  --color-muted-foreground: #5a7a8c;
+  --color-accent: #e8f0f4;
+  --color-accent-foreground: #34687e;
+  --color-border: #d9e2e8;
+  --color-input: #e8f0f4;
+  --color-ring: var(--color-primary);
 
-  /* Semantic Colors */
-  --color-destructive: #ef4444;
+  /* Status Colors */
+  --color-destructive: #c73e35;
   --color-destructive-foreground: #ffffff;
-  --color-success: #10b981;
+  --color-success: #4a7c59;
   --color-success-foreground: #ffffff;
-  --color-warning: #f59e0b;
+  --color-warning: #d4824b;
   --color-warning-foreground: #ffffff;
 
   /* Radius */
   --radius: 0.5rem;
-
-  /* Custom Breakpoints */
-  --breakpoint-xs: 20rem;
-  --breakpoint-sm: 24rem;
-  --breakpoint-md: 28rem;
-  --breakpoint-lg: 32rem;
-  --breakpoint-xl: 36rem;
 }
 
-/* Dark Mode Konfiguration für Tailwind CSS 4 */
-@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
-
-/* Dark Mode Farben */
-[data-theme='dark'] {
-  --color-background: #0f172a;
-  --color-foreground: #f8fafc;
-  --color-muted: #1e293b;
-  --color-muted-foreground: #94a3b8;
-  --color-border: #334155;
-  --color-input: #334155;
-  --color-primary: #3b82f6;
-  --color-secondary: #facc15;
+.dark {
+  --color-background: #0f1922;
+  --color-foreground: #e8f0f4;
+  --color-card: #1a2e38;
+  --color-card-foreground: #e8f0f4;
+  --color-popover: #1a2e38;
+  --color-popover-foreground: #e8f0f4;
+  --color-muted: #243642;
+  --color-muted-foreground: #8fa9ba;
+  --color-accent: #2a4555;
+  --color-accent-foreground: #e8f0f4;
+  --color-border: #2a4555;
+  --color-input: #243642;
+  --color-primary: #5a8aa0;
+  --color-secondary: #d66961;
+  --color-destructive: #e85449;
+  --color-success: #5d9b6f;
+  --color-warning: #e8975a;
 }
 
-/* Base Styles */
 * {
-  border-color: theme(colors.border);
+  border-color: var(--color-border);
 }
 
 body {
-  color: theme(colors.foreground);
-  background: theme(colors.background);
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

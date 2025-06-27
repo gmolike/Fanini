@@ -4,20 +4,15 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 Minuten
-      gcTime: 1000 * 60 * 10, // 10 Minuten (ehemals cacheTime)
+      gcTime: 1000 * 60 * 10, // 10 Minuten
       retry: (failureCount, error: any) => {
-        if (error?.status === 404) return false
+        if (error?.status >= 400 && error?.status < 500) return false
         return failureCount < 3
       },
-      refetchOnWindowFocus: true,
-      networkMode: 'online',
+      refetchOnWindowFocus: false,
     },
     mutations: {
-      retry: 0,
-      networkMode: 'online',
+      retry: 1,
     },
   },
 })
-
-// Re-export für einfacheren Import
-export { QueryClient } from '@tanstack/react-query'

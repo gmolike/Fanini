@@ -1,0 +1,10 @@
+{
+  "name": "faninitiative-spandau-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Backend für Faninitiative Spandau e.V.",
+  "scripts": {
+    "dev": "echo 'Backend wird in Phase 3 implementiert'",
+    "build": "echo 'Backend wird in Phase 3 implementiert'"
+  }
+}

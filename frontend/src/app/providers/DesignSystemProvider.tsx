@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
-import { faniniTheme } from '@/shared/design-system/themes'
 
 interface DesignSystemProviderProps {
   children: ReactNode

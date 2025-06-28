@@ -1,38 +1,60 @@
-import rootConfig from '../eslint.config.mjs'
-import reactRefreshPlugin from 'eslint-plugin-react-refresh'
+// frontend/eslint.config.js
+import js from '@eslint/js'
+import typescript from '@typescript-eslint/eslint-plugin'
+import typescriptParser from '@typescript-eslint/parser'
+import react from 'eslint-plugin-react'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { fileURLToPath } from 'url'
+import path from 'path'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default [
-  ...rootConfig,
+  js.configs.recommended,
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: { jsx: true },
+        project: './tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     plugins: {
-      'react-refresh': reactRefreshPlugin,
+      '@typescript-eslint': typescript,
+      react: react,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
     },
     rules: {
-      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
-      '@typescript-eslint/no-interface': 'error',
-      'prefer-const': 'error',
-      'prefer-arrow-callback': 'error',
+      ...typescript.configs.recommended.rules,
+      ...reactHooks.configs.recommended.rules,
+      'react/react-in-jsx-scope': 'off', // React 19 doesn't need this
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
-      'func-style': [
-        'error',
-        'expression',
-        {
-          allowArrowFunctions: true,
-        },
-      ],
-      'no-function-expression': 'off',
-      '@typescript-eslint/naming-convention': [
-        'error',
-        {
-          selector: 'typeAlias',
-          format: ['PascalCase'],
-        },
-        {
-          selector: 'variable',
-          format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
-        },
-      ],
     },
+    settings: {
+      react: { version: '19.0' },
+      'import/resolver': {
+        typescript: {
+          project: path.resolve(__dirname, './tsconfig.json'),
+          alwaysTryTypes: true,
+        },
+      },
+    },
+  },
+  {
+    ignores: [
+      'node_modules/',
+      'dist/',
+      'build/',
+      'coverage/',
+      '*.config.ts',
+      'vite-env.d.ts',
+      'src/routes/$*.tsx',
+    ],
   },
 ]

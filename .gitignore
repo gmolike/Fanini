@@ -42,3 +42,25 @@ next-env.d.ts
 .vscode/
 *.swp
 *.swo
+
+# Root .gitignore
+node_modules/
+.pnpm-debug.log*
+
+# Build outputs
+**/dist/
+**/build/
+**/coverage/
+
+# ESLint cache (now in workspaces)
+**/.eslintcache
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Environment files
+**/.env
+**/.env.local
+
+**/.pnpm-store/*

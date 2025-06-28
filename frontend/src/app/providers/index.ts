@@ -1,2 +1,1 @@
-export { AppProvider } from './AppProvider'
-export { DesignSystemProvider } from './DesignSystemProvider'
+export { AppProvider } from './AppProvider';

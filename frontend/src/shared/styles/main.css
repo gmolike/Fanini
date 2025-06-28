@@ -1,74 +1,69 @@
 @import 'tailwindcss';
 
-:root {
-  /* Faninitiative Spandau Hauptfarben */
-  --color-fanini-blue: #34687e;
-  --color-fanini-red: #b94f46;
+@layer base {
+  :root {
+    /* Faninitiative Spandau Hauptfarben */
+    --color-fanini-blue: #34687e;
+    --color-fanini-red: #b94f46;
 
-  /* Semantic Colors */
-  --color-primary: var(--color-fanini-blue);
-  --color-primary-foreground: #ffffff;
-  --color-secondary: var(--color-fanini-red);
-  --color-secondary-foreground: #ffffff;
+    /* Base Colors */
+    --background: 0 0% 100%;
+    --foreground: 204 24% 17%;
+    --card: 0 0% 100%;
+    --card-foreground: 204 24% 17%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 204 24% 17%;
+    --primary: 200 39% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 4 47% 52%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 200 24% 96%;
+    --muted-foreground: 200 24% 46%;
+    --accent: 200 39% 92%;
+    --accent-foreground: 200 39% 34%;
+    --destructive: 4 67% 49%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 24% 88%;
+    --input: 200 39% 92%;
+    --ring: 200 39% 34%;
+    --radius: 0.5rem;
+  }
 
-  /* Base Colors */
-  --color-background: #ffffff;
-  --color-foreground: #1a2e38;
-  --color-card: #ffffff;
-  --color-card-foreground: #1a2e38;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #1a2e38;
-  --color-muted: #f3f6f8;
-  --color-muted-foreground: #5a7a8c;
-  --color-accent: #e8f0f4;
-  --color-accent-foreground: #34687e;
-  --color-border: #d9e2e8;
-  --color-input: #e8f0f4;
-  --color-ring: var(--color-primary);
-
-  /* Status Colors */
-  --color-destructive: #c73e35;
-  --color-destructive-foreground: #ffffff;
-  --color-success: #4a7c59;
-  --color-success-foreground: #ffffff;
-  --color-warning: #d4824b;
-  --color-warning-foreground: #ffffff;
-
-  /* Radius */
-  --radius: 0.5rem;
+  .dark {
+    --background: 204 39% 9%;
+    --foreground: 200 39% 92%;
+    --card: 204 24% 17%;
+    --card-foreground: 200 39% 92%;
+    --popover: 204 24% 17%;
+    --popover-foreground: 200 39% 92%;
+    --primary: 200 31% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 4 33% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 204 24% 22%;
+    --muted-foreground: 200 24% 65%;
+    --accent: 200 39% 25%;
+    --accent-foreground: 200 39% 92%;
+    --destructive: 4 71% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 200 39% 25%;
+    --input: 204 24% 22%;
+    --ring: 200 31% 50%;
+  }
 }
 
-.dark {
-  --color-background: #0f1922;
-  --color-foreground: #e8f0f4;
-  --color-card: #1a2e38;
-  --color-card-foreground: #e8f0f4;
-  --color-popover: #1a2e38;
-  --color-popover-foreground: #e8f0f4;
-  --color-muted: #243642;
-  --color-muted-foreground: #8fa9ba;
-  --color-accent: #2a4555;
-  --color-accent-foreground: #e8f0f4;
-  --color-border: #2a4555;
-  --color-input: #243642;
-  --color-primary: #5a8aa0;
-  --color-secondary: #d66961;
-  --color-destructive: #e85449;
-  --color-success: #5d9b6f;
-  --color-warning: #e8975a;
-}
-
-* {
-  border-color: var(--color-border);
-}
-
-body {
-  color: var(--color-foreground);
-  background: var(--color-background);
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Custom Fanini Utilities */
+@layer utilities {
+  .text-fanini-blue {
+    color: #34687e;
+  }
+  .text-fanini-red {
+    color: #b94f46;
+  }
+  .bg-fanini-blue {
+    background-color: #34687e;
+  }
+  .bg-fanini-red {
+    background-color: #b94f46;
+  }
 }

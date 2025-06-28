@@ -1,59 +1,92 @@
 {
   "compilerOptions": {
+    // ECMAScript und Modul-Einstellungen
+    "target": "ES2024",
+    "lib": [
+      "ES2024",
+      "DOM",
+      "DOM.Iterable",
+      "WebWorker"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    // JSX für React 19
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    // Strengste Type-Safety
     "strict": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    // Erweiterte Type-Checking
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    // Performance-Optimierungen
     "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
+    "composite": false,
+    // Module Resolution
+    "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "target": "ES2022",
-    "useDefineForClassFields": true,
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "moduleDetection": "force",
+    // Output
     "noEmit": true,
-    "jsx": "react-jsx",
-    "noUncheckedSideEffectImports": true,
+    "declaration": false,
+    "sourceMap": true,
+    "removeComments": false,
+    // FSD Path Mapping
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@app/*": [
-        "./src/app/*"
-      ],
-      "@pages/*": [
-        "./src/pages/*"
-      ],
-      "@widgets/*": [
-        "./src/widgets/*"
-      ],
-      "@features/*": [
-        "./src/features/*"
+      "@shared/*": [
+        "src/shared/*"
       ],
       "@entities/*": [
-        "./src/entities/*"
+        "src/entities/*"
       ],
-      "@shared/*": [
-        "./src/shared/*"
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@widgets/*": [
+        "src/widgets/*"
+      ],
+      "@pages/*": [
+        "src/pages/*"
+      ],
+      "@app/*": [
+        "src/app/*"
+      ],
+      "@/*": [
+        "src/*"
       ]
     }
   },
   "include": [
-    "src",
-    "vite.config.ts"
+    "src/**/*",
+    "src/**/*.json",
+    "**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage"
   ]
 }

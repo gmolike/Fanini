@@ -1,0 +1,37 @@
+@font-face {
+    font-display: swap;
+    font-family: 'Bebas Neue';
+    font-weight: 400;
+    src:
+        local('Bebas Neue'),
+        url('/fonts/BebasNeue-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'Bebas Neue Bold';
+    font-weight: 600;
+    src:
+        local('Bebas Neue Bold'),
+        url('/fonts/BebasNeue-Bold.ttf.woff') format('woff');
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'PT Sans';
+    src:
+        local('PT Sans'),
+        url('/fonts/pt-sans-v9-latin-regular.woff2') format('woff2'),
+        url('/fonts/PTS55F-webfont.woff') format('woff');
+    font-weight: 400;
+}
+
+@font-face {
+    font-display: swap;
+    font-family: 'PT Sans';
+    src:
+        local('PT Sans Bold'),
+        url('/fonts/pt-sans-v9-latin-700.woff2') format('woff2'),
+        url('/fonts/PTS75F-webfont.woff') format('woff');
+    font-weight:  bold;
+}

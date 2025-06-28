@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/shared/shadcn": [
+        "./src/shared/shadcn"
+      ],
+      "@/shared/shadcn/ui": [
+        "./src/shared/shadcn/ui"
+      ]
+    }
+  }
+}

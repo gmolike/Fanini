@@ -1,0 +1,4 @@
+{
+  "pattern": "^(main|master|develop)$|^(feature|fix|hotfix|release|chore|docs|style|refactor|perf|test|build|ci)/[a-z0-9-]+$",
+  "errorMsg": "Branch names must follow the pattern: <type>/<description> (e.g., feature/user-authentication, fix/memory-leak)"
+}

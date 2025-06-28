@@ -1,0 +1,43 @@
+﻿import { createFileRoute, Outlet, Link } from '@tanstack/react-router'
+
+export const Route = createFileRoute('/app/_layout')({
+  component: AppLayout,
+})
+
+function AppLayout() {
+  return (
+    <div className="flex min-h-screen">
+      {/* Sidebar Navigation */}
+      <aside className="w-64 bg-card border-r">
+        <nav className="p-4 space-y-2">
+          <Link
+            to="/app"
+            className="block px-4 py-2 rounded-md hover:bg-accent"
+            activeProps={{ className: 'bg-accent' }}
+          >
+            Dashboard
+          </Link>
+          <Link
+            to="/app/events"
+            className="block px-4 py-2 rounded-md hover:bg-accent"
+            activeProps={{ className: 'bg-accent' }}
+          >
+            Events
+          </Link>
+          <Link
+            to="/app/members"
+            className="block px-4 py-2 rounded-md hover:bg-accent"
+            activeProps={{ className: 'bg-accent' }}
+          >
+            Mitglieder
+          </Link>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 p-8">
+        <Outlet />
+      </main>
+    </div>
+  )
+}

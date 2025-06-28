@@ -1,0 +1,87 @@
+# WICHTIG: Keine node_modules in Docker Context!
+**/node_modules
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+
+# Build outputs
+**/dist
+**/build
+**/.next
+**/.cache
+
+# Dependencies stores
+.pnpm-store/
+**/.pnpm-store/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory
+coverage/
+.nyc_output/
+
+# ESLint cache
+.eslintcache
+
+# Optional caches
+.npm/
+.yarn/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README*.md
+*.md
+
+# Test files
+**/*.test.*
+**/*.spec.*
+**/__tests__/
+**/test/
+**/tests/
+
+# TanStack Router generated
+**/routeTree.gen.ts
+
+# Backup files
+*~
+*.bak
+*.tmp
+*.temp

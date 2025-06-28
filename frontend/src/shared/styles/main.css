@@ -1,0 +1,74 @@
+@import 'tailwindcss';
+
+:root {
+  /* Faninitiative Spandau Hauptfarben */
+  --color-fanini-blue: #34687e;
+  --color-fanini-red: #b94f46;
+
+  /* Semantic Colors */
+  --color-primary: var(--color-fanini-blue);
+  --color-primary-foreground: #ffffff;
+  --color-secondary: var(--color-fanini-red);
+  --color-secondary-foreground: #ffffff;
+
+  /* Base Colors */
+  --color-background: #ffffff;
+  --color-foreground: #1a2e38;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a2e38;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a2e38;
+  --color-muted: #f3f6f8;
+  --color-muted-foreground: #5a7a8c;
+  --color-accent: #e8f0f4;
+  --color-accent-foreground: #34687e;
+  --color-border: #d9e2e8;
+  --color-input: #e8f0f4;
+  --color-ring: var(--color-primary);
+
+  /* Status Colors */
+  --color-destructive: #c73e35;
+  --color-destructive-foreground: #ffffff;
+  --color-success: #4a7c59;
+  --color-success-foreground: #ffffff;
+  --color-warning: #d4824b;
+  --color-warning-foreground: #ffffff;
+
+  /* Radius */
+  --radius: 0.5rem;
+}
+
+.dark {
+  --color-background: #0f1922;
+  --color-foreground: #e8f0f4;
+  --color-card: #1a2e38;
+  --color-card-foreground: #e8f0f4;
+  --color-popover: #1a2e38;
+  --color-popover-foreground: #e8f0f4;
+  --color-muted: #243642;
+  --color-muted-foreground: #8fa9ba;
+  --color-accent: #2a4555;
+  --color-accent-foreground: #e8f0f4;
+  --color-border: #2a4555;
+  --color-input: #243642;
+  --color-primary: #5a8aa0;
+  --color-secondary: #d66961;
+  --color-destructive: #e85449;
+  --color-success: #5d9b6f;
+  --color-warning: #e8975a;
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

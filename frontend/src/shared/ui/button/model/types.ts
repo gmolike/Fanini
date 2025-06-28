@@ -1,5 +1,5 @@
 import type { VariantProps } from 'class-variance-authority'
-import type { buttonVariants } from '@/shared/shadcn/ui/button'
+import type { buttonVariants } from '@/shared/shadcn/button'
 
 /**
  * Button Komponenten Types

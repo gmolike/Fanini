@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/lib'
 
 type ButtonGroupProps = {
   children: React.ReactNode

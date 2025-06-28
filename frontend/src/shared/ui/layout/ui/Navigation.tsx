@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link } from '@tanstack/react-router'
-import { cn } from '@/shared/lib/utils'
-import { Badge } from '@/shared/shadcn/ui/badge'
+import { cn } from '@/shared/lib'
+import { Badge } from '@/shared/shadcn/badge'
 import type { NavigationProps } from '../model/types'
 
 /**

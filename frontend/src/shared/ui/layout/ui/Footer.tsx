@@ -1,6 +1,5 @@
-import * as React from 'react'
+import { cn } from '@/shared/lib'
 import { Link } from '@tanstack/react-router'
-import { cn } from '@/shared/lib/utils'
 import type { FooterProps } from '../model/types'
 
 /**
@@ -35,7 +34,7 @@ export const Footer = ({ className }: FooterProps) => {
                 </Link>
               </li>
               <li>
-                <Link to="/statute" className="text-muted-foreground hover:text-[#34687e]">
+                <Link to="/verein/satzung" className="text-muted-foreground hover:text-[#34687e]">
                   Satzung
                 </Link>
               </li>

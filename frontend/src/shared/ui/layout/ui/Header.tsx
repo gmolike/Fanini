@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { Link } from '@tanstack/react-router'
 import { Menu } from 'lucide-react'
-import { Button } from '@/shared/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/shared/shadcn/ui/sheet'
-import { cn } from '@/shared/lib/utils'
+import { Sheet, SheetContent, SheetTrigger } from '@/shared/shadcn/sheet'
+import { cn } from '@/shared/lib'
 import type { HeaderProps } from '../model/types'
+import { Button } from '@/shared/shadcn'
 
 /**
  * Header Komponente
@@ -28,10 +28,7 @@ export const Header = ({ className, showMobileMenu = true }: HeaderProps) => {
           <Link to="/events" className="text-sm font-medium transition-colors hover:text-[#34687e]">
             Events
           </Link>
-          <Link
-            to="/contact"
-            className="text-sm font-medium transition-colors hover:text-[#34687e]"
-          >
+          <Link to="/about" className="text-sm font-medium transition-colors hover:text-[#34687e]">
             Kontakt
           </Link>
         </nav>
@@ -51,11 +48,7 @@ export const Header = ({ className, showMobileMenu = true }: HeaderProps) => {
                 <Link to="/events" onClick={() => setIsOpen(false)} className="text-lg font-medium">
                   Events
                 </Link>
-                <Link
-                  to="/contact"
-                  onClick={() => setIsOpen(false)}
-                  className="text-lg font-medium"
-                >
+                <Link to="/about" onClick={() => setIsOpen(false)} className="text-lg font-medium">
                   Kontakt
                 </Link>
               </nav>

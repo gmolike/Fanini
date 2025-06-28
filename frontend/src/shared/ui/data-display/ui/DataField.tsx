@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { cn } from '@/shared/lib/utils'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/shadcn/ui/tooltip'
+import { cn } from '@/shared/lib'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/shadcn/tooltip'
 import type { DataFieldProps } from '../model/types'
 
 /**

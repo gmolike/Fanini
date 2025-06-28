@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Loader2 } from 'lucide-react'
-import { Button as ShadcnButton } from '@/shared/shadcn/ui/button'
-import { cn } from '@/shared/lib/utils'
+import { Button as ShadcnButton } from '@/shared/shadcn/button'
+import { cn } from '@/shared/lib'
 import type { ButtonProps } from '../model/types'
 
 /**

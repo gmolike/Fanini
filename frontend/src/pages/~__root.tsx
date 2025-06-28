@@ -1,6 +1,7 @@
 ﻿import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { QueryClient } from '@tanstack/react-query'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { LayoutProvider } from '@/shared/providers/Layout'
 
 interface RouterContext {
   queryClient: QueryClient
@@ -12,11 +13,9 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 
 function RootLayout() {
   return (
-    <div className="min-h-screen bg-background">
+    <LayoutProvider>
       <Outlet />
-      {import.meta.env.DEV && (
-        <TanStackRouterDevtools position="bottom-right" />
-      )}
-    </div>
+      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
+    </LayoutProvider>
   )
 }

@@ -1,2 +1,1 @@
-export * from './styleComposer'
-export * from './configMerger'
+export * from './configMerger';

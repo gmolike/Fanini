@@ -51,10 +51,10 @@ function DashboardPage() {
             icon: TrendingUp,
             color: 'var(--color-success)',
           },
-        ].map((stat, i) => {
+        ].map(stat => {
           const Icon = stat.icon;
           return (
-            <Card key={i}>
+            <Card key={stat.title}>
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                 <CardTitle className='text-sm font-medium'>{stat.title}</CardTitle>
                 <Icon className='h-4 w-4' style={{ color: stat.color }} />
@@ -90,7 +90,10 @@ function DashboardPage() {
               color: 'var(--color-fanini-blue)',
             },
           ].map((event, i) => (
-            <div key={i} className='flex items-center gap-4 rounded-lg bg-[var(--color-muted)] p-4'>
+            <div
+              key={`${event.title}-${event.date}`}
+              className='flex items-center gap-4 rounded-lg bg-[var(--color-muted)] p-4'
+            >
               <div
                 className='min-w-[60px] rounded-lg p-3 text-center text-white'
                 style={{ backgroundColor: event.color }}

@@ -9,4 +9,3 @@ export * from './types/forms'
 
 // UI Components
 export * from './shadcn'
-export * from './ui'

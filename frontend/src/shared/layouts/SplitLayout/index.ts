@@ -1,1 +1,0 @@
-export { SplitLayout } from './SplitLayout'

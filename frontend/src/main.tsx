@@ -3,8 +3,8 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { RouterProvider } from '@tanstack/react-router'
 import { queryClient, router } from '@/shared/config'
-import './shared/styles/font.css'
-import './shared/styles/main.css'
+import './styles/font.css'
+import './styles/main.css'
 
 const rootElement = document.getElementById('root')!
 

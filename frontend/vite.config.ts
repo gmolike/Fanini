@@ -1,7 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import { resolve } from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [
@@ -42,6 +42,7 @@ export default defineConfig({
     jsx: 'automatic',
     jsxDev: true,
   },
+  assetsInclude: ['**/*.jpg', '**/*.png', '**/*.jpeg', '**/*.svg'],
 
   build: {
     target: 'esnext',
@@ -92,4 +93,4 @@ export default defineConfig({
       drafts: { customMedia: true },
     },
   },
-})
+});

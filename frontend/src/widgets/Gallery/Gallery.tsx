@@ -1,12 +1,12 @@
 import { cn } from '@/shared/lib';
 import { Image } from '@/shared/ui/Image';
 
-interface GalleryImage {
+type GalleryImage = {
   src: string;
   alt: string;
 }
 
-interface GalleryProps {
+type GalleryProps = {
   images: GalleryImage[];
   className?: string;
 }
@@ -17,24 +17,24 @@ export const Gallery = ({ images, className }: GalleryProps) => {
       {images.map(image => (
         <div
           key={image.src}
-          className='group aspect-square cursor-pointer overflow-hidden rounded-lg'
+          className="group aspect-square cursor-pointer overflow-hidden rounded-lg"
         >
           <Image
             src={image.src}
             alt={image.alt}
-            className='h-full w-full transition-transform duration-300 group-hover:scale-110'
+            className="h-full w-full transition-transform duration-300 group-hover:scale-110"
           />
         </div>
       ))}
 
       {/* Placeholder für weitere Bilder */}
       {images.length < 8 &&
-        [...Array(8 - images.length)].map((_, i) => (
+        Array.from({ length: 8 - images.length }).map((_, i) => (
           <div
-            key={`placeholder-${images.length + i}`}
-            className='flex aspect-square items-center justify-center rounded-lg bg-[var(--color-muted)]'
+            key={`placeholder-${String(images.length + i)}`}
+            className="flex aspect-square items-center justify-center rounded-lg bg-[var(--color-muted)]"
           >
-            <span className='text-[var(--color-muted-foreground)]'>Bald mehr...</span>
+            <span className="text-[var(--color-muted-foreground)]">Bald mehr...</span>
           </div>
         ))}
     </div>

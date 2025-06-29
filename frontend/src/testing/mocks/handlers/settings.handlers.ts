@@ -5,19 +5,15 @@ import { settingsSchema, brandingSchema } from '@/entities/settings/model/schema
 
 import { settingsMockData } from '../data/settings.data';
 
-console.log('[MSW] Registering settings handlers...');
-
 export const settingsHandlers = [
   // GET /api/settings
   http.get('/api/settings', async () => {
-    console.log('[MSW] GET /api/settings');
     await delay(300);
     return HttpResponse.json(settingsMockData.getDefault());
   }),
 
   // PUT /api/settings
   http.put('/api/settings', async ({ request }) => {
-    console.log('[MSW] PUT /api/settings');
     await delay(500);
 
     try {
@@ -32,7 +28,6 @@ export const settingsHandlers = [
 
   // GET /api/settings/branding
   http.get('/api/settings/branding', async () => {
-    console.log('[MSW] GET /api/settings/branding');
     await delay(200);
     const settings = settingsMockData.getDefault();
     return HttpResponse.json(settings.branding);
@@ -40,7 +35,6 @@ export const settingsHandlers = [
 
   // PATCH /api/settings/branding
   http.patch('/api/settings/branding', async ({ request }) => {
-    console.log('[MSW] PATCH /api/settings/branding');
     await delay(400);
 
     try {
@@ -53,5 +47,3 @@ export const settingsHandlers = [
     }
   }),
 ];
-
-console.log(`[MSW] Registered ${settingsHandlers.length} settings handlers`);

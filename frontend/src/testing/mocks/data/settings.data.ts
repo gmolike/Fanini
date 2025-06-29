@@ -8,21 +8,36 @@ class SettingsMockData {
 
   getDefault(): Settings {
     // Deep clone to prevent mutations
-    return JSON.parse(JSON.stringify(this.settings));
+    return JSON.parse(JSON.stringify(this.settings)) as Settings;
   }
 
   update(updates: SettingsUpdate): Settings {
     // Deep merge implementation
-    const merge = (target: any, source: any): any => {
-      if (!source) return target;
-
-      const output = { ...target };
+    const merge = <T extends object>(
+      target: Partial<{ [K in keyof T]: T[K] | undefined }>,
+      source: Partial<{ [K in keyof T]: T[K] | undefined }>
+    ): Partial<{ [K in keyof T]: T[K] | undefined }> => {
+      const output: Partial<{ [K in keyof T]: T[K] | undefined }> = { ...target };
 
       Object.keys(source).forEach(key => {
-        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-          output[key] = merge(target[key] || {}, source[key]);
-        } else if (source[key] !== undefined) {
-          output[key] = source[key];
+        const k = key as keyof T;
+        const sourceValue = source[k];
+        const targetValue = target[k];
+
+        if (
+          sourceValue !== undefined &&
+          typeof sourceValue === 'object' &&
+          sourceValue != null &&
+          !Array.isArray(sourceValue)
+        ) {
+          output[k] = merge(
+            (typeof targetValue === 'object' && targetValue != null && !Array.isArray(targetValue)
+              ? targetValue
+              : {}) as Record<string, unknown>,
+            sourceValue as Record<string, unknown>
+          ) as T[keyof T];
+        } else if (sourceValue !== undefined) {
+          output[k] = sourceValue as unknown as T[keyof T];
         }
       });
 
@@ -31,7 +46,7 @@ class SettingsMockData {
 
     this.settings = {
       ...this.settings,
-      ...merge(this.settings, updates),
+      ...(merge(this.settings, updates) as Settings),
       updatedAt: new Date().toISOString(),
     };
 

@@ -1,12 +1,12 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react';
 
-import { cn } from '@/shared/lib'
+import { cn } from '@/shared/lib';
 
-import { BreadcrumbItem } from './Item'
+import { BreadcrumbItem } from './Item';
 
-import type { BreadcrumbProps } from '../model/types'
+import type { BreadcrumbProps } from '../model/types';
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
@@ -15,13 +15,13 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   showHomeIcon = true,
   variant = 'default',
 }) => {
-  if (!items || items.length === 0) return null
+  if (items.length === 0) return null;
 
   const variantClasses = {
     default: 'text-sm',
     compact: 'text-xs',
     large: 'text-base',
-  }
+  };
 
   return (
     <nav
@@ -30,15 +30,15 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
     >
       <ol className="flex items-center space-x-2">
         {items.map((item, index) => {
-          const isLast = index === items.length - 1
-          const isFirst = index === 0
+          const isLast = index === items.length - 1;
+          const isFirst = index === 0;
 
           return (
-            <li key={`${item.label}-${index}`} className="flex items-center">
+            <li key={`${item.label}-${index.toString()}`} className="flex items-center">
               {/* Separator */}
               {index > 0 && (
                 <Separator
-                  className="mx-2 h-4 w-4 text-muted-foreground flex-shrink-0"
+                  className="text-muted-foreground mx-2 h-4 w-4 flex-shrink-0"
                   aria-hidden="true"
                 />
               )}
@@ -51,9 +51,9 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                 showHomeIcon={showHomeIcon}
               />
             </li>
-          )
+          );
         })}
       </ol>
     </nav>
-  )
-}
+  );
+};

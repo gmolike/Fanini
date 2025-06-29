@@ -2,7 +2,7 @@ import * as React from 'react'
 
 import { cn } from '@/shared/lib'
 
-interface ButtonGroupProps {
+type ButtonGroupProps = {
   children: React.ReactNode
   className?: string
   orientation?: 'horizontal' | 'vertical'

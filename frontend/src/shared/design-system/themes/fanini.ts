@@ -1,5 +1,6 @@
-import { colors } from '../tokens/colors'
-import { spacing } from '../tokens/spacing'
+/* eslint-disable @typescript-eslint/naming-convention */
+import { colors } from '../tokens/colors';
+import { spacing } from '../tokens/spacing';
 
 /**
  * Faninitiative Spandau e.V. Theme
@@ -71,6 +72,6 @@ export const faniniTheme = {
     xl: '1rem',
     full: '9999px',
   },
-} as const
+} as const;
 
-export type FaniniTheme = typeof faniniTheme
+export type FaniniTheme = typeof faniniTheme;

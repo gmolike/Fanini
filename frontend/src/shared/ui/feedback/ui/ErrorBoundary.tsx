@@ -6,7 +6,7 @@ import { Button } from '@/shared/shadcn';
 
 import type { ErrorBoundaryProps } from '../model/types';
 
-interface ErrorBoundaryState {
+type ErrorBoundaryState = {
   hasError: boolean;
   error: Error | null;
 }
@@ -42,17 +42,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       }
 
       return (
-        <div className='flex min-h-[400px] flex-col items-center justify-center p-8'>
-          <AlertCircle className='text-destructive mb-4 h-12 w-12' />
-          <h2 className='mb-2 text-lg font-semibold'>Ein Fehler ist aufgetreten</h2>
-          <p className='text-muted-foreground mb-4 text-sm'>{this.state.error.message}</p>
-          <Button onClick={this.reset} variant='outline'>
+        <div className="flex min-h-[400px] flex-col items-center justify-center p-8">
+          <AlertCircle className="text-destructive mb-4 h-12 w-12" />
+          <h2 className="mb-2 text-lg font-semibold">Ein Fehler ist aufgetreten</h2>
+          <p className="text-muted-foreground mb-4 text-sm">{this.state.error.message}</p>
+          <Button onClick={this.reset} variant="outline">
             Erneut versuchen
           </Button>
         </div>
       );
     }
 
-    return this.props.children;
+    if (this.props.children !== undefined && this.props.children !== null) {
+      return <>{this.props.children}</>;
+    }
+    return null;
   }
 }

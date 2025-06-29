@@ -18,7 +18,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   showHomeIcon = true,
   variant = 'default',
 }) => {
-  if (!items || items.length === 0) return null
+  if (items.length === 0) return null
 
   const variantClasses = {
     default: 'text-sm',
@@ -38,7 +38,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
           const Icon = item.icon
 
           return (
-            <li key={`${item.label}-${index}`} className="flex items-center">
+            <li key={`${item.label}-${index.toString()}`} className="flex items-center">
               {/* Separator */}
               {index > 0 && (
                 <Separator

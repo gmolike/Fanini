@@ -1,10 +1,10 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import { Link } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router';
 
-import { cn } from '@/shared/lib'
+import { cn } from '@/shared/lib';
 
-import type { NavLinkProps } from './model/types'
+import type { NavLinkProps } from './model/types';
 
 /**
  * NavLink Komponente
@@ -22,7 +22,7 @@ export const NavLink: React.FC<NavLinkProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2'
+    'inline-flex items-center gap-2 font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
 
   const variantClasses = {
     default: 'text-foreground hover:text-primary [&.active]:text-primary',
@@ -31,23 +31,25 @@ export const NavLink: React.FC<NavLinkProps> = ({
       'text-muted-foreground hover:text-foreground hover:bg-accent [&.active]:bg-accent [&.active]:text-accent-foreground',
     sidebar:
       'w-full justify-start rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground [&.active]:bg-accent [&.active]:text-accent-foreground',
-  }
+  };
 
   const sizeClasses = {
     sm: 'text-sm px-2 py-1',
     default: 'px-3 py-2',
     lg: 'text-lg px-4 py-3',
-  }
+  };
 
   const content = (
     <>
       {Icon ? <Icon className="h-4 w-4" /> : null}
       <span className="flex-1">{children}</span>
-      {badge ? <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+      {badge !== undefined ? (
+        <span className="bg-primary text-primary-foreground ml-auto rounded-full px-2 py-0.5 text-xs">
           {badge}
-        </span> : null}
+        </span>
+      ) : null}
     </>
-  )
+  );
 
   if (isExternal) {
     return (
@@ -59,7 +61,11 @@ export const NavLink: React.FC<NavLinkProps> = ({
       >
         {content}
       </a>
-    )
+    );
+  }
+
+  if (to === undefined) {
+    return null;
   }
 
   return (
@@ -71,5 +77,5 @@ export const NavLink: React.FC<NavLinkProps> = ({
     >
       {content}
     </Link>
-  )
-}
+  );
+};

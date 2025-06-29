@@ -3,12 +3,12 @@
 
 import { z } from 'zod';
 
-import { apiClient, type ApiError } from '../config/apiClient';
+import { apiClient } from '../config/apiClient';
 
 /**
  * API Endpoint Konfiguration
  */
-export interface ApiEndpointConfig<TParams = void, TResponse = unknown> {
+export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   url: string | ((params: TParams) => string);
   schema?: z.ZodSchema<TResponse>;
@@ -79,7 +79,7 @@ export const createBatchOperation = <TParams, TResponse>(
     delay?: number;
   }
 ) => {
-  const { batchSize = 5, delay = 100 } = options || {};
+  const { batchSize = 5, delay = 100 } = options ?? {};
 
   return async (items: TParams[]): Promise<TResponse[]> => {
     const results: TResponse[] = [];

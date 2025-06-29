@@ -1,6 +1,6 @@
 import { cn } from '@/shared/lib';
 
-interface SocialIconProps {
+type SocialIconProps = {
   icon: string; // SVG path data from simple-icons
   className?: string;
   size?: number;

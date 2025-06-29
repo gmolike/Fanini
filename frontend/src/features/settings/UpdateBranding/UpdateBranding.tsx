@@ -17,6 +17,146 @@ import {
   Label,
 } from '@/shared/shadcn';
 
+// Subcomponent: ColorPreview
+const ColorPreview = ({ displayColors }: { displayColors: Partial<Branding['colors']> }) => (
+  <div className="flex gap-4 rounded-lg border p-4">
+    <div className="space-y-2">
+      <Label>Vorschau</Label>
+      <div className="flex gap-2">
+        <div
+          className="h-16 w-16 rounded-md border"
+          style={{ backgroundColor: displayColors.primary ?? '#34687e' }}
+        />
+        <div
+          className="h-16 w-16 rounded-md border"
+          style={{ backgroundColor: displayColors.secondary ?? '#b94f46' }}
+        />
+        {displayColors.accent ? (
+          <div
+            className="h-16 w-16 rounded-md border"
+            style={{ backgroundColor: displayColors.accent }}
+          />
+        ) : null}
+      </div>
+    </div>
+  </div>
+);
+
+// Subcomponent: ColorInputs
+const ColorInputs = ({
+  form,
+  previewColors,
+  setPreviewColors,
+}: {
+  form: ReturnType<typeof useForm<Branding>>;
+  previewColors: Partial<Branding['colors']>;
+  setPreviewColors: React.Dispatch<React.SetStateAction<Partial<Branding['colors']>>>;
+}) => (
+  <div className="space-y-4">
+    <div>
+      <Label htmlFor="primary">Primärfarbe</Label>
+      <div className="flex gap-2">
+        <Input
+          id="primary"
+          type="color"
+          className="h-10 w-20"
+          {...form.register('colors.primary')}
+          onChange={e => {
+            form.setValue('colors.primary', e.target.value);
+            setPreviewColors({ ...previewColors, primary: e.target.value });
+          }}
+        />
+        <Input
+          type="text"
+          className="flex-1"
+          {...form.register('colors.primary')}
+          placeholder="#34687e"
+        />
+      </div>
+      {form.formState.errors.colors?.primary ? (
+        <p className="text-destructive mt-1 text-sm">
+          {form.formState.errors.colors.primary.message}
+        </p>
+      ) : null}
+    </div>
+
+    <div>
+      <Label htmlFor="secondary">Sekundärfarbe</Label>
+      <div className="flex gap-2">
+        <Input
+          id="secondary"
+          type="color"
+          className="h-10 w-20"
+          {...form.register('colors.secondary')}
+          onChange={e => {
+            form.setValue('colors.secondary', e.target.value);
+            setPreviewColors({ ...previewColors, secondary: e.target.value });
+          }}
+        />
+        <Input
+          type="text"
+          className="flex-1"
+          {...form.register('colors.secondary')}
+          placeholder="#b94f46"
+        />
+      </div>
+      {form.formState.errors.colors?.secondary ? (
+        <p className="text-destructive mt-1 text-sm">
+          {form.formState.errors.colors.secondary.message}
+        </p>
+      ) : null}
+    </div>
+
+    <div>
+      <Label htmlFor="accent">Akzentfarbe (Optional)</Label>
+      <div className="flex gap-2">
+        <Input
+          id="accent"
+          type="color"
+          className="h-10 w-20"
+          {...form.register('colors.accent')}
+          onChange={e => {
+            form.setValue('colors.accent', e.target.value);
+            setPreviewColors({ ...previewColors, accent: e.target.value });
+          }}
+        />
+        <Input
+          type="text"
+          className="flex-1"
+          {...form.register('colors.accent')}
+          placeholder="#e8f0f4"
+        />
+      </div>
+      {form.formState.errors.colors?.accent ? (
+        <p className="text-destructive mt-1 text-sm">
+          {form.formState.errors.colors.accent.message}
+        </p>
+      ) : null}
+    </div>
+  </div>
+);
+
+// Subcomponent: LogoInputs
+const LogoInputs = ({ form }: { form: ReturnType<typeof useForm<Branding>> }) => (
+  <div className="space-y-4">
+    <div>
+      <Label htmlFor="logoUrl">Logo URL</Label>
+      <Input id="logoUrl" type="url" placeholder="https://..." {...form.register('logo.url')} />
+      {form.formState.errors.logo?.url ? (
+        <p className="text-destructive mt-1 text-sm">{form.formState.errors.logo.url.message}</p>
+      ) : null}
+    </div>
+
+    <div>
+      <Label htmlFor="logoAlt">Logo Alt-Text</Label>
+      <Input id="logoAlt" type="text" placeholder="Vereinslogo..." {...form.register('logo.alt')} />
+      {form.formState.errors.logo?.alt ? (
+        <p className="text-destructive mt-1 text-sm">{form.formState.errors.logo.alt.message}</p>
+      ) : null}
+    </div>
+  </div>
+);
+
 export const UpdateBranding = () => {
   const { data: branding, isLoading, error } = useBranding();
   const updateBranding = useUpdateBranding();
@@ -40,13 +180,15 @@ export const UpdateBranding = () => {
   // Form mit Daten füllen wenn geladen
   useEffect(() => {
     if (branding) {
-      console.log('[UpdateBranding] Setting form data:', branding);
+      // Only allowed console methods
+      console.info('[UpdateBranding] Setting form data:', branding);
       form.reset(branding);
     }
   }, [branding, form]);
 
   const onSubmit = async (data: Branding) => {
-    console.log('[UpdateBranding] Submitting:', data);
+    // Only allowed console methods
+    console.info('[UpdateBranding] Submitting:', data);
     try {
       await updateBranding.mutateAsync(data);
     } catch (error) {
@@ -78,7 +220,7 @@ export const UpdateBranding = () => {
   }
 
   // Main Component
-  const colors = form.watch('colors') || branding?.colors;
+  const colors = form.watch('colors');
   const displayColors = { ...colors, ...previewColors };
 
   return (
@@ -90,144 +232,17 @@ export const UpdateBranding = () => {
       <CardContent>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Color Preview */}
-          <div className="flex gap-4 rounded-lg border p-4">
-            <div className="space-y-2">
-              <Label>Vorschau</Label>
-              <div className="flex gap-2">
-                <div
-                  className="h-16 w-16 rounded-md border"
-                  style={{ backgroundColor: displayColors?.primary || '#34687e' }}
-                />
-                <div
-                  className="h-16 w-16 rounded-md border"
-                  style={{ backgroundColor: displayColors?.secondary || '#b94f46' }}
-                />
-                {displayColors?.accent ? (
-                  <div
-                    className="h-16 w-16 rounded-md border"
-                    style={{ backgroundColor: displayColors.accent }}
-                  />
-                ) : null}
-              </div>
-            </div>
-          </div>
+          <ColorPreview displayColors={displayColors} />
 
           {/* Colors */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="primary">Primärfarbe</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="primary"
-                  type="color"
-                  className="h-10 w-20"
-                  {...form.register('colors.primary')}
-                  onChange={e => {
-                    form.setValue('colors.primary', e.target.value);
-                    setPreviewColors({ ...previewColors, primary: e.target.value });
-                  }}
-                />
-                <Input
-                  type="text"
-                  className="flex-1"
-                  {...form.register('colors.primary')}
-                  placeholder="#34687e"
-                />
-              </div>
-              {form.formState.errors.colors?.primary ? (
-                <p className="text-destructive mt-1 text-sm">
-                  {form.formState.errors.colors.primary.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div>
-              <Label htmlFor="secondary">Sekundärfarbe</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="secondary"
-                  type="color"
-                  className="h-10 w-20"
-                  {...form.register('colors.secondary')}
-                  onChange={e => {
-                    form.setValue('colors.secondary', e.target.value);
-                    setPreviewColors({ ...previewColors, secondary: e.target.value });
-                  }}
-                />
-                <Input
-                  type="text"
-                  className="flex-1"
-                  {...form.register('colors.secondary')}
-                  placeholder="#b94f46"
-                />
-              </div>
-              {form.formState.errors.colors?.secondary ? (
-                <p className="text-destructive mt-1 text-sm">
-                  {form.formState.errors.colors.secondary.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div>
-              <Label htmlFor="accent">Akzentfarbe (Optional)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="accent"
-                  type="color"
-                  className="h-10 w-20"
-                  {...form.register('colors.accent')}
-                  onChange={e => {
-                    form.setValue('colors.accent', e.target.value);
-                    setPreviewColors({ ...previewColors, accent: e.target.value });
-                  }}
-                />
-                <Input
-                  type="text"
-                  className="flex-1"
-                  {...form.register('colors.accent')}
-                  placeholder="#e8f0f4"
-                />
-              </div>
-              {form.formState.errors.colors?.accent ? (
-                <p className="text-destructive mt-1 text-sm">
-                  {form.formState.errors.colors.accent.message}
-                </p>
-              ) : null}
-            </div>
-          </div>
+          <ColorInputs
+            form={form}
+            previewColors={previewColors}
+            setPreviewColors={setPreviewColors}
+          />
 
           {/* Logo */}
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="logoUrl">Logo URL</Label>
-              <Input
-                id="logoUrl"
-                type="url"
-                placeholder="https://..."
-                {...form.register('logo.url')}
-              />
-              {form.formState.errors.logo?.url ? (
-                <p className="text-destructive mt-1 text-sm">
-                  {form.formState.errors.logo.url.message}
-                </p>
-              ) : null}
-            </div>
-
-            <div>
-              <Label htmlFor="logoAlt">Logo Alt-Text</Label>
-              <Input
-                id="logoAlt"
-                type="text"
-                placeholder="Vereinslogo..."
-                {...form.register('logo.alt')}
-              />
-              {form.formState.errors.logo?.alt ? (
-                <p className="text-destructive mt-1 text-sm">
-                  {form.formState.errors.logo.alt.message}
-                </p>
-              ) : null}
-            </div>
-          </div>
+          <LogoInputs form={form} />
 
           {/* Submit Button */}
           <Button

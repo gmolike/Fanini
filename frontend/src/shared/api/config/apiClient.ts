@@ -1,12 +1,10 @@
 ﻿// frontend/src/shared/api/config/apiClient.ts
-// Axios/Fetch client setup
-
 import { z } from 'zod';
 
 /**
  * API Error Schema
  */
-const apiErrorSchema = z.object({
+export const apiErrorSchema = z.object({
   message: z.string(),
   code: z.string().optional(),
   statusCode: z.number(),
@@ -16,30 +14,61 @@ const apiErrorSchema = z.object({
 export type ApiError = z.infer<typeof apiErrorSchema>;
 
 /**
+ * Custom API Error Klasse
+ */
+export class ApiClientError extends Error implements ApiError {
+  code: string | undefined;
+  statusCode: number;
+  details: Record<string, unknown> | undefined;
+
+  constructor(error: ApiError) {
+    super(error.message);
+    this.name = 'ApiClientError';
+    this.code = error.code;
+    this.statusCode = error.statusCode;
+    this.details = error.details;
+  }
+}
+
+/**
+ * Request Options Type
+ */
+export type RequestOptions = {
+  params?: Record<string, string | number | boolean>;
+} & Omit<RequestInit, 'body' | 'method'>
+
+/**
  * API Client Klasse
  * @description Wrapper um fetch mit TypeScript und Error Handling
  */
 class ApiClient {
   private readonly baseURL: string;
   private readonly timeout: number;
-  private headers: Record<string, string>;
+  private defaultHeaders: Record<string, string>;
 
   constructor() {
-    this.baseURL = import.meta.env.VITE_API_BASE_URL ?? '';
-    this.timeout = Number(import.meta.env.VITE_API_TIMEOUT) || 30000;
-    this.headers = {
-      'Content-Type': 'application/json',
+    // Validate environment variables
+    const baseURL = import.meta.env['VITE_API_BASE_URL'] as string | undefined;
+    if (!baseURL && import.meta.env['VITE_MOCK_API_ENABLED'] !== 'true') {
+      throw new Error('VITE_API_BASE_URL is not defined');
+    }
+
+    this.baseURL = baseURL ?? '';
+    this.timeout = Number(import.meta.env['VITE_API_TIMEOUT']) || 30000;
+    this.defaultHeaders = {
+      contentType: 'application/json',
+      accept: 'application/json',
     };
   }
 
   /**
    * Setzt den Auth Token
    */
-  setAuthToken(token: string | null) {
+  setAuthToken(token: string | null): void {
     if (token) {
-      this.headers['Authorization'] = `Bearer ${token}`;
+      this.defaultHeaders['Authorization'] = `Bearer ${token}`;
     } else {
-      delete this.headers['Authorization'];
+      delete this.defaultHeaders['Authorization'];
     }
   }
 
@@ -51,12 +80,50 @@ class ApiClient {
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
     // Für MSW - immer relative URLs verwenden
-    if (import.meta.env.VITE_MOCK_API_ENABLED === 'true') {
+    if (import.meta.env['VITE_MOCK_API_ENABLED'] === 'true') {
       return `/api${cleanEndpoint}`;
     }
 
-    // Für Production API
-    return `${this.baseURL}${cleanEndpoint}`;
+    // Für Production API - stelle sicher, dass baseURL kein trailing slash hat
+    const cleanBaseURL = this.baseURL.endsWith('/') ? this.baseURL.slice(0, -1) : this.baseURL;
+
+    return `${cleanBaseURL}${cleanEndpoint}`;
+  }
+
+  /**
+   * Merge Headers
+   */
+  private mergeHeaders(customHeaders?: HeadersInit): Headers {
+    // Map camelCase keys to standard HTTP header keys
+    const headerKeyMap: Record<string, string> = {
+      contentType: 'Content-Type',
+      accept: 'Accept',
+      authorization: 'Authorization',
+    };
+
+    const headers = new Headers();
+    Object.entries(this.defaultHeaders).forEach(([key, value]) => {
+      const mappedKey = headerKeyMap[key] ?? key;
+      headers.set(mappedKey, value);
+    });
+
+    if (customHeaders) {
+      if (customHeaders instanceof Headers) {
+        customHeaders.forEach((value, key) => {
+          headers.set(key, value);
+        });
+      } else if (Array.isArray(customHeaders)) {
+        customHeaders.forEach(([key, value]) => {
+          headers.set(key, value);
+        });
+      } else {
+        Object.entries(customHeaders).forEach(([key, value]) => {
+          headers.set(key, value);
+        });
+      }
+    }
+
+    return headers;
   }
 
   /**
@@ -64,24 +131,39 @@ class ApiClient {
    */
   private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => { controller.abort(); }, this.timeout);
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, this.timeout);
 
     try {
       const response = await fetch(url, {
         ...options,
         signal: controller.signal,
-        headers: {
-          ...this.headers,
-          ...options.headers,
-        },
+        headers: this.mergeHeaders(options.headers),
       });
+
       clearTimeout(timeoutId);
       return response;
     } catch (error) {
       clearTimeout(timeoutId);
-      if (error instanceof Error && error.name === 'AbortError') {
-        throw new Error(`Request timeout after ${this.timeout}ms`);
+
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new ApiClientError({
+            message: `Request timeout after ${this.timeout.toString()}ms`,
+            statusCode: 408,
+            code: 'TIMEOUT',
+          });
+        }
+
+        // Network error
+        throw new ApiClientError({
+          message: error.message || 'Network error',
+          statusCode: 0,
+          code: 'NETWORK_ERROR',
+        });
       }
+
       throw error;
     }
   }
@@ -90,45 +172,67 @@ class ApiClient {
    * Verarbeitet die Response
    */
   private async handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({
-        message: response.statusText,
-        statusCode: response.status,
-      }));
+    // Handle successful responses
+    if (response.ok) {
+      // 204 No Content
+      if (response.status === 204) {
+        return {} as T;
+      }
 
-      const apiError: ApiError = {
-        message: errorData.message ?? 'Ein Fehler ist aufgetreten',
-        code: errorData.code,
+      try {
+        return await response.json() as T;
+      } catch {
+        // Response ist kein JSON
+        return {} as T;
+      }
+    }
+
+    // Handle error responses
+    let errorData: Partial<ApiError>;
+
+    try {
+      errorData = await response.json() as Partial<ApiError>;
+    } catch {
+      errorData = {
+        message: response.statusText || 'Ein Fehler ist aufgetreten',
         statusCode: response.status,
-        details: errorData.details,
       };
-
-      throw apiError;
     }
 
-    // 204 No Content
-    if (response.status === 204) {
-      return {} as T;
+    const apiError: ApiError = {
+      message: errorData.message ?? 'Ein Fehler ist aufgetreten',
+      code: errorData.code,
+      statusCode: response.status,
+      details: errorData.details,
+    };
+
+    throw new ApiClientError(apiError);
+  }
+
+  /**
+   * Build URL with params
+   */
+  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
+    const url = new URL(this.getFullUrl(endpoint), window.location.origin);
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        url.searchParams.append(key, String(value));
+      });
     }
 
-    return response.json();
+    return url.toString();
   }
 
   /**
    * GET Request
    */
-  async get<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
-    const url = new URL(this.getFullUrl(endpoint));
+  async get<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
+    const { params, ...fetchOptions } = options ?? {};
+    const url = this.buildUrl(endpoint, params);
 
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      });
-    }
-
-    const response = await this.fetchWithTimeout(url.toString(), {
+    const response = await this.fetchWithTimeout(url, {
+      ...fetchOptions,
       method: 'GET',
     });
 
@@ -138,10 +242,14 @@ class ApiClient {
   /**
    * POST Request
    */
-  async post<T>(endpoint: string, data?: unknown): Promise<T> {
-    const response = await this.fetchWithTimeout(this.getFullUrl(endpoint), {
+  async post<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
+    const { params, ...fetchOptions } = options ?? {};
+    const url = this.buildUrl(endpoint, params);
+
+    const response = await this.fetchWithTimeout(url, {
+      ...fetchOptions,
       method: 'POST',
-      body: data ? JSON.stringify(data) : null,
+      body: data !== undefined ? JSON.stringify(data) : null,
     });
 
     return this.handleResponse<T>(response);
@@ -150,21 +258,14 @@ class ApiClient {
   /**
    * PUT Request
    */
-  async put<T>(endpoint: string, data?: unknown): Promise<T> {
-    const response = await this.fetchWithTimeout(this.getFullUrl(endpoint), {
+  async put<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
+    const { params, ...fetchOptions } = options ?? {};
+    const url = this.buildUrl(endpoint, params);
+
+    const response = await this.fetchWithTimeout(url, {
+      ...fetchOptions,
       method: 'PUT',
-      body: data ? JSON.stringify(data) : null,
-    });
-
-    return this.handleResponse<T>(response);
-  }
-
-  /**
-   * DELETE Request
-   */
-  async delete<T>(endpoint: string): Promise<T> {
-    const response = await this.fetchWithTimeout(this.getFullUrl(endpoint), {
-      method: 'DELETE',
+      body: data !== undefined ? JSON.stringify(data) : null,
     });
 
     return this.handleResponse<T>(response);
@@ -173,10 +274,54 @@ class ApiClient {
   /**
    * PATCH Request
    */
-  async patch<T>(endpoint: string, data?: unknown): Promise<T> {
-    const response = await this.fetchWithTimeout(this.getFullUrl(endpoint), {
+  async patch<T = unknown>(endpoint: string, data?: unknown, options?: RequestOptions): Promise<T> {
+    const { params, ...fetchOptions } = options ?? {};
+    const url = this.buildUrl(endpoint, params);
+
+    const response = await this.fetchWithTimeout(url, {
+      ...fetchOptions,
       method: 'PATCH',
-      body: data ? JSON.stringify(data) : null,
+      body: data !== undefined ? JSON.stringify(data) : null,
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
+  /**
+   * DELETE Request
+   */
+  async delete<T = unknown>(endpoint: string, options?: RequestOptions): Promise<T> {
+    const { params, ...fetchOptions } = options ?? {};
+    const url = this.buildUrl(endpoint, params);
+
+    const response = await this.fetchWithTimeout(url, {
+      ...fetchOptions,
+      method: 'DELETE',
+    });
+
+    return this.handleResponse<T>(response);
+  }
+
+  /**
+   * Upload File
+   */
+  async upload<T = unknown>(
+    endpoint: string,
+    formData: FormData,
+    options?: RequestOptions
+  ): Promise<T> {
+    const { params, headers, ...fetchOptions } = options ?? {};
+    const url = this.buildUrl(endpoint, params);
+
+    // Remove Content-Type for FormData (browser will set it)
+    const uploadHeaders = this.mergeHeaders(headers);
+    uploadHeaders.delete('Content-Type');
+
+    const response = await this.fetchWithTimeout(url, {
+      ...fetchOptions,
+      method: 'POST',
+      body: formData,
+      headers: uploadHeaders,
     });
 
     return this.handleResponse<T>(response);
@@ -185,3 +330,6 @@ class ApiClient {
 
 // Singleton Instance
 export const apiClient = new ApiClient();
+
+// Export für Tests oder spezielle Use Cases
+export { ApiClient };

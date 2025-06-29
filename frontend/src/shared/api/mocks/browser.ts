@@ -24,8 +24,6 @@ export const initMockServer = async () => {
         url: '/mockServiceWorker.js',
       },
     });
-
-    console.log('[MSW] Mock Service Worker started successfully');
   } catch (error) {
     console.error('[MSW] Failed to start Mock Service Worker:', error);
   }

@@ -22,7 +22,7 @@ export class ApiClientError extends Error {
     public code?: string,
     public details?: Record<string, unknown>
   ) {
-    super(`API Error: ${statusCode}`);
+    super(`API Error: ${statusCode.toString()}`);
     this.name = 'ApiClientError';
   }
 }
@@ -30,29 +30,29 @@ export class ApiClientError extends Error {
 /**
  * API Request Configuration
  */
-export interface ApiRequestConfig extends Omit<RequestInit, 'body'> {
-  params?: Record<string, any>;
+export type ApiRequestConfig = {
+  params?: Record<string, unknown>;
   timeout?: number;
   body?: unknown;
-}
+} & Omit<RequestInit, 'body'>;
 
 /**
  * API Client Class
  */
 export class ApiClient {
-  private baseURL: string;
-  private defaultTimeout: number;
+  private readonly baseURL: string;
+  private readonly defaultTimeout: number;
   private defaultHeaders: Record<string, string>;
 
   constructor() {
     // WICHTIG: Für MSW keine base URL!
     this.baseURL =
-      import.meta.env.VITE_MOCK_API_ENABLED === 'true'
+      String(import.meta.env['VITE_MOCK_API_ENABLED']) === 'true'
         ? '' // Leer für MSW!
-        : import.meta.env.VITE_API_BASE_URL || '';
-    this.defaultTimeout = Number(import.meta.env.VITE_API_TIMEOUT) || 30000;
+        : String(import.meta.env['VITE_API_BASE_URL'] ?? '');
+    this.defaultTimeout = Number(import.meta.env['VITE_API_TIMEOUT'] ?? 30000);
     this.defaultHeaders = {
-      'Content-Type': 'application/json',
+      contentType: 'application/json',
     };
   }
 
@@ -70,12 +70,13 @@ export class ApiClient {
   /**
    * Konstruiert die vollständige URL
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private buildUrl(endpoint: string, params?: Record<string, any>): string {
     // Stelle sicher, dass endpoint mit / beginnt
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
     // Für MSW: Direkt den endpoint zurückgeben
-    if (import.meta.env.VITE_MOCK_API_ENABLED === 'true') {
+    if (import.meta.env['VITE_MOCK_API_ENABLED'] === 'true') {
       const url = new URL(cleanEndpoint, window.location.origin);
 
       if (params) {
@@ -114,19 +115,24 @@ export class ApiClient {
 
     // Timeout handling
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => { controller.abort(); }, timeout);
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, timeout);
 
     try {
-      console.debug(`[API] ${fetchConfig.method || 'GET'} ${url}`);
-
       const response = await fetch(url, {
         ...fetchConfig,
         signal: controller.signal,
         headers: {
           ...this.defaultHeaders,
-          ...fetchConfig.headers,
+          ...(fetchConfig.headers &&
+          !(fetchConfig.headers instanceof Headers) &&
+          typeof fetchConfig.headers === 'object' &&
+          !Array.isArray(fetchConfig.headers)
+            ? fetchConfig.headers
+            : {}),
         },
-        body: body ? JSON.stringify(body) : null,
+        body: body !== undefined ? JSON.stringify(body) : null,
       });
 
       clearTimeout(timeoutId);
@@ -154,8 +160,7 @@ export class ApiClient {
       }
 
       // Parse JSON
-      const data = await response.json();
-      console.debug(`[API] Response:`, data);
+      const data = (await response.json()) as unknown;
       return data as T;
     } catch (error) {
       clearTimeout(timeoutId);

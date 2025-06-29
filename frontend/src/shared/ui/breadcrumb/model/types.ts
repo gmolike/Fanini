@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react'
 
-export interface BreadcrumbItem {
+export type BreadcrumbItem = {
   label: string
   href?: string
   icon?: ComponentType<{ className?: string }>
@@ -8,7 +8,7 @@ export interface BreadcrumbItem {
 
 export type BreadcrumbVariant = 'default' | 'compact' | 'large'
 
-export interface BreadcrumbProps {
+export type BreadcrumbProps = {
   items: BreadcrumbItem[]
   className?: string
   separator?: ComponentType<{ className?: string }>
@@ -16,7 +16,7 @@ export interface BreadcrumbProps {
   variant?: BreadcrumbVariant
 }
 
-export interface BreadcrumbContextValue {
+export type BreadcrumbContextValue = {
   items: BreadcrumbItem[]
   setItems: (items: BreadcrumbItem[]) => void
   resetToAuto: () => void

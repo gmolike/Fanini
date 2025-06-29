@@ -8,7 +8,7 @@ import { cn } from '@/shared/lib'
 
 import type { BreadcrumbItem as BreadcrumbItemType } from '../model/types'
 
-interface BreadcrumbItemProps {
+type BreadcrumbItemProps = {
   item: BreadcrumbItemType
   isFirst: boolean
   isLast: boolean

@@ -9,6 +9,8 @@ import { delay as mswDelay, HttpResponse, type DefaultBodyType } from 'msw';
  * @param max - Maximum delay in ms
  */
 export const getMockDelay = (min = 100, max = 600): number => {
+  // Math.random() is safe here because this delay is only used for mock/testing purposes.
+  // eslint-disable-next-line sonarjs/pseudo-random
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
@@ -47,7 +49,7 @@ export const mockErrorResponse = async (
   message: string,
   statusCode = 400,
   code?: string
-): Promise<HttpResponse<any>> => {
+): Promise<HttpResponse<Record<string, unknown>>> => {
   await mswDelay(getMockDelay(50, 200));
 
   return HttpResponse.json(

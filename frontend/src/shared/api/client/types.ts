@@ -4,7 +4,7 @@ import type { z } from 'zod';
 /**
  * Generic API Response Wrapper
  */
-export interface ApiResponse<T> {
+export type ApiResponse<T> = {
   data: T;
   meta?: {
     page?: number;
@@ -12,31 +12,31 @@ export interface ApiResponse<T> {
     total?: number;
     totalPages?: number;
   };
-}
+};
 
 /**
  * API Endpoint Configuration
  */
-export interface ApiEndpointConfig<TParams = void, TResponse = unknown> {
+export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   endpoint: string | ((params: TParams) => string);
   schema?: z.ZodSchema<TResponse>;
-}
+};
 
 /**
  * Pagination Parameters
  */
-export interface PaginationParams {
+export type PaginationParams = {
   page?: number;
   limit?: number;
   sort?: string;
   order?: 'asc' | 'desc';
-}
+};
 
 /**
  * Standard Query Parameters
  */
-export interface QueryParams extends PaginationParams {
+export type QueryParams = {
   search?: string;
-  filters?: Record<string, any>;
-}
+  filters?: Record<string, unknown>;
+} & PaginationParams;

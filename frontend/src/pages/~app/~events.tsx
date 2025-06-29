@@ -64,22 +64,22 @@ function EventsPage() {
   };
 
   return (
-    <div className='space-y-6 p-8'>
+    <div className="space-y-6 p-8">
       {/* Page Header */}
-      <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className='text-fanini-blue-700 text-3xl font-bold'>Events</h1>
-          <p className='text-muted-foreground mt-1'>Alle Vereinsveranstaltungen auf einen Blick</p>
+          <h1 className="text-fanini-blue-700 text-3xl font-bold">Events</h1>
+          <p className="text-muted-foreground mt-1">Alle Vereinsveranstaltungen auf einen Blick</p>
         </div>
-        <div className='flex items-center gap-3'>
+        <div className="flex items-center gap-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant='outline' size='sm'>
-                <Filter className='mr-2 h-4 w-4' />
+              <Button variant="outline" size="sm">
+                <Filter className="mr-2 h-4 w-4" />
                 Filter
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align='end' className='w-48'>
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuLabel>Event-Typ</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Alle anzeigen</DropdownMenuItem>
@@ -88,15 +88,15 @@ function EventsPage() {
               <DropdownMenuItem>Nur Versammlungen</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button className='bg-fanini-blue-600 hover:bg-fanini-blue-700'>
-            <Plus className='mr-2 h-4 w-4' />
+          <Button className="bg-fanini-blue-600 hover:bg-fanini-blue-700">
+            <Plus className="mr-2 h-4 w-4" />
             Event erstellen
           </Button>
         </div>
       </div>
 
       {/* Events Grid */}
-      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {events.map(event => {
           const typeStyle = typeColors[event.type as keyof typeof typeColors];
           const participationRate = event.maxParticipants
@@ -106,81 +106,90 @@ function EventsPage() {
           return (
             <Card
               key={event.id}
-              className='group overflow-hidden transition-all duration-300 hover:shadow-lg'
+              className="group overflow-hidden transition-all duration-300 hover:shadow-lg"
             >
               {/* Event Type Banner */}
               <div
                 className={`h-2 ${event.type === 'away' ? 'bg-fanini-red-500' : 'bg-fanini-blue-500'}`}
               />
 
-              <CardHeader className='pb-4'>
-                <div className='mb-2 flex items-start justify-between'>
+              <CardHeader className="pb-4">
+                <div className="mb-2 flex items-start justify-between">
                   <Badge className={`${typeStyle.bg} ${typeStyle.text} border-0`}>
                     {typeStyle.label}
                   </Badge>
                   {event.status === 'upcoming' && (
                     <Badge
-                      variant='outline'
-                      className='border-green-200 bg-green-50 text-green-700'
+                      variant="outline"
+                      className="border-green-200 bg-green-50 text-green-700"
                     >
                       Anstehend
                     </Badge>
                   )}
                 </div>
-                <CardTitle className='group-hover:text-fanini-blue-600 text-xl transition-colors'>
+                <CardTitle className="group-hover:text-fanini-blue-600 text-xl transition-colors">
                   {event.title}
                 </CardTitle>
-                <CardDescription className='mt-2 line-clamp-2'>{event.description}</CardDescription>
+                <CardDescription className="mt-2 line-clamp-2">{event.description}</CardDescription>
               </CardHeader>
 
-              <CardContent className='space-y-4'>
+              <CardContent className="space-y-4">
                 {/* Event Details */}
-                <div className='space-y-2 text-sm'>
-                  <div className='text-muted-foreground flex items-center gap-2'>
-                    <Calendar className='text-fanini-blue-600 h-4 w-4' />
+                <div className="space-y-2 text-sm">
+                  <div className="text-muted-foreground flex items-center gap-2">
+                    <Calendar className="text-fanini-blue-600 h-4 w-4" />
                     <span>{event.date}</span>
                   </div>
-                  <div className='text-muted-foreground flex items-center gap-2'>
-                    <Clock className='text-fanini-blue-600 h-4 w-4' />
+                  <div className="text-muted-foreground flex items-center gap-2">
+                    <Clock className="text-fanini-blue-600 h-4 w-4" />
                     <span>{event.time} Uhr</span>
                   </div>
-                  <div className='text-muted-foreground flex items-center gap-2'>
-                    <MapPin className='text-fanini-blue-600 h-4 w-4' />
+                  <div className="text-muted-foreground flex items-center gap-2">
+                    <MapPin className="text-fanini-blue-600 h-4 w-4" />
                     <span>{event.location}</span>
                   </div>
-                  <div className='text-muted-foreground flex items-center gap-2'>
-                    <Users className='text-fanini-blue-600 h-4 w-4' />
+                  <div className="text-muted-foreground flex items-center gap-2">
+                    <Users className="text-fanini-blue-600 h-4 w-4" />
                     <span>
                       {event.participants}
-                      {event.maxParticipants ? ` / ${event.maxParticipants}` : null} Teilnehmer
+                      {event.maxParticipants
+                        ? ` / ${event.maxParticipants.toLocaleString()}`
+                        : null}{' '}
+                      Teilnehmer
                     </span>
                   </div>
                 </div>
 
                 {/* Participation Progress */}
-                {event.maxParticipants ? <div className='space-y-2'>
-                    <div className='text-muted-foreground flex justify-between text-xs'>
+                {event.maxParticipants ? (
+                  <div className="space-y-2">
+                    <div className="text-muted-foreground flex justify-between text-xs">
                       <span>Teilnehmer</span>
                       <span>{Math.round(participationRate)}%</span>
                     </div>
-                    <div className='h-2 overflow-hidden rounded-full bg-gray-200'>
-                      <div
-                        className={`h-full transition-all duration-500 ${
-                          participationRate > 80
-                            ? 'bg-fanini-red-500'
-                            : participationRate > 50
-                              ? 'bg-amber-500'
-                              : 'bg-fanini-blue-500'
-                        }`}
-                        style={{ width: `${participationRate}%` }}
-                      />
+                    <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                      {(() => {
+                        let progressBarColor = 'bg-fanini-blue-500';
+                        if (participationRate > 80) {
+                          progressBarColor = 'bg-fanini-red-500';
+                        } else if (participationRate > 50) {
+                          progressBarColor = 'bg-amber-500';
+                        }
+                        return (
+                          <div
+                            className={`h-full transition-all duration-500 ${progressBarColor}`}
+                            style={{ width: `${participationRate.toString()}%` }}
+                          />
+                        );
+                      })()}
                     </div>
-                  </div> : null}
+                  </div>
+                ) : null}
 
                 {/* Actions */}
-                <div className='flex gap-2 pt-2'>
+                <div className="flex gap-2 pt-2">
                   <Button
-                    className='bg-fanini-blue-600 hover:bg-fanini-blue-700 flex-1'
+                    className="bg-fanini-blue-600 hover:bg-fanini-blue-700 flex-1"
                     disabled={
                       !!event.maxParticipants && event.participants >= event.maxParticipants
                     }
@@ -189,14 +198,14 @@ function EventsPage() {
                       ? 'Ausgebucht'
                       : 'Teilnehmen'}
                   </Button>
-                  <Button variant='outline' size='icon'>
-                    <span className='sr-only'>Mehr Optionen</span>
-                    <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <Button variant="outline" size="icon">
+                    <span className="sr-only">Mehr Optionen</span>
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         strokeWidth={2}
-                        d='M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z'
+                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
                       />
                     </svg>
                   </Button>
@@ -208,9 +217,9 @@ function EventsPage() {
       </div>
 
       {/* Calendar View Toggle */}
-      <div className='flex justify-center pt-8'>
-        <Button variant='outline' size='lg'>
-          <Calendar className='mr-2 h-4 w-4' />
+      <div className="flex justify-center pt-8">
+        <Button variant="outline" size="lg">
+          <Calendar className="mr-2 h-4 w-4" />
           Kalenderansicht
         </Button>
       </div>

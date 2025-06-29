@@ -12,7 +12,7 @@ import './shared/styles/main.css';
  * @description Startet MSW in Development wenn aktiviert
  */
 async function prepare(): Promise<void> {
-  if (import.meta.env.DEV && import.meta.env.VITE_MOCK_API_ENABLED === 'true') {
+  if (import.meta.env.DEV && import.meta.env['VITE_MOCK_API_ENABLED'] === 'true') {
     // Dynamischer Import nur wenn benötigt
     const { startMockServer } = await import('@/testing');
     await startMockServer();
@@ -34,6 +34,6 @@ prepare()
       </AppProvider>
     );
   })
-  .catch(error => {
+  .catch((error: unknown) => {
     console.error('Failed to start app:', error);
   });

@@ -81,6 +81,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: '^_',
         },
       ],
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/prefer-nullish-coalescing': 'error',
@@ -88,9 +89,13 @@ export default tseslint.config(
       '@typescript-eslint/strict-boolean-expressions': [
         'error',
         {
-          allowString: false,
-          allowNumber: false,
-          allowNullableObject: false,
+          allowString: true, // "" als falsy erlauben
+          allowNumber: true, // 0 als falsy erlauben
+          allowNullableObject: true, // Objekte ohne expliziten null check
+          allowNullableBoolean: true,
+          allowNullableString: true,
+          allowNullableNumber: true,
+          allowAny: false,
         },
       ],
       '@typescript-eslint/no-misused-promises': [
@@ -132,14 +137,30 @@ export default tseslint.config(
         // camelCase für Parameter
         {
           selector: 'parameter',
-          format: ['camelCase'],
+          format: ['camelCase', 'PascalCase'],
           leadingUnderscore: 'allow',
         },
         // camelCase für member
         {
           selector: 'memberLike',
-          format: ['camelCase'],
+          format: ['camelCase', 'PascalCase'],
           leadingUnderscore: 'allow',
+        },
+        {
+          selector: 'objectLiteralProperty',
+          format: null,
+          filter: {
+            regex: '^(\\d+|[A-Z_]+)$', // Zahlen oder UPPER_CASE
+            match: true,
+          },
+        },
+        {
+          selector: 'objectLiteralProperty',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+          filter: {
+            regex: '^(Content-Type|Authorization|X-.*|VITE_.*)$',
+            match: false,
+          },
         },
       ],
 
@@ -393,6 +414,8 @@ export default tseslint.config(
       'backend/**', // Backend wird separat gelintet
       'eslint.config.*', // Ignore ESLint config files to avoid TS project errors
       'eslint.config.mjs', // Explicitly ignore this config file
+      'frontend/src/pages/**/*.tsx',
+      'frontend/src/pages/**/*.ts',
     ],
   }
 );

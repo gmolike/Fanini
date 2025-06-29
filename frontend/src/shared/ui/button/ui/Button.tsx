@@ -1,11 +1,11 @@
-import * as React from 'react'
+import * as React from 'react';
 
-import { Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react';
 
-import { cn } from '@/shared/lib'
-import { Button as ShadcnButton } from '@/shared/shadcn/button'
+import { cn } from '@/shared/lib';
+import { Button as ShadcnButton } from '@/shared/shadcn/button';
 
-import type { ButtonProps } from '../model/types'
+import type { ButtonProps } from '../model/types';
 
 /**
  * Button Komponente mit Loading State
@@ -14,12 +14,12 @@ import type { ButtonProps } from '../model/types'
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, loading, disabled, ...props }, ref) => {
     return (
-      <ShadcnButton ref={ref} disabled={disabled || loading} className={cn(className)} {...props}>
+      <ShadcnButton ref={ref} disabled={disabled ?? loading} className={cn(className)} {...props}>
         {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         {children}
       </ShadcnButton>
-    )
-  },
-)
+    );
+  }
+);
 
-Button.displayName = 'Button'
+Button.displayName = 'Button';

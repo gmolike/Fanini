@@ -1,10 +1,14 @@
 // frontend/src/shared/ui/breadcrumb/model/context.ts
-import { createContext } from 'react'
+import { createContext } from 'react';
 
-import type { BreadcrumbContextValue } from './types'
+import type { BreadcrumbContextValue } from './types';
 
 export const BreadcrumbContext = createContext<BreadcrumbContextValue>({
   items: [],
-  setItems: () => {},
-  resetToAuto: () => {},
-})
+  setItems: _items => {
+    // Default implementation: does nothing
+  },
+  resetToAuto: () => {
+    // Default implementation: does nothing
+  },
+});

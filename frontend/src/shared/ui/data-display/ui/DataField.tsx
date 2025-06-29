@@ -1,7 +1,7 @@
-import { cn } from '@/shared/lib'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/shadcn/tooltip'
+import { cn } from '@/shared/lib';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/shadcn/tooltip';
 
-import type { DataFieldProps } from '../model/types'
+import type { DataFieldProps } from '../model/types';
 
 /**
  * DataField Komponente
@@ -15,26 +15,31 @@ export const DataField = ({
   valueClassName,
   highlightEmpty = false,
 }: DataFieldProps) => {
-  const isEmpty = !value || value === '–'
-  const displayValue = value || '–'
+  const isEmpty =
+    value === undefined ||
+    value === null ||
+    (typeof value === 'string' && (value === '' || value === '–'));
+  const displayValue = value ?? '–';
 
   const content = (
     <div className={cn('flex items-start gap-3', className)}>
-      {icon ? <div className="text-muted-foreground mt-0.5 flex-shrink-0">{icon}</div> : null}
+      {icon != null ? (
+        <div className="text-muted-foreground mt-0.5 flex-shrink-0">{icon}</div>
+      ) : null}
       <div className="min-w-0 flex-1">
-        <div className="text-sm text-muted-foreground">{label}</div>
+        <div className="text-muted-foreground text-sm">{label}</div>
         <div
           className={cn(
             'font-medium',
             isEmpty && highlightEmpty && 'text-destructive',
-            valueClassName,
+            valueClassName
           )}
         >
           {displayValue}
         </div>
       </div>
     </div>
-  )
+  );
 
   // Tooltip nur bei Overflow
   if (typeof displayValue === 'string' && displayValue.length > 50) {
@@ -47,8 +52,8 @@ export const DataField = ({
           <p className="max-w-xs">{displayValue}</p>
         </TooltipContent>
       </Tooltip>
-    )
+    );
   }
 
-  return content
-}
+  return content;
+};

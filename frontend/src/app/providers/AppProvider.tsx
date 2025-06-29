@@ -7,7 +7,7 @@ import { queryClient } from '@/shared/config'
 import { TooltipProvider } from '@/shared/shadcn'
 import { ErrorBoundary } from '@/shared/ui/feedback/ui/ErrorBoundary'
 
-interface AppProviderProps {
+type AppProviderProps = {
   children: ReactNode
 }
 

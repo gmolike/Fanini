@@ -9,7 +9,7 @@ import { type z } from 'zod';
 
 import { apiClient } from '../client/apiClient';
 
-export interface RemoteMutationConfig<TData, TVariables, TContext = unknown> {
+export type RemoteMutationConfig<TData, TVariables, TContext = unknown> = {
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   endpoint: string | ((variables: TVariables) => string);
   schema?: z.ZodSchema<TData>;

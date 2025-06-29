@@ -3,9 +3,9 @@ import { type ImgHTMLAttributes } from 'react';
 
 import { cn } from '@/shared/lib';
 
-interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {
+type ImageProps = {
   fallback?: string;
-}
+} & ImgHTMLAttributes<HTMLImageElement>
 
 export const Image = ({
   className,

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { Footer } from './Footer';
 import { Header } from './Header';
 
-interface PublicLayoutProps {
+type PublicLayoutProps = {
   children: ReactNode;
 }
 

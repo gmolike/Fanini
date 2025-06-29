@@ -15,9 +15,18 @@ export const queryClient = new QueryClient({
       // Cache wird nach 10 Minuten gelöscht
       gcTime: 1000 * 60 * 10,
       // Retry-Logik
-      retry: (failureCount, error: any) => {
+      retry: (failureCount: number, error: unknown) => {
         // Bei 4xx Fehlern nicht wiederholen
-        if (error?.status >= 400 && error?.status < 500) return false;
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'status' in error &&
+          typeof (error as { status?: number }).status === 'number' &&
+          (error as { status: number }).status >= 400 &&
+          (error as { status: number }).status < 500
+        ) {
+          return false;
+        }
         // Maximal 3 Versuche
         return failureCount < 3;
       },
@@ -39,6 +48,7 @@ export const queryClient = new QueryClient({
 if (import.meta.env.DEV) {
   queryClient.getQueryCache().subscribe(event => {
     if (event.type === 'observerResultsUpdated') {
+      // eslint-disable-next-line no-console
       console.debug('[Query]', event.query.queryKey, event.query.state.status);
     }
   });

@@ -18,7 +18,7 @@ export const LoadingState = <TData,>({
   if (query.isLoading) {
     return (
       <>
-        {loadingFallback || (
+        {loadingFallback ?? (
           <div className="flex items-center justify-center p-8">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
@@ -30,7 +30,7 @@ export const LoadingState = <TData,>({
   if (query.isError) {
     return (
       <>
-        {errorFallback || (
+        {errorFallback ?? (
           <Alert variant="destructive">
             <AlertDescription>
               Fehler beim Laden der Daten. Bitte versuche es später erneut.
@@ -41,8 +41,8 @@ export const LoadingState = <TData,>({
     )
   }
 
-  if (!query.data) {
-    return <>{emptyFallback || <div>Keine Daten vorhanden</div>}</>
+  if (query.data === undefined || query.data == null) {
+    return <>{emptyFallback ?? <div>Keine Daten vorhanden</div>}</>
   }
 
   return <>{children(query.data)}</>

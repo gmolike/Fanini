@@ -9,7 +9,7 @@ import { type z, ZodError } from 'zod';
 
 import { apiClient, ApiClientError } from '../client';
 
-export interface RemoteQueryConfig<TData, TParams = void> {
+export type RemoteQueryConfig<TData, TParams = void> = {
   queryKey: QueryKey | ((params: TParams) => QueryKey);
   endpoint: string | ((params: TParams) => string);
   schema?: z.ZodSchema<TData>;
@@ -65,7 +65,7 @@ export function createRemoteQuery<TData, TParams = void>(
           return response as TData;
         } catch (error) {
           if (error instanceof ApiClientError) {
-            throw new Error(`API Fehler (${error.statusCode}): ${error.message}`);
+            throw new Error(`API Fehler (${String(error.statusCode)}): ${error.message}`);
           }
           if (error instanceof Error) {
             throw error;
@@ -106,6 +106,6 @@ export function createSimpleRemoteQuery<TData>(
     });
 
     // Rufe sie mit undefined auf (da keine Parameter benötigt werden)
-    return useParametrizedQuery(undefined as any, options);
+    return useParametrizedQuery(undefined, options);
   };
 }

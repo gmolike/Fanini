@@ -6,8 +6,7 @@ import { worker } from './browser';
  */
 export async function startMockServer(): Promise<void> {
   // Check if mocking is enabled
-  if (import.meta.env.VITE_MOCK_API_ENABLED !== 'true') {
-    console.log('[MSW] Mock API disabled via environment variable');
+  if (import.meta.env['VITE_MOCK_API_ENABLED'] !== 'true') {
     return;
   }
 
@@ -20,7 +19,7 @@ export async function startMockServer(): Promise<void> {
   try {
     // Start MSW
     await worker.start({
-      onUnhandledRequest: (req, print) => {
+      onUnhandledRequest: req => {
         // Ignoriere statische Assets
         const url = new URL(req.url);
         if (
@@ -40,13 +39,6 @@ export async function startMockServer(): Promise<void> {
         url: '/mockServiceWorker.js',
       },
     });
-
-    console.log('[MSW] Mock Service Worker started successfully ✅');
-
-    // Für MSW v2 - keine handler.info mehr verfügbar
-    console.log(
-      '[MSW] Mock server is running. Check browser DevTools Network tab to see intercepted requests.'
-    );
   } catch (error) {
     console.error('[MSW] Failed to start Mock Service Worker:', error);
     throw error;
@@ -56,7 +48,9 @@ export async function startMockServer(): Promise<void> {
 /**
  * Stoppt den Mock Service Worker
  */
-export async function stopMockServer(): Promise<void> {
-  await worker.stop();
-  console.log('[MSW] Mock Service Worker stopped');
+export function stopMockServer(): Promise<void> {
+  return new Promise(resolve => {
+    worker.stop();
+    resolve();
+  });
 }

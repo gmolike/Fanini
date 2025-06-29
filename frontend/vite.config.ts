@@ -20,13 +20,16 @@ export default defineConfig({
     }),
     tailwindcss(),
   ],
-
+  publicDir: 'public',
   server: {
     port: 5173,
     host: true,
     hmr: { overlay: true },
     warmup: {
       clientFiles: ['./src/main.tsx', './src/App.tsx'],
+    },
+    fs: {
+      strict: false,
     },
   },
 

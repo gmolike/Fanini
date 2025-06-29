@@ -50,5 +50,10 @@
     "concurrently": "^9.1.0",
     "globals": "^15.15.0",
     "prettier": "^3.6.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

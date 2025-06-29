@@ -345,7 +345,7 @@ pnpm lint
 ## 🤝 Contributing
 
 1. Feature Branch erstellen
-2. Code schreiben (mit Tests!)
+2. Code schreiben
 3. Lint & Format durchführen
 4. Commit mit Conventional Commits
 5. Pull Request erstellen

@@ -1,8 +1,11 @@
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import { tanstackRouter } from '@tanstack/router-plugin/vite';
+/* eslint-disable @typescript-eslint/naming-convention */
 import { resolve } from 'path';
+
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig, loadEnv } from 'vite';
+
 import type { PluginOption } from 'vite';
 
 export default defineConfig(({ mode }) => {
@@ -31,7 +34,7 @@ export default defineConfig(({ mode }) => {
 
       // Bundle Analyzer nur bei Bedarf
       isProd &&
-        process.env.ANALYZE &&
+        process.env['ANALYZE'] &&
         visualizer({
           open: true,
           filename: './dist/stats.html',
@@ -68,7 +71,7 @@ export default defineConfig(({ mode }) => {
       // Proxy für EasyVerein API
       proxy: {
         '/api/easyverein': {
-          target: env.VITE_EASYVEREIN_API_URL || 'https://api.easyverein.com',
+          target: env['VITE_EASYVEREIN_API_URL'] ?? 'https://api.easyverein.com',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api\/easyverein/, ''),
           secure: true,
@@ -88,26 +91,25 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'esnext',
       minify: isProd ? 'terser' : false,
-      terserOptions: isProd
-        ? {
-            compress: {
-              drop_console: true,
-              drop_debugger: true,
-              pure_funcs: ['console.log', 'console.debug'],
-              passes: 2,
-            },
-            mangle: {
-              safari10: true,
-            },
-            format: {
-              comments: false,
-              ecma: 2020,
-            },
-          }
-        : undefined,
+      ...(isProd && {
+        terserOptions: {
+          compress: {
+            drop_console: true,
+            drop_debugger: true,
+            pure_funcs: ['console.log', 'console.debug'],
+            passes: 2,
+          },
+          mangle: {
+            safari10: true,
+          },
+          format: {
+            comments: false,
+            ecma: 2020,
+          },
+        },
+      }),
       sourcemap: isDev ? 'inline' : false,
       cssCodeSplit: true,
-      cssMinify: 'lightningcss',
       assetsInlineLimit: 4096,
       chunkSizeWarningLimit: 1000,
 
@@ -134,9 +136,9 @@ export default defineConfig(({ mode }) => {
           entryFileNames: isDev ? '[name].js' : 'assets/js/[name]-[hash].js',
           chunkFileNames: isDev ? '[name].js' : 'assets/js/[name]-[hash].js',
           assetFileNames: assetInfo => {
-            const info = assetInfo.name?.split('.');
+            const info = assetInfo.names[0]?.split('.');
             const ext = info?.[info.length - 1];
-            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name ?? '')) {
+            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.names[0] ?? '')) {
               return isDev ? '[name][extname]' : 'assets/images/[name]-[hash][extname]';
             }
             if (ext === 'css') {
@@ -196,14 +198,6 @@ export default defineConfig(({ mode }) => {
         },
       },
       devSourcemap: isDev,
-      transformer: 'lightningcss',
-      lightningcss: {
-        targets: {
-          chrome: 115,
-          firefox: 115,
-          safari: 15,
-        },
-      },
     },
 
     // Performance

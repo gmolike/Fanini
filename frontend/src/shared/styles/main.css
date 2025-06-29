@@ -1,17 +1,14 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 :root {
-  /* Faninitiative Spandau Hauptfarben */
   --color-fanini-blue: #34687e;
   --color-fanini-red: #b94f46;
 
-  /* Semantic Colors */
   --color-primary: var(--color-fanini-blue);
   --color-primary-foreground: #ffffff;
   --color-secondary: var(--color-fanini-red);
   --color-secondary-foreground: #ffffff;
 
-  /* Base Colors */
   --color-background: #ffffff;
   --color-foreground: #1a2e38;
   --color-card: #ffffff;
@@ -26,7 +23,6 @@
   --color-input: #e8f0f4;
   --color-ring: var(--color-primary);
 
-  /* Status Colors */
   --color-destructive: #c73e35;
   --color-destructive-foreground: #ffffff;
   --color-success: #4a7c59;
@@ -34,7 +30,6 @@
   --color-warning: #d4824b;
   --color-warning-foreground: #ffffff;
 
-  /* Radius */
   --radius: 0.5rem;
 }
 

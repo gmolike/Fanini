@@ -74,7 +74,7 @@
     "src/**/*",
     "vite.config.ts",
     "tailwind.config.ts"
-  ],
+, "src/pages/_public/.tsx"  ],
   "exclude": [
     "node_modules",
     "dist",

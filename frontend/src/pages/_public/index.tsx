@@ -13,25 +13,33 @@ function HomePage() {
   return (
     <>
       {/* Hero Section - Mobile First */}
-      <section className="relative py-16 sm:py-20 lg:py-32 overflow-hidden">
+      <section className="relative overflow-hidden py-16 sm:py-20 lg:py-32">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--color-fanini-blue)] to-[var(--color-fanini-blue)]/80" />
-        <div className="absolute inset-0 bg-[url('/pattern.svg')] opacity-10" />
+        <div className="absolute inset-0 opacity-10" />
 
         <Container className="relative">
           <div className="max-w-3xl">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-[Bebas_Neue] text-white mb-4">
-              Gemeinsam für <span className="text-[var(--color-fanini-red)]">Eintracht Spandau</span>
+            <h1 className="mb-4 font-[Bebas_Neue] text-4xl text-white sm:text-5xl lg:text-6xl">
+              Gemeinsam für{' '}
+              <span className="text-[var(--color-fanini-red)]">Eintracht Spandau</span>
             </h1>
-            <p className="text-lg sm:text-xl text-white/90 mb-8">
-              Seit 2022 vereinen wir die Fans der Eintracht Spandau.
-              Werde Teil unserer leidenschaftlichen Community!
+            <p className="mb-8 text-lg text-white/90 sm:text-xl">
+              Seit 2022 vereinen wir die Fans der Eintracht Spandau. Werde Teil unserer
+              leidenschaftlichen Community!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-[var(--color-fanini-red)] hover:bg-[var(--color-fanini-red)]/90">
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <Button
+                size="lg"
+                className="bg-[var(--color-fanini-red)] hover:bg-[var(--color-fanini-red)]/90"
+              >
                 Mitglied werden
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline" className="bg-white/10 border-white text-white hover:bg-white/20">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white bg-white/10 text-white hover:bg-white/20"
+              >
                 Mehr erfahren
               </Button>
             </div>
@@ -40,9 +48,9 @@ function HomePage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 bg-[var(--color-muted)]">
+      <section className="bg-[var(--color-muted)] py-12">
         <Container>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
+          <div className="grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-4">
             {[
               { icon: Users, value: '156+', label: 'Aktive Mitglieder' },
               { icon: Calendar, value: '24', label: 'Events pro Jahr' },
@@ -52,13 +60,11 @@ function HomePage() {
               const Icon = stat.icon;
               return (
                 <div key={i} className="text-center">
-                  <Icon className="h-8 w-8 mx-auto mb-2 text-[var(--color-fanini-blue)]" />
-                  <div className="text-2xl sm:text-3xl font-bold text-[var(--color-fanini-blue)]">
+                  <Icon className="mx-auto mb-2 h-8 w-8 text-[var(--color-fanini-blue)]" />
+                  <div className="text-2xl font-bold text-[var(--color-fanini-blue)] sm:text-3xl">
                     {stat.value}
                   </div>
-                  <div className="text-sm text-[var(--color-muted-foreground)]">
-                    {stat.label}
-                  </div>
+                  <div className="text-sm text-[var(--color-muted-foreground)]">{stat.label}</div>
                 </div>
               );
             })}
@@ -69,20 +75,20 @@ function HomePage() {
       {/* Next Events */}
       <section className="py-16 sm:py-20">
         <Container>
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-[Bebas_Neue] text-[var(--color-fanini-blue)] mb-4">
+          <div className="mb-12 text-center">
+            <h2 className="mb-4 font-[Bebas_Neue] text-3xl text-[var(--color-fanini-blue)] sm:text-4xl">
               Nächste Events
             </h2>
-            <p className="text-lg text-[var(--color-muted-foreground)] max-w-2xl mx-auto">
+            <p className="mx-auto max-w-2xl text-lg text-[var(--color-muted-foreground)]">
               Verpasse keine Veranstaltung und sei bei allen wichtigen Terminen dabei
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {/* Event Cards - Placeholder für echte Events */}
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="group hover:shadow-lg transition-all duration-300">
-                <div className="aspect-video bg-gradient-to-br from-[var(--color-fanini-blue)] to-[var(--color-fanini-blue)]/80 relative overflow-hidden">
+            {[1, 2, 3].map(i => (
+              <Card key={i} className="group transition-all duration-300 hover:shadow-lg">
+                <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-[var(--color-fanini-blue)] to-[var(--color-fanini-blue)]/80">
                   <div className="absolute inset-0 bg-black/20" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <div className="text-3xl font-bold">28</div>
@@ -90,13 +96,13 @@ function HomePage() {
                   </div>
                 </div>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold mb-2 group-hover:text-[var(--color-fanini-blue)] transition-colors">
+                  <h3 className="mb-2 text-xl font-semibold transition-colors group-hover:text-[var(--color-fanini-blue)]">
                     Rückrundenstart-Party
                   </h3>
-                  <p className="text-[var(--color-muted-foreground)] mb-4">
+                  <p className="mb-4 text-[var(--color-muted-foreground)]">
                     Gemeinsam in die zweite Saisonhälfte!
                   </p>
-                  <Button variant="ghost" className="text-[var(--color-fanini-blue)] p-0 h-auto">
+                  <Button variant="ghost" className="h-auto p-0 text-[var(--color-fanini-blue)]">
                     Mehr erfahren →
                   </Button>
                 </CardContent>

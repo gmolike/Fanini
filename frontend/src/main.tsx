@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client';
 
 import { AppProvider } from '@/app/providers';
 import { router } from '@/shared/config';
+
+// CSS imports in korrekter Reihenfolge
 import './shared/styles/font.css';
 import './shared/styles/main.css';
 

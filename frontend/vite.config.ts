@@ -1,6 +1,8 @@
+// frontend/vite.config.ts
 /* eslint-disable @typescript-eslint/naming-convention */
 import { resolve } from 'path';
 
+import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react-swc';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -15,6 +17,9 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [
+      // Tailwind CSS v4
+      tailwindcss(),
+
       // TanStack Router mit FSD-konformen Routes
       tanstackRouter({
         routesDirectory: './src/pages',
@@ -191,11 +196,6 @@ export default defineConfig(({ mode }) => {
       modules: {
         localsConvention: 'camelCase',
         generateScopedName: isDev ? '[name]__[local]__[hash:base64:5]' : '[hash:base64:8]',
-      },
-      preprocessorOptions: {
-        scss: {
-          additionalData: `@import "@shared/styles/variables.scss";`,
-        },
       },
       devSourcemap: isDev,
     },

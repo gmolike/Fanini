@@ -35,7 +35,7 @@ export class ApiClientError extends Error implements ApiError {
  */
 export type RequestOptions = {
   params?: Record<string, string | number | boolean>;
-} & Omit<RequestInit, 'body' | 'method'>
+} & Omit<RequestInit, 'body' | 'method'>;
 
 /**
  * API Client Klasse
@@ -180,7 +180,7 @@ class ApiClient {
       }
 
       try {
-        return await response.json() as T;
+        return (await response.json()) as T;
       } catch {
         // Response ist kein JSON
         return {} as T;
@@ -191,7 +191,7 @@ class ApiClient {
     let errorData: Partial<ApiError>;
 
     try {
-      errorData = await response.json() as Partial<ApiError>;
+      errorData = (await response.json()) as Partial<ApiError>;
     } catch {
       errorData = {
         message: response.statusText || 'Ein Fehler ist aufgetreten',

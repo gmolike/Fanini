@@ -1,6 +1,9 @@
 import * as React from 'react'
+
 import { Link } from '@tanstack/react-router'
+
 import { cn } from '@/shared/lib'
+
 import type { NavLinkProps } from './model/types'
 
 /**
@@ -38,13 +41,11 @@ export const NavLink: React.FC<NavLinkProps> = ({
 
   const content = (
     <>
-      {Icon && <Icon className="h-4 w-4" />}
+      {Icon ? <Icon className="h-4 w-4" /> : null}
       <span className="flex-1">{children}</span>
-      {badge && (
-        <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+      {badge ? <span className="ml-auto rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
           {badge}
-        </span>
-      )}
+        </span> : null}
     </>
   )
 

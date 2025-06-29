@@ -1,6 +1,8 @@
 // frontend/src/entities/settings/api/queries.ts
 import { createSimpleRemoteQuery } from '@shared/api';
+
 import { settingsSchema, brandingSchema } from '../model/schemas';
+
 import type { Settings, Branding } from '../model/types';
 
 /**

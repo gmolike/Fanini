@@ -9,7 +9,7 @@ import type { Settings } from '../model/types';
  */
 class SettingsCache {
   private cache: Settings | null = null;
-  private readonly listeners: Set<(settings: Settings) => void> = new Set();
+  private readonly listeners = new Set<(settings: Settings) => void>();
 
   /**
    * Setzt die Settings im Cache
@@ -49,7 +49,7 @@ class SettingsCache {
    * Benachrichtigt alle Listener
    */
   private notifyListeners(settings: Settings) {
-    this.listeners.forEach(listener => listener(settings));
+    this.listeners.forEach(listener => { listener(settings); });
   }
 
   /**

@@ -1,34 +1,34 @@
 /**
  * Layout Komponenten Types
  */
-export type NavigationItem = {
+export interface NavigationItem {
   label: string
   href: string
   icon?: React.ComponentType<{ className?: string }>
   badge?: string
 }
 
-export type BreadcrumbItem = {
+export interface BreadcrumbItem {
   label: string
   href?: string
 }
 
-export type HeaderProps = {
+export interface HeaderProps {
   className?: string
   showMobileMenu?: boolean
 }
 
-export type FooterProps = {
+export interface FooterProps {
   className?: string
 }
 
-export type NavigationProps = {
+export interface NavigationProps {
   items: NavigationItem[]
   className?: string
   orientation?: 'horizontal' | 'vertical'
 }
 
-export type BreadcrumbProps = {
+export interface BreadcrumbProps {
   items: BreadcrumbItem[]
   className?: string
 }

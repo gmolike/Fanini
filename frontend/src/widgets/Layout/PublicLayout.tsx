@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
-import { Header } from './Header';
-import { Footer } from './Footer';
 
-type PublicLayoutProps = {
+import { Footer } from './Footer';
+import { Header } from './Header';
+
+interface PublicLayoutProps {
   children: ReactNode;
-};
+}
 
 export const PublicLayout = ({ children }: PublicLayoutProps) => {
   return (

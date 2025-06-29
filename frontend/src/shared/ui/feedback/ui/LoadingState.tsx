@@ -1,5 +1,7 @@
-import { Alert, AlertDescription } from '@/shared/shadcn'
 import { Loader2 } from 'lucide-react'
+
+import { Alert, AlertDescription } from '@/shared/shadcn'
+
 import type { LoadingStateProps } from '../model/types'
 
 /**

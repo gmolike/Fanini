@@ -1,8 +1,12 @@
-import { Container } from '@/shared/ui/layout/Container';
-import { Button, Sheet, SheetContent, SheetTrigger } from '@shared/shadcn';
+import { useState } from 'react';
+
 import { Link } from '@tanstack/react-router';
 import { Menu, Users } from 'lucide-react';
-import { useState } from 'react';
+
+import { Container } from '@/shared/ui/layout/Container';
+
+import { Button, Sheet, SheetContent, SheetTrigger } from '@shared/shadcn';
+
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -71,7 +75,7 @@ export const Header = () => {
                   <Link
                     key={item.name}
                     to={item.href}
-                    onClick={() => setIsOpen(false)}
+                    onClick={() => { setIsOpen(false); }}
                     className='text-lg font-medium transition-colors hover:text-[var(--color-fanini-blue)]'
                     activeProps={{
                       className: 'text-[var(--color-fanini-blue)]',
@@ -81,7 +85,7 @@ export const Header = () => {
                   </Link>
                 ))}
                 <hr className='my-4' />
-                <Button asChild className='w-full' onClick={() => setIsOpen(false)}>
+                <Button asChild className='w-full' onClick={() => { setIsOpen(false); }}>
                   <Link to='/app'>
                     <Users className='mr-2 h-4 w-4' />
                     Mitgliederbereich

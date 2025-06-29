@@ -1,13 +1,14 @@
 ﻿// frontend/src/entities/settings/model/types.ts
 // TypeScript types derived from schemas
 
-import { z } from 'zod';
+import { type z } from 'zod';
+
 import {
-  settingsSchema,
-  settingsUpdateSchema,
-  brandingSchema,
-  contactSchema,
-  featuresSchema,
+  type settingsSchema,
+  type settingsUpdateSchema,
+  type brandingSchema,
+  type contactSchema,
+  type featuresSchema,
 } from './schemas';
 
 // Direkt von Schemas ableiten

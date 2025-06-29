@@ -1,5 +1,6 @@
 // frontend/src/testing/mocks/data/settings.data.ts
 import { DEFAULT_SETTINGS } from '@/entities/settings/model/constants';
+
 import type { Branding, Settings, SettingsUpdate } from '@entities/settings';
 
 class SettingsMockData {

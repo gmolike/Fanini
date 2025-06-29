@@ -1,5 +1,6 @@
 // frontend/src/pages/~_public/~kontakt.tsx
 import { createFileRoute } from '@tanstack/react-router';
+
 import { Container } from '@/shared/ui/layout/Container';
 
 export const Route = createFileRoute('/_public/kontakt')({

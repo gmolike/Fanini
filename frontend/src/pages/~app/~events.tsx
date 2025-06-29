@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Calendar, MapPin, Users, Clock, Filter, Plus } from 'lucide-react';
-import { Button } from '@/shared/shadcn/button';
+
 import { Badge } from '@/shared/shadcn/badge';
+import { Button } from '@/shared/shadcn/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn/card';
 import {
   DropdownMenu,
@@ -151,14 +152,13 @@ function EventsPage() {
                     <Users className='text-fanini-blue-600 h-4 w-4' />
                     <span>
                       {event.participants}
-                      {event.maxParticipants && ` / ${event.maxParticipants}`} Teilnehmer
+                      {event.maxParticipants ? ` / ${event.maxParticipants}` : null} Teilnehmer
                     </span>
                   </div>
                 </div>
 
                 {/* Participation Progress */}
-                {event.maxParticipants && (
-                  <div className='space-y-2'>
+                {event.maxParticipants ? <div className='space-y-2'>
                     <div className='text-muted-foreground flex justify-between text-xs'>
                       <span>Teilnehmer</span>
                       <span>{Math.round(participationRate)}%</span>
@@ -175,8 +175,7 @@ function EventsPage() {
                         style={{ width: `${participationRate}%` }}
                       />
                     </div>
-                  </div>
-                )}
+                  </div> : null}
 
                 {/* Actions */}
                 <div className='flex gap-2 pt-2'>

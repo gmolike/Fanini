@@ -1,8 +1,9 @@
 ﻿// frontend/src/features/settings/ManageFeatureFlags/ManageFeatureFlags.tsx
 // Feature flags component
 
+import { Calendar, Users, Image } from 'lucide-react';
+
 import { useSettings, useUpdateSettings } from '@/entities/settings';
-import type { Features } from '@/entities/settings';
 import {
   Card,
   CardContent,
@@ -12,7 +13,8 @@ import {
   Switch,
   Label,
 } from '@/shared/shadcn';
-import { Calendar, Users, Image } from 'lucide-react';
+
+import type { Features } from '@/entities/settings';
 
 const FEATURE_CONFIG = {
   events: {
@@ -36,7 +38,7 @@ export const ManageFeatureFlags = () => {
   const { data: settings } = useSettings();
   const updateSettings = useUpdateSettings();
 
-  if (!settings) return null;
+  if (settings == null) return null;
 
   const handleToggle = async (feature: keyof Features, enabled: boolean) => {
     await updateSettings.mutateAsync({
@@ -53,23 +55,23 @@ export const ManageFeatureFlags = () => {
         <CardTitle>Features verwalten</CardTitle>
         <CardDescription>Aktiviere oder deaktiviere Funktionen für deine Webseite</CardDescription>
       </CardHeader>
-      <CardContent className='space-y-6'>
-        {(Object.keys(FEATURE_CONFIG) as Array<keyof Features>).map(feature => {
+      <CardContent className="space-y-6">
+        {(Object.keys(FEATURE_CONFIG) as (keyof Features)[]).map(feature => {
           const config = FEATURE_CONFIG[feature];
           const Icon = config.icon;
           const isEnabled = settings.features[feature];
 
           return (
-            <div key={feature} className='flex items-center justify-between space-x-4'>
-              <div className='flex items-center space-x-4'>
-                <div className='bg-muted rounded-lg p-2'>
-                  <Icon className='h-5 w-5' />
+            <div key={feature} className="flex items-center justify-between space-x-4">
+              <div className="flex items-center space-x-4">
+                <div className="bg-muted rounded-lg p-2">
+                  <Icon className="h-5 w-5" />
                 </div>
-                <div className='space-y-1'>
-                  <Label htmlFor={feature} className='text-base'>
+                <div className="space-y-1">
+                  <Label htmlFor={feature} className="text-base">
                     {config.label}
                   </Label>
-                  <p className='text-muted-foreground text-sm'>{config.description}</p>
+                  <p className="text-muted-foreground text-sm">{config.description}</p>
                 </div>
               </div>
               <Switch

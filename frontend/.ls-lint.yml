@@ -1,0 +1,154 @@
+# Faninitiative FSD Naming Convention
+ls:
+  # App Layer - Orchestrierung
+  frontend/src/app:
+    .dir: kebab-case
+    .ts: camelCase | PascalCase
+    .tsx: PascalCase
+    providers:
+      .dir: regex:^[a-z-]+$
+      .tsx: PascalCase
+    config:
+      .dir: regex:^[a-z-]+$
+      .ts: camelCase | kebab-case
+
+  # Pages Layer - Routen
+  frontend/src/pages:
+    .dir: kebab-case | regex:^\[[a-z-]+\]$ # Dynamic routes
+    .tsx: kebab-case | regex:^_[a-z-]+$ | regex:^\[[a-z-]+\]$
+
+  # Widgets Layer - Zusammengesetzte UI Blöcke
+  frontend/src/widgets:
+    .dir: PascalCase # MemberDashboard, EventCalendar
+    .tsx: PascalCase # Hauptkomponente direkt im Ordner
+    .ts: camelCase
+    ui:
+      .dir: kebab-case
+      .tsx: PascalCase
+    model:
+      .dir: kebab-case
+      .ts: camelCase
+    lib:
+      .dir: kebab-case
+      .ts: camelCase
+
+  # Features Layer - Business Features
+  frontend/src/features:
+    .dir: PascalCase # EventRegistration, TodoManagement
+    .tsx: PascalCase # Hauptkomponente direkt im Ordner
+    .ts: camelCase
+    ui:
+      .dir: kebab-case
+      .tsx: PascalCase
+    model:
+      .dir: kebab-case
+      .ts: camelCase
+    api:
+      .dir: kebab-case
+      .ts: camelCase
+    lib:
+      .dir: kebab-case
+      .ts: camelCase
+
+  # Entities Layer - Business Entities
+  frontend/src/entities:
+    .dir: PascalCase # User, Event, Todo
+    .tsx: PascalCase # Hauptkomponente direkt im Ordner
+    .ts: camelCase
+    ui:
+      .dir: kebab-case
+      .tsx: PascalCase
+    model:
+      .dir: kebab-case
+      .ts: camelCase
+    api:
+      .dir: kebab-case
+      .ts: camelCase
+    lib:
+      .dir: kebab-case
+      .ts: camelCase
+
+  # Shared Layer - Geteilte Ressourcen
+  frontend/src/shared:
+    .dir: kebab-case
+
+    # UI Components (shadcn/ui)
+    ui:
+      .dir: kebab-case
+      .tsx: kebab-case # button.tsx, dialog.tsx (shadcn standard)
+
+    # API Clients & Services
+    api:
+      .dir: kebab-case
+      .ts: camelCase | kebab-case
+      generated: # OpenAPI generated
+        .dir: regex:.*
+        .ts: regex:.*
+
+    # Configs
+    config:
+      .dir: kebab-case
+      .ts: camelCase | kebab-case
+
+    # Hooks
+    hooks:
+      .dir: kebab-case
+      .ts: camelCase # useAuth.ts, useDebounce.ts
+      .tsx: camelCase
+
+    # Libraries & Utilities
+    lib:
+      .dir: kebab-case
+      .ts: camelCase | kebab-case
+
+    # Types
+    types:
+      .dir: kebab-case
+      .ts: camelCase | kebab-case
+      .d.ts: regex:.*
+
+    # Styles
+    styles:
+      .dir: kebab-case
+      .css: kebab-case
+      .scss: kebab-case
+
+    # Assets
+    assets:
+      .dir: kebab-case
+      images:
+        .dir: kebab-case
+      fonts:
+        .dir: kebab-case
+      icons:
+        .dir: kebab-case
+
+  # Spezielle Dateinamen
+  frontend/src:
+    index.css: regex:^index\.css$
+    main.tsx: regex:^main\.tsx$
+    vite-env.d.ts: regex:^vite-env\.d\.ts$
+
+  # Test Files - Überall erlaubt
+  '**/__tests__':
+    .dir: regex:^__tests__$
+    .test.ts: regex:.*\.test\.ts$
+    .test.tsx: regex:.*\.test\.tsx$
+    .spec.ts: regex:.*\.spec\.ts$
+    .spec.tsx: regex:.*\.spec\.tsx$
+
+ignore:
+  - node_modules
+  - dist
+  - build
+  - .next
+  - coverage
+  - .git
+  - .vscode
+  - .idea
+  - backend
+  - public
+  - frontend/src/app/routeTree.gen.ts
+  - '**/*.d.ts'
+  - '**/*.min.js'
+  - '**/*.map'

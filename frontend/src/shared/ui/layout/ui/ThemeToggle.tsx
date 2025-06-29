@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+
 import { Moon, Sun, Monitor } from 'lucide-react'
+
 import { Button } from '@/shared/shadcn/button'
 import {
   DropdownMenu,
@@ -45,15 +47,15 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme('light')}>
+        <DropdownMenuItem onClick={() => { setTheme('light'); }}>
           <Sun className="mr-2 h-4 w-4" />
           <span>Hell</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('dark')}>
+        <DropdownMenuItem onClick={() => { setTheme('dark'); }}>
           <Moon className="mr-2 h-4 w-4" />
           <span>Dunkel</span>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme('system')}>
+        <DropdownMenuItem onClick={() => { setTheme('system'); }}>
           <Monitor className="mr-2 h-4 w-4" />
           <span>System</span>
         </DropdownMenuItem>

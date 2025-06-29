@@ -1,6 +1,8 @@
 // frontend/src/entities/settings/api/mutations.ts
 import { createRemoteMutation } from '@/shared/api/mutations';
+
 import { settingsSchema, brandingSchema } from '../model/schemas';
+
 import type { Settings, SettingsUpdate, Branding } from '../model/types';
 
 /**

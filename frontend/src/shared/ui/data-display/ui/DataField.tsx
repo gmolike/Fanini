@@ -1,5 +1,6 @@
 import { cn } from '@/shared/lib'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/shared/shadcn/tooltip'
+
 import type { DataFieldProps } from '../model/types'
 
 /**
@@ -19,7 +20,7 @@ export const DataField = ({
 
   const content = (
     <div className={cn('flex items-start gap-3', className)}>
-      {icon && <div className="text-muted-foreground mt-0.5 flex-shrink-0">{icon}</div>}
+      {icon ? <div className="text-muted-foreground mt-0.5 flex-shrink-0">{icon}</div> : null}
       <div className="min-w-0 flex-1">
         <div className="text-sm text-muted-foreground">{label}</div>
         <div

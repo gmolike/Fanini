@@ -1,7 +1,7 @@
 export function formatCurrency(
   amount: number,
-  currency: string = 'EUR',
-  locale: string = 'de-DE',
+  currency = 'EUR',
+  locale = 'de-DE',
 ): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',
@@ -11,7 +11,7 @@ export function formatCurrency(
 
 export function formatNumber(
   value: number,
-  locale: string = 'de-DE',
+  locale = 'de-DE',
   options?: Intl.NumberFormatOptions,
 ): string {
   return new Intl.NumberFormat(locale, options).format(value)

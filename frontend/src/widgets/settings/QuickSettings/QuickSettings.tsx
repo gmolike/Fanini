@@ -2,6 +2,7 @@
 // Quick settings dropdown
 
 import { Settings } from 'lucide-react';
+
 import { useSettings } from '@/entities/settings';
 import {
   Button,
@@ -16,7 +17,7 @@ import {
 export const QuickSettings = () => {
   const { data: settings } = useSettings();
 
-  if (!settings) return null;
+  if (settings == null) return null;
 
   return (
     <DropdownMenu>

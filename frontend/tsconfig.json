@@ -1,100 +1,84 @@
 {
   "compilerOptions": {
-    // ECMAScript und Modul-Einstellungen
+    // TypeScript 5.7 Features & Target
     "target": "ES2024",
     "lib": [
       "ES2024",
       "DOM",
-      "DOM.Iterable",
-      "WebWorker"
+      "DOM.Iterable"
     ],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
     "moduleDetection": "force",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    // JSX für React 19
+    // React 19
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    // Strengste Type-Safety
+    // Stricteste Type-Safety
     "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "useUnknownInCatchVariables": true,
     "exactOptionalPropertyTypes": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    // Erweiterte Type-Checking
+    "noPropertyAccessFromIndexSignature": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    // Performance-Optimierungen
-    "skipLibCheck": true,
-    "skipDefaultLibCheck": true,
-    "incremental": true,
-    "tsBuildInfoFile": "./.tsbuildinfo",
-    "composite": false,
-    // Module Resolution
+    "noUncheckedSideEffectImports": true,
+    // Module System
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    // Performance
+    "skipLibCheck": true,
+    "incremental": true,
     // Output
     "noEmit": true,
-    "declaration": false,
     "sourceMap": true,
-    "removeComments": false,
     // FSD Path Mapping
     "baseUrl": ".",
     "paths": {
-      "@shared/*": [
-        "src/shared/*"
-      ],
-      "@entities/*": [
-        "src/entities/*"
-      ],
-      "@features/*": [
-        "src/features/*"
-      ],
-      "@widgets/*": [
-        "src/widgets/*"
+      "@app/*": [
+        "src/app/*"
       ],
       "@pages/*": [
         "src/pages/*"
       ],
-      "@app/*": [
-        "src/app/*"
+      "@widgets/*": [
+        "src/widgets/*"
+      ],
+      "@features/*": [
+        "src/features/*"
+      ],
+      "@entities/*": [
+        "src/entities/*"
+      ],
+      "@shared/*": [
+        "src/shared/*"
       ],
       "@/*": [
         "src/*"
-      ],
-      "@testing": [
-        "src/testing"
-      ],
-      "@testing/*": [
-        "src/testing/*"
       ]
-    }
+    },
+    // Vite/Node Support
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "allowJs": true
   },
   "include": [
     "src/**/*",
-    "src/**/*.json",
-    "**/*.d.ts"
+    "vite.config.ts",
+    "tailwind.config.ts"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "build",
-    "coverage",
-    "src/testing/**/*.test.ts",
-    "src/testing/**/*.spec.ts"
+    "coverage"
   ]
 }

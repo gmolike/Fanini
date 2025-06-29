@@ -5,14 +5,15 @@ import {
   type UseMutationResult,
   useQueryClient,
 } from '@tanstack/react-query';
-import { z } from 'zod';
+import { type z } from 'zod';
+
 import { apiClient } from '../client/apiClient';
 
 export interface RemoteMutationConfig<TData, TVariables, TContext = unknown> {
   method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   endpoint: string | ((variables: TVariables) => string);
   schema?: z.ZodSchema<TData>;
-  invalidateQueries?: Array<string | readonly unknown[]>;
+  invalidateQueries?: (string | readonly unknown[])[];
   onSuccess?: (
     data: TData,
     variables: TVariables,

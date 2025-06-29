@@ -1,4 +1,5 @@
 import type { ReactNode, ComponentType } from 'react'
+
 import type { LinkProps } from '@tanstack/react-router'
 
 export type NavLinkVariant = 'default' | 'primary' | 'ghost' | 'sidebar'

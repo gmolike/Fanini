@@ -1,4 +1,5 @@
 import { cn } from '@/shared/lib'
+
 import type { DataGridProps } from '../model/types'
 
 /**

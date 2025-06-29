@@ -1,8 +1,12 @@
 import * as React from 'react'
+
 import { ChevronRight } from 'lucide-react'
+
 import { cn } from '@/shared/lib'
-import type { BreadcrumbProps } from '../model/types'
+
 import { BreadcrumbItem } from './Item'
+
+import type { BreadcrumbProps } from '../model/types'
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,

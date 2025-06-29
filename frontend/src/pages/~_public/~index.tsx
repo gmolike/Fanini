@@ -1,7 +1,8 @@
 // frontend/src/pages/~_public/~index.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { Button, Card, CardContent } from '@/shared/shadcn';
 import { ArrowRight, Calendar, Users, Trophy } from 'lucide-react';
+
+import { Button, Card, CardContent } from '@/shared/shadcn';
 import { Container } from '@/shared/ui/layout/Container';
 
 export const Route = createFileRoute('/_public/')({

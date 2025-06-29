@@ -1,6 +1,9 @@
 import * as React from 'react'
+
 import { cn } from '@/shared/lib'
+
 import { Container } from '../Container'
+
 import type { PageHeaderProps } from './model/types'
 
 /**
@@ -24,7 +27,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <header className={cn('py-8', variantClasses[variant], className)}>
       <Container>
-        {breadcrumb && <div className="mb-4">{breadcrumb}</div>}
+        {breadcrumb ? <div className="mb-4">{breadcrumb}</div> : null}
 
         <div className="flex items-start justify-between">
           <div className="min-w-0 flex-1">
@@ -36,19 +39,17 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             >
               {title}
             </h1>
-            {description && (
-              <p
+            {description ? <p
                 className={cn(
                   'mt-2 text-lg',
                   variant === 'hero' ? 'text-white/90' : 'text-muted-foreground',
                 )}
               >
                 {description}
-              </p>
-            )}
+              </p> : null}
           </div>
 
-          {actions && <div className="ml-4 flex items-center gap-3">{actions}</div>}
+          {actions ? <div className="ml-4 flex items-center gap-3">{actions}</div> : null}
         </div>
       </Container>
     </header>

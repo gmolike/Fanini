@@ -1,5 +1,6 @@
 // frontend/src/shared/ui/Image/Image.tsx
 import { type ImgHTMLAttributes } from 'react';
+
 import { cn } from '@/shared/lib';
 
 interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {

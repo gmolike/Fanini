@@ -3,7 +3,7 @@ import type { UseQueryResult } from '@tanstack/react-query'
 /**
  * Feedback Komponenten Types
  */
-export type LoadingStateProps<TData = unknown> = {
+export interface LoadingStateProps<TData = unknown> {
   query: UseQueryResult<TData>
   children: (data: NonNullable<TData>) => React.ReactNode
   loadingFallback?: React.ReactNode
@@ -11,7 +11,7 @@ export type LoadingStateProps<TData = unknown> = {
   emptyFallback?: React.ReactNode
 }
 
-export type ErrorBoundaryProps = {
+export interface ErrorBoundaryProps {
   children: React.ReactNode
   fallback?: React.ComponentType<{ error: Error; reset: () => void }>
 }

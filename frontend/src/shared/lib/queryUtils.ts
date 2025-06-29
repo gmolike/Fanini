@@ -1,4 +1,4 @@
-import { QueryClient } from '@tanstack/react-query'
+import { type QueryClient } from '@tanstack/react-query'
 
 // Utility für optimistic Updates
 export function createOptimisticUpdate<T extends { id: string }>(

@@ -1,7 +1,10 @@
 import * as React from 'react'
+
 import { Loader2 } from 'lucide-react'
-import { Button as ShadcnButton } from '@/shared/shadcn/button'
+
 import { cn } from '@/shared/lib'
+import { Button as ShadcnButton } from '@/shared/shadcn/button'
+
 import type { ButtonProps } from '../model/types'
 
 /**
@@ -12,7 +15,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, children, loading, disabled, ...props }, ref) => {
     return (
       <ShadcnButton ref={ref} disabled={disabled || loading} className={cn(className)} {...props}>
-        {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+        {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
         {children}
       </ShadcnButton>
     )

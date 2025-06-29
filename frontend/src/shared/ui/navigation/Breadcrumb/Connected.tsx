@@ -1,7 +1,10 @@
 import * as React from 'react'
-import { Breadcrumb } from './Breadcrumb'
-import type { BreadcrumbProps } from './model/types'
+
 import { useBreadcrumb } from '@/shared/hooks'
+
+import { Breadcrumb } from './Breadcrumb'
+
+import type { BreadcrumbProps } from './model/types'
 
 type ConnectedBreadcrumbProps = Omit<BreadcrumbProps, 'items'> & {
   /**

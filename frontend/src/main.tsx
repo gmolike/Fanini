@@ -1,6 +1,7 @@
 // frontend/src/main.tsx
-import ReactDOM from 'react-dom/client';
 import { RouterProvider } from '@tanstack/react-router';
+import ReactDOM from 'react-dom/client';
+
 import { AppProvider } from '@/app/providers';
 import { router } from '@/shared/config';
 import './shared/styles/font.css';

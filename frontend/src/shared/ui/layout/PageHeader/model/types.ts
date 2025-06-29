@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 export type PageHeaderVariant = 'default' | 'hero' | 'minimal'
 
-export type PageHeaderProps = {
+export interface PageHeaderProps {
   /**
    * Seitentitel
    */

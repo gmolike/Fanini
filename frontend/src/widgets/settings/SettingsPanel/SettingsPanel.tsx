@@ -1,9 +1,10 @@
 ﻿// frontend/src/widgets/settings/SettingsPanel/SettingsPanel.tsx
 // Complete settings panel
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/shadcn';
-import { UpdateBranding, ManageFeatureFlags, ConfigureNotifications } from '@/features/settings';
 import { Palette, ToggleLeft, Bell } from 'lucide-react';
+
+import { UpdateBranding, ManageFeatureFlags, ConfigureNotifications } from '@/features/settings';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/shadcn';
 
 export const SettingsPanel = () => {
   return (

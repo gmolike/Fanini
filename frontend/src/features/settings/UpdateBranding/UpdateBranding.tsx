@@ -1,11 +1,11 @@
 ﻿// frontend/src/features/settings/UpdateBranding/UpdateBranding.tsx
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import { useBranding, useUpdateBranding } from '@/entities/settings/api';
-import { brandingSchema } from '@/entities/settings/model/schemas';
-import type { Branding } from '@/entities/settings';
+import { useForm } from 'react-hook-form';
+
+import { brandingSchema, useBranding, useUpdateBranding, type Branding } from '@/entities/settings';
 import {
   Button,
   Card,
@@ -58,8 +58,8 @@ export const UpdateBranding = () => {
   if (isLoading) {
     return (
       <Card>
-        <CardContent className='flex items-center justify-center p-8'>
-          <Loader2 className='h-8 w-8 animate-spin' />
+        <CardContent className="flex items-center justify-center p-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </CardContent>
       </Card>
     );
@@ -69,9 +69,9 @@ export const UpdateBranding = () => {
   if (error) {
     return (
       <Card>
-        <CardContent className='p-8'>
-          <p className='text-destructive'>Fehler beim Laden der Einstellungen</p>
-          <pre className='mt-2 text-xs'>{error.message}</pre>
+        <CardContent className="p-8">
+          <p className="text-destructive">Fehler beim Laden der Einstellungen</p>
+          <pre className="mt-2 text-xs">{error.message}</pre>
         </CardContent>
       </Card>
     );
@@ -88,39 +88,39 @@ export const UpdateBranding = () => {
         <CardDescription>Passe die Farben und das Logo deines Vereins an</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Color Preview */}
-          <div className='flex gap-4 rounded-lg border p-4'>
-            <div className='space-y-2'>
+          <div className="flex gap-4 rounded-lg border p-4">
+            <div className="space-y-2">
               <Label>Vorschau</Label>
-              <div className='flex gap-2'>
+              <div className="flex gap-2">
                 <div
-                  className='h-16 w-16 rounded-md border'
+                  className="h-16 w-16 rounded-md border"
                   style={{ backgroundColor: displayColors?.primary || '#34687e' }}
                 />
                 <div
-                  className='h-16 w-16 rounded-md border'
+                  className="h-16 w-16 rounded-md border"
                   style={{ backgroundColor: displayColors?.secondary || '#b94f46' }}
                 />
-                {displayColors?.accent && (
+                {displayColors?.accent ? (
                   <div
-                    className='h-16 w-16 rounded-md border'
+                    className="h-16 w-16 rounded-md border"
                     style={{ backgroundColor: displayColors.accent }}
                   />
-                )}
+                ) : null}
               </div>
             </div>
           </div>
 
           {/* Colors */}
-          <div className='space-y-4'>
+          <div className="space-y-4">
             <div>
-              <Label htmlFor='primary'>Primärfarbe</Label>
-              <div className='flex gap-2'>
+              <Label htmlFor="primary">Primärfarbe</Label>
+              <div className="flex gap-2">
                 <Input
-                  id='primary'
-                  type='color'
-                  className='h-10 w-20'
+                  id="primary"
+                  type="color"
+                  className="h-10 w-20"
                   {...form.register('colors.primary')}
                   onChange={e => {
                     form.setValue('colors.primary', e.target.value);
@@ -128,26 +128,26 @@ export const UpdateBranding = () => {
                   }}
                 />
                 <Input
-                  type='text'
-                  className='flex-1'
+                  type="text"
+                  className="flex-1"
                   {...form.register('colors.primary')}
-                  placeholder='#34687e'
+                  placeholder="#34687e"
                 />
               </div>
-              {form.formState.errors.colors?.primary && (
-                <p className='text-destructive mt-1 text-sm'>
+              {form.formState.errors.colors?.primary ? (
+                <p className="text-destructive mt-1 text-sm">
                   {form.formState.errors.colors.primary.message}
                 </p>
-              )}
+              ) : null}
             </div>
 
             <div>
-              <Label htmlFor='secondary'>Sekundärfarbe</Label>
-              <div className='flex gap-2'>
+              <Label htmlFor="secondary">Sekundärfarbe</Label>
+              <div className="flex gap-2">
                 <Input
-                  id='secondary'
-                  type='color'
-                  className='h-10 w-20'
+                  id="secondary"
+                  type="color"
+                  className="h-10 w-20"
                   {...form.register('colors.secondary')}
                   onChange={e => {
                     form.setValue('colors.secondary', e.target.value);
@@ -155,26 +155,26 @@ export const UpdateBranding = () => {
                   }}
                 />
                 <Input
-                  type='text'
-                  className='flex-1'
+                  type="text"
+                  className="flex-1"
                   {...form.register('colors.secondary')}
-                  placeholder='#b94f46'
+                  placeholder="#b94f46"
                 />
               </div>
-              {form.formState.errors.colors?.secondary && (
-                <p className='text-destructive mt-1 text-sm'>
+              {form.formState.errors.colors?.secondary ? (
+                <p className="text-destructive mt-1 text-sm">
                   {form.formState.errors.colors.secondary.message}
                 </p>
-              )}
+              ) : null}
             </div>
 
             <div>
-              <Label htmlFor='accent'>Akzentfarbe (Optional)</Label>
-              <div className='flex gap-2'>
+              <Label htmlFor="accent">Akzentfarbe (Optional)</Label>
+              <div className="flex gap-2">
                 <Input
-                  id='accent'
-                  type='color'
-                  className='h-10 w-20'
+                  id="accent"
+                  type="color"
+                  className="h-10 w-20"
                   {...form.register('colors.accent')}
                   onChange={e => {
                     form.setValue('colors.accent', e.target.value);
@@ -182,76 +182,76 @@ export const UpdateBranding = () => {
                   }}
                 />
                 <Input
-                  type='text'
-                  className='flex-1'
+                  type="text"
+                  className="flex-1"
                   {...form.register('colors.accent')}
-                  placeholder='#e8f0f4'
+                  placeholder="#e8f0f4"
                 />
               </div>
-              {form.formState.errors.colors?.accent && (
-                <p className='text-destructive mt-1 text-sm'>
+              {form.formState.errors.colors?.accent ? (
+                <p className="text-destructive mt-1 text-sm">
                   {form.formState.errors.colors.accent.message}
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
 
           {/* Logo */}
-          <div className='space-y-4'>
+          <div className="space-y-4">
             <div>
-              <Label htmlFor='logoUrl'>Logo URL</Label>
+              <Label htmlFor="logoUrl">Logo URL</Label>
               <Input
-                id='logoUrl'
-                type='url'
-                placeholder='https://...'
+                id="logoUrl"
+                type="url"
+                placeholder="https://..."
                 {...form.register('logo.url')}
               />
-              {form.formState.errors.logo?.url && (
-                <p className='text-destructive mt-1 text-sm'>
+              {form.formState.errors.logo?.url ? (
+                <p className="text-destructive mt-1 text-sm">
                   {form.formState.errors.logo.url.message}
                 </p>
-              )}
+              ) : null}
             </div>
 
             <div>
-              <Label htmlFor='logoAlt'>Logo Alt-Text</Label>
+              <Label htmlFor="logoAlt">Logo Alt-Text</Label>
               <Input
-                id='logoAlt'
-                type='text'
-                placeholder='Vereinslogo...'
+                id="logoAlt"
+                type="text"
+                placeholder="Vereinslogo..."
                 {...form.register('logo.alt')}
               />
-              {form.formState.errors.logo?.alt && (
-                <p className='text-destructive mt-1 text-sm'>
+              {form.formState.errors.logo?.alt ? (
+                <p className="text-destructive mt-1 text-sm">
                   {form.formState.errors.logo.alt.message}
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
 
           {/* Submit Button */}
           <Button
-            type='submit'
+            type="submit"
             disabled={updateBranding.isPending || !form.formState.isDirty}
-            className='w-full'
+            className="w-full"
           >
-            {updateBranding.isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
+            {updateBranding.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {updateBranding.isPending ? 'Speichern...' : 'Änderungen speichern'}
           </Button>
 
           {/* Success Message */}
-          {updateBranding.isSuccess && !form.formState.isDirty && (
-            <div className='rounded-lg bg-green-50 p-3 text-center text-sm text-green-800'>
+          {updateBranding.isSuccess && !form.formState.isDirty ? (
+            <div className="rounded-lg bg-green-50 p-3 text-center text-sm text-green-800">
               Einstellungen erfolgreich gespeichert!
             </div>
-          )}
+          ) : null}
 
           {/* Error Message */}
-          {updateBranding.isError && (
-            <div className='rounded-lg bg-red-50 p-3 text-center text-sm text-red-800'>
+          {updateBranding.isError ? (
+            <div className="rounded-lg bg-red-50 p-3 text-center text-sm text-red-800">
               Fehler beim Speichern. Bitte versuche es erneut.
             </div>
-          )}
+          ) : null}
         </form>
       </CardContent>
     </Card>

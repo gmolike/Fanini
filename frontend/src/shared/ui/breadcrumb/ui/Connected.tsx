@@ -1,7 +1,9 @@
 import * as React from 'react'
-import { BreadcrumbContext } from '../model/context'
-import type { BreadcrumbProps } from '../model/types'
+
 import { Breadcrumb } from './Breadcrumb'
+import { BreadcrumbContext } from '../model/context'
+
+import type { BreadcrumbProps } from '../model/types'
 
 type ConnectedBreadcrumbProps = Omit<BreadcrumbProps, 'items'> & {
   items?: BreadcrumbProps['items']

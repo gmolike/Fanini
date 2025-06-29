@@ -1,12 +1,12 @@
 import { format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 
-export function formatDate(date: Date | string, formatStr: string = 'dd.MM.yyyy'): string {
+export function formatDate(date: Date | string, formatStr = 'dd.MM.yyyy'): string {
   const dateObj = typeof date === 'string' ? parseISO(date) : date
   return format(dateObj, formatStr, { locale: de })
 }
 
-export function formatDateTime(date: Date | string, showTime: boolean = true): string {
+export function formatDateTime(date: Date | string, showTime = true): string {
   const formatStr = showTime ? 'dd.MM.yyyy HH:mm' : 'dd.MM.yyyy'
   return formatDate(date, formatStr)
 }

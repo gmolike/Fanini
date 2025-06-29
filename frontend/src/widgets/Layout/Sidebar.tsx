@@ -1,5 +1,5 @@
-import { cn } from '@/shared/lib'
-import { Badge } from '@/shared/shadcn/badge'
+import React, { useState } from 'react'
+
 import { Link, useLocation } from '@tanstack/react-router'
 import {
   Activity,
@@ -12,9 +12,12 @@ import {
   User,
   Users,
 } from 'lucide-react'
-import React, { useState } from 'react'
 
-type NavItem = {
+import { cn } from '@/shared/lib'
+import { Badge } from '@/shared/shadcn/badge'
+
+
+interface NavItem {
   label: string
   href: string
   icon: React.ComponentType<{ className?: string }>
@@ -22,7 +25,7 @@ type NavItem = {
   children?: { label: string; href: string }[]
 }
 
-type NavSection = {
+interface NavSection {
   title: string
   items: NavItem[]
 }
@@ -117,22 +120,17 @@ export const Sidebar = () => {
                       <Icon className="h-4 w-4 flex-shrink-0" />
                       <span className="flex-1 text-left">{item.label}</span>
 
-                      {item.badge && (
-                        <Badge variant="secondary" className="ml-auto">
+                      {item.badge ? <Badge variant="secondary" className="ml-auto">
                           {item.badge}
-                        </Badge>
-                      )}
+                        </Badge> : null}
 
-                      {item.children && (
-                        <ChevronRight
+                      {item.children ? <ChevronRight
                           className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-90')}
-                        />
-                      )}
+                        /> : null}
                     </button>
 
                     {/* Untermenü */}
-                    {item.children && isExpanded && (
-                      <div className="ml-9 mt-1 space-y-1">
+                    {item.children && isExpanded ? <div className="ml-9 mt-1 space-y-1">
                         {item.children.map(child => (
                           <Link
                             key={child.href}
@@ -147,8 +145,7 @@ export const Sidebar = () => {
                             {child.label}
                           </Link>
                         ))}
-                      </div>
-                    )}
+                      </div> : null}
                   </div>
                 )
               })}

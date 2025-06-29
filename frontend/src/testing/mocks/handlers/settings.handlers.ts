@@ -1,7 +1,9 @@
 // frontend/src/testing/mocks/handlers/settings.handlers.ts
 import { http, HttpResponse, delay } from 'msw';
-import { settingsMockData } from '../data/settings.data';
+
 import { settingsSchema, brandingSchema } from '@/entities/settings/model/schemas';
+
+import { settingsMockData } from '../data/settings.data';
 
 console.log('[MSW] Registering settings handlers...');
 

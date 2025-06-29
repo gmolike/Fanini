@@ -1,9 +1,10 @@
 // frontend/src/widgets/Navigation/Footer.tsx
 import { Link } from '@tanstack/react-router';
 import { Mail, MapPin } from 'lucide-react';
-import { Container } from '@/shared/ui/layout/Container';
+
 import { SocialIcon } from '@/shared/ui/icons/SocialIcon';
 import { socialIcons } from '@/shared/ui/icons/socialIcons';
+import { Container } from '@/shared/ui/layout/Container';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();

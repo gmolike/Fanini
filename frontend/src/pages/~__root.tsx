@@ -1,5 +1,5 @@
-﻿import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
-import { QueryClient } from '@tanstack/react-query'
+﻿import { type QueryClient } from '@tanstack/react-query'
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/router-devtools'
 
 interface RouterContext {
@@ -14,7 +14,7 @@ function RootLayout() {
   return (
     <>
       <Outlet />
-      {import.meta.env.DEV && <TanStackRouterDevtools position="bottom-right" />}
+      {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
     </>
   )
 }

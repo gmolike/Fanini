@@ -1,12 +1,15 @@
 import * as React from 'react';
+
 import { AlertCircle } from 'lucide-react';
-import type { ErrorBoundaryProps } from '../model/types';
+
 import { Button } from '@/shared/shadcn';
 
-type ErrorBoundaryState = {
+import type { ErrorBoundaryProps } from '../model/types';
+
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
-};
+}
 
 /**
  * ErrorBoundary Komponente

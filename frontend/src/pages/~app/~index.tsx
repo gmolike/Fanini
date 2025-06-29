@@ -1,8 +1,10 @@
 // frontend/src/pages/~app/~index.tsx
 import { createFileRoute } from '@tanstack/react-router';
 import { Settings, Palette, ToggleLeft, Shield } from 'lucide-react';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@shared/shadcn';
+
 import { useSettings } from '@/entities/settings';
+
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@shared/shadcn';
 
 export const Route = createFileRoute('/app/')({
   component: DashboardPage,
@@ -113,8 +115,7 @@ function DashboardPage() {
             <CardTitle>Aktuelle Einstellungen</CardTitle>
           </CardHeader>
           <CardContent className='space-y-3'>
-            {settings && (
-              <>
+            {settings ? <>
                 <div className='flex items-center justify-between'>
                   <span className='text-sm text-[var(--color-muted-foreground)]'>Events</span>
                   <span
@@ -139,8 +140,7 @@ function DashboardPage() {
                     {settings.features.gallery ? 'Aktiviert' : 'Deaktiviert'}
                   </span>
                 </div>
-              </>
-            )}
+              </> : null}
           </CardContent>
         </Card>
       </div>

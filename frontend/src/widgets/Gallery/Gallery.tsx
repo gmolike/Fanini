@@ -1,5 +1,5 @@
-import { Image } from '@/shared/ui/Image';
 import { cn } from '@/shared/lib';
+import { Image } from '@/shared/ui/Image';
 
 interface GalleryImage {
   src: string;

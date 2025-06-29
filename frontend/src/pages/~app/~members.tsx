@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Search, UserPlus, Mail, Shield, Crown, Star } from 'lucide-react';
-import { Button } from '@/shared/shadcn/button';
-import { Input } from '@/shared/shadcn/input';
+
 import { Badge } from '@/shared/shadcn/badge';
+import { Button } from '@/shared/shadcn/button';
 import { Card } from '@/shared/shadcn/card';
+import { Input } from '@/shared/shadcn/input';
 
 export const Route = createFileRoute('/app/members')({
   component: MembersPage,

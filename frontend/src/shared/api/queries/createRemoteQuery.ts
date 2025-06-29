@@ -5,7 +5,8 @@ import {
   type UseQueryResult,
   type QueryKey,
 } from '@tanstack/react-query';
-import { z, ZodError } from 'zod';
+import { type z, ZodError } from 'zod';
+
 import { apiClient, ApiClientError } from '../client';
 
 export interface RemoteQueryConfig<TData, TParams = void> {
@@ -23,8 +24,8 @@ export function createRemoteQuery<TData, TParams = void>(
 ) {
   return function useRemoteQuery(
     params: TParams,
-    options?: Omit<UseQueryOptions<TData, Error, TData, QueryKey>, 'queryKey' | 'queryFn'>
-  ): UseQueryResult<TData, Error> {
+    options?: Omit<UseQueryOptions<TData, Error, TData>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<TData> {
     const queryKey =
       typeof config.queryKey === 'function' ? config.queryKey(params) : config.queryKey;
 
@@ -34,7 +35,7 @@ export function createRemoteQuery<TData, TParams = void>(
     const enabled =
       typeof config.enabled === 'function' ? config.enabled(params) : (config.enabled ?? true);
 
-    return useQuery<TData, Error, TData, QueryKey>({
+    return useQuery<TData, Error, TData>({
       queryKey,
       queryFn: async () => {
         try {
@@ -91,15 +92,15 @@ export function createRemoteQuery<TData, TParams = void>(
 
 // Vereinfachte Version ohne Parameter
 export function createSimpleRemoteQuery<TData>(
-  config: Omit<RemoteQueryConfig<TData, void>, 'enabled'> & {
+  config: Omit<RemoteQueryConfig<TData>, 'enabled'> & {
     enabled?: boolean;
   }
 ) {
   return function useSimpleRemoteQuery(
-    options?: Omit<UseQueryOptions<TData, Error, TData, QueryKey>, 'queryKey' | 'queryFn'>
-  ): UseQueryResult<TData, Error> {
+    options?: Omit<UseQueryOptions<TData, Error, TData>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<TData> {
     // Erstelle die parametrisierte Version
-    const useParametrizedQuery = createRemoteQuery<TData, void>({
+    const useParametrizedQuery = createRemoteQuery<TData>({
       ...config,
       enabled: () => config.enabled ?? true,
     });

@@ -1,18 +1,19 @@
 ﻿// frontend/src/shared/api/lib/apiFactory.ts
 // Generic API helper functions
 
-import { apiClient, type ApiError } from '../config/apiClient';
 import { z } from 'zod';
+
+import { apiClient, type ApiError } from '../config/apiClient';
 
 /**
  * API Endpoint Konfiguration
  */
-export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
+export interface ApiEndpointConfig<TParams = void, TResponse = unknown> {
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   url: string | ((params: TParams) => string);
   schema?: z.ZodSchema<TResponse>;
   transformResponse?: (data: unknown) => TResponse;
-};
+}
 
 /**
  * Erstellt eine typsichere API-Funktion

@@ -1,7 +1,7 @@
 /**
  * DataDisplay Komponenten Types
  */
-export type DataFieldProps = {
+export interface DataFieldProps {
   label: string
   value: React.ReactNode
   icon?: React.ReactNode
@@ -11,7 +11,7 @@ export type DataFieldProps = {
   highlightEmpty?: boolean
 }
 
-export type DataGridProps = {
+export interface DataGridProps {
   children: React.ReactNode
   columns?: 1 | 2 | 3 | 4
   className?: string

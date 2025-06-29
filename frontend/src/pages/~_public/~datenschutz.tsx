@@ -1,5 +1,6 @@
 // frontend/src/pages/~_public/~datenschutz.tsx
 import { createFileRoute } from '@tanstack/react-router';
+
 import { Container } from '@/shared/ui/layout/Container';
 
 export const Route = createFileRoute('/_public/datenschutz')({

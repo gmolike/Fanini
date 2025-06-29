@@ -3,7 +3,7 @@ import type { ComponentType } from 'react'
 /**
  * Breadcrumb Item
  */
-export type BreadcrumbItem = {
+export interface BreadcrumbItem {
   /**
    * Angezeigter Text
    */
@@ -28,7 +28,7 @@ export type BreadcrumbVariant = 'default' | 'compact' | 'large'
 /**
  * Breadcrumb Props
  */
-export type BreadcrumbProps = {
+export interface BreadcrumbProps {
   /**
    * Breadcrumb Items
    */
@@ -61,7 +61,7 @@ export type BreadcrumbProps = {
 /**
  * Route Breadcrumb Config
  */
-export type BreadcrumbConfig = {
+export interface BreadcrumbConfig {
   /**
    * Titel für die Route
    */

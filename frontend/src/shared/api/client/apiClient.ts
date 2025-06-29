@@ -114,7 +114,7 @@ export class ApiClient {
 
     // Timeout handling
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
+    const timeoutId = setTimeout(() => { controller.abort(); }, timeout);
 
     try {
       console.debug(`[API] ${fetchConfig.method || 'GET'} ${url}`);

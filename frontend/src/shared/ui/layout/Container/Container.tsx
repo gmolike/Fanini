@@ -1,6 +1,8 @@
 import * as React from 'react'
-import type { ContainerProps } from './model/types'
+
 import { cn } from '@/shared/lib'
+
+import type { ContainerProps } from './model/types'
 
 /**
  * Container Komponente

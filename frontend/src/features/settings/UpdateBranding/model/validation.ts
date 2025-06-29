@@ -1,6 +1,4 @@
 ﻿// frontend/src/features/settings/UpdateBranding/model/validation.ts
-// Branding form validation
-
 import { z } from 'zod';
 
 // Erweiterte Validierung für Formulare
@@ -15,7 +13,7 @@ export const brandingFormSchema = z.object({
       .or(z.literal('')),
   }),
   logo: z.object({
-    url: z.string().url('Bitte gültige URL eingeben'),
+    url: z.string().min(1, 'Logo URL ist erforderlich'),
     alt: z.string().min(1, 'Alt-Text ist erforderlich für Barrierefreiheit'),
   }),
 });

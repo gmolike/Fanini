@@ -1,8 +1,6 @@
-﻿// frontend/src/entities/settings/model/constants.ts
-// Default values and constants
+﻿import type { Settings } from './types';
 
-import type { Settings } from './types';
-
+// frontend/src/entities/settings/model/constants.ts
 export const DEFAULT_SETTINGS: Settings = {
   id: 'default-settings',
   branding: {

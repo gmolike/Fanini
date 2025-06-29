@@ -8,5 +8,4 @@ export * from './model';
 export * from './api';
 
 // Re-export commonly used items
-export { settingsQueryKeys } from './api/settingsHooks';
-export type { Settings, Branding, Contact, Features } from './model/types';
+export type { Settings, Branding, Contact, Features, SettingsUpdate } from './model/types';

@@ -1,6 +1,4 @@
 ﻿// frontend/src/entities/settings/model/schemas.ts
-// Zod schemas for settings
-
 import { z } from 'zod';
 
 /**
@@ -9,35 +7,35 @@ import { z } from 'zod';
 const hexColorSchema = z.string().regex(/^#[0-9A-F]{6}$/i, 'Ungültiges Hex-Format');
 
 /**
- * Branding Schema - alle Felder required
+ * Branding Schema
  */
 export const brandingSchema = z.object({
   colors: z.object({
     primary: hexColorSchema,
     secondary: hexColorSchema,
-    accent: hexColorSchema.optional(), // Nur accent ist optional
+    accent: hexColorSchema.optional(),
   }),
   logo: z.object({
-    url: z.string().url('Ungültige URL'),
+    url: z.string().min(1), // Flexibler als .url()
     alt: z.string().min(1, 'Alt-Text erforderlich'),
   }),
 });
 
 /**
- * Contact Schema - alle Felder required außer phone
+ * Contact Schema
  */
 export const contactSchema = z.object({
   email: z.string().email('Ungültige E-Mail'),
-  phone: z.string().optional(), // Nur phone ist optional
+  phone: z.string().optional(),
   address: z.object({
-    street: z.string(),
-    zip: z.string().regex(/^\d{5}$/, 'PLZ muss 5 Ziffern haben'),
-    city: z.string(),
+    street: z.string().min(1),
+    zip: z.string().length(5, 'PLZ muss 5 Ziffern haben'),
+    city: z.string().min(1),
   }),
 });
 
 /**
- * Feature Flags Schema - alle required
+ * Feature Flags Schema
  */
 export const featuresSchema = z.object({
   events: z.boolean(),
@@ -46,7 +44,7 @@ export const featuresSchema = z.object({
 });
 
 /**
- * Main Settings Schema - alle Felder required
+ * Main Settings Schema
  */
 export const settingsSchema = z.object({
   id: z.string(),
@@ -57,10 +55,6 @@ export const settingsSchema = z.object({
 });
 
 /**
- * Settings Update Schema - hier können Felder optional sein
+ * Settings Update Schema - partial updates
  */
-export const settingsUpdateSchema = z.object({
-  branding: brandingSchema.partial().optional(), // partial macht alle Unterfelder optional
-  contact: contactSchema.partial().optional(),
-  features: featuresSchema.partial().optional(),
-});
+export const settingsUpdateSchema = settingsSchema.partial().omit({ id: true, updatedAt: true });

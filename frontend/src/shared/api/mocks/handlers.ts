@@ -1,7 +1,7 @@
 ﻿// frontend/src/shared/api/mocks/handlers.ts
 // Combined mock handlers
 
-import { settingsHandlers } from '@/entities/settings/api/settingsMocks';
+import { settingsHandlers } from '@/testing/mocks/handlers/settings.handlers';
 
 /**
  * Alle Mock Handler kombiniert

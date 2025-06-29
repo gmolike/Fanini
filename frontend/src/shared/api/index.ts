@@ -1,13 +1,13 @@
-﻿// Config exports
-export * from './config';
+﻿// frontend/src/shared/api/index.ts
+// Client exports
+export * from './client';
 
-// Library exports
-export * from './lib';
-
-// Mock exports (nur in dev)
-export { initMockServer } from './mocks';
-
-// Re-export commonly used items for convenience
+// Config exports (queryClient bleibt wo es ist)
 export { queryClient } from './config/queryClient';
-export { apiClient } from './config/apiClient';
-export { createQueryKeys } from './lib/queryFactory';
+
+// Query/Mutation utilities
+export * from './queries';
+
+// Re-export commonly used items
+export { apiClient } from './client/apiClient';
+export { createRemoteMutation } from './mutations';

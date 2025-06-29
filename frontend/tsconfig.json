@@ -75,6 +75,12 @@
       ],
       "@/*": [
         "src/*"
+      ],
+      "@testing": [
+        "src/testing"
+      ],
+      "@testing/*": [
+        "src/testing/*"
       ]
     }
   },
@@ -87,6 +93,8 @@
     "node_modules",
     "dist",
     "build",
-    "coverage"
+    "coverage",
+    "src/testing/**/*.test.ts",
+    "src/testing/**/*.spec.ts"
   ]
 }

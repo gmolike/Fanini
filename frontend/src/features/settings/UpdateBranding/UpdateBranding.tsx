@@ -1,8 +1,9 @@
-﻿import { useState, useEffect } from 'react';
+﻿// frontend/src/features/settings/UpdateBranding/UpdateBranding.tsx
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import { useBranding, useUpdateBranding } from '@/entities/settings';
+import { useBranding, useUpdateBranding } from '@/entities/settings/api';
 import { brandingSchema } from '@/entities/settings/model/schemas';
 import type { Branding } from '@/entities/settings';
 import {
@@ -21,11 +22,19 @@ export const UpdateBranding = () => {
   const updateBranding = useUpdateBranding();
   const [previewColors, setPreviewColors] = useState<Partial<Branding['colors']>>({});
 
-  // Debug
-  console.log('[UpdateBranding] State:', { branding, isLoading, error });
-
   const form = useForm<Branding>({
     resolver: zodResolver(brandingSchema),
+    defaultValues: {
+      colors: {
+        primary: '#34687e',
+        secondary: '#b94f46',
+        accent: '#e8f0f4',
+      },
+      logo: {
+        url: '/images/logo.svg',
+        alt: 'Faninitiative Spandau e.V.',
+      },
+    },
   });
 
   // Form mit Daten füllen wenn geladen
@@ -45,18 +54,8 @@ export const UpdateBranding = () => {
     }
   };
 
-  if (error) {
-    return (
-      <Card>
-        <CardContent className='p-8'>
-          <p className='text-destructive'>Fehler beim Laden der Einstellungen</p>
-          <pre className='mt-2 text-xs'>{JSON.stringify(error, null, 2)}</pre>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (isLoading || !branding) {
+  // Loading State
+  if (isLoading) {
     return (
       <Card>
         <CardContent className='flex items-center justify-center p-8'>
@@ -66,7 +65,20 @@ export const UpdateBranding = () => {
     );
   }
 
-  const colors = form.watch('colors') || branding.colors;
+  // Error State
+  if (error) {
+    return (
+      <Card>
+        <CardContent className='p-8'>
+          <p className='text-destructive'>Fehler beim Laden der Einstellungen</p>
+          <pre className='mt-2 text-xs'>{error.message}</pre>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Main Component
+  const colors = form.watch('colors') || branding?.colors;
   const displayColors = { ...colors, ...previewColors };
 
   return (
@@ -110,6 +122,10 @@ export const UpdateBranding = () => {
                   type='color'
                   className='h-10 w-20'
                   {...form.register('colors.primary')}
+                  onChange={e => {
+                    form.setValue('colors.primary', e.target.value);
+                    setPreviewColors({ ...previewColors, primary: e.target.value });
+                  }}
                 />
                 <Input
                   type='text'
@@ -133,6 +149,10 @@ export const UpdateBranding = () => {
                   type='color'
                   className='h-10 w-20'
                   {...form.register('colors.secondary')}
+                  onChange={e => {
+                    form.setValue('colors.secondary', e.target.value);
+                    setPreviewColors({ ...previewColors, secondary: e.target.value });
+                  }}
                 />
                 <Input
                   type='text'
@@ -141,6 +161,11 @@ export const UpdateBranding = () => {
                   placeholder='#b94f46'
                 />
               </div>
+              {form.formState.errors.colors?.secondary && (
+                <p className='text-destructive mt-1 text-sm'>
+                  {form.formState.errors.colors.secondary.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -151,6 +176,10 @@ export const UpdateBranding = () => {
                   type='color'
                   className='h-10 w-20'
                   {...form.register('colors.accent')}
+                  onChange={e => {
+                    form.setValue('colors.accent', e.target.value);
+                    setPreviewColors({ ...previewColors, accent: e.target.value });
+                  }}
                 />
                 <Input
                   type='text'
@@ -159,6 +188,11 @@ export const UpdateBranding = () => {
                   placeholder='#e8f0f4'
                 />
               </div>
+              {form.formState.errors.colors?.accent && (
+                <p className='text-destructive mt-1 text-sm'>
+                  {form.formState.errors.colors.accent.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -187,13 +221,37 @@ export const UpdateBranding = () => {
                 placeholder='Vereinslogo...'
                 {...form.register('logo.alt')}
               />
+              {form.formState.errors.logo?.alt && (
+                <p className='text-destructive mt-1 text-sm'>
+                  {form.formState.errors.logo.alt.message}
+                </p>
+              )}
             </div>
           </div>
 
-          <Button type='submit' disabled={updateBranding.isPending} className='w-full'>
+          {/* Submit Button */}
+          <Button
+            type='submit'
+            disabled={updateBranding.isPending || !form.formState.isDirty}
+            className='w-full'
+          >
             {updateBranding.isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-            Speichern
+            {updateBranding.isPending ? 'Speichern...' : 'Änderungen speichern'}
           </Button>
+
+          {/* Success Message */}
+          {updateBranding.isSuccess && !form.formState.isDirty && (
+            <div className='rounded-lg bg-green-50 p-3 text-center text-sm text-green-800'>
+              Einstellungen erfolgreich gespeichert!
+            </div>
+          )}
+
+          {/* Error Message */}
+          {updateBranding.isError && (
+            <div className='rounded-lg bg-red-50 p-3 text-center text-sm text-red-800'>
+              Fehler beim Speichern. Bitte versuche es erneut.
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>

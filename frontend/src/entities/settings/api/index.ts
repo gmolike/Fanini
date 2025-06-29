@@ -1,6 +1,4 @@
 ﻿// frontend/src/entities/settings/api/index.ts
-// Settings API exports
-
-export * from './settingsApi';
-export * from './settingsHooks';
-export { settingsHandlers } from './settingsMocks';
+// API exports for settings entity
+export * from './queries';
+export * from './mutations';

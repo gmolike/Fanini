@@ -1,8 +1,49 @@
-dist
-node_modules
+# Dependencies
+node_modules/
 pnpm-lock.yaml
-routeTree.gen.ts
-coverage
-.next
-.cache
-public
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+coverage/
+
+# Generated files
+frontend/src/app/routeTree.gen.ts
+*.min.js
+*.min.css
+*.map
+
+# Cache
+.cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/local.settings.json
+
+# Environment
+.env.local
+.env.*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+CHANGELOG.md
+
+# Backend (separate prettier config)
+backend/

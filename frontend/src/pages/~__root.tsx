@@ -1,22 +1,21 @@
-﻿import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
-import { QueryClient } from '@tanstack/react-query'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+﻿/* eslint-disable unicorn/filename-case */
+import { type QueryClient } from '@tanstack/react-query';
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
-interface RouterContext {
-  queryClient: QueryClient
+type RouterContext = {
+  queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
   component: RootLayout,
-})
+});
 
 function RootLayout() {
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Outlet />
-      {import.meta.env.DEV && (
-        <TanStackRouterDevtools position="bottom-right" />
-      )}
-    </div>
-  )
+      {import.meta.env.DEV ? <TanStackRouterDevtools position="bottom-right" /> : null}
+    </>
+  );
 }

@@ -1,52 +1,84 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "useDefineForClassFields": true,
+    // TypeScript 5.7 Features & Target
+    "target": "ES2024",
     "lib": [
-      "ES2022",
+      "ES2024",
       "DOM",
       "DOM.Iterable"
     ],
     "module": "ESNext",
-    "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "isolatedModules": true,
     "moduleDetection": "force",
-    "noEmit": true,
+    // React 19
     "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    // Stricteste Type-Safety
     "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    // Module System
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
+    // Performance
+    "skipLibCheck": true,
+    "incremental": true,
+    // Output
+    "noEmit": true,
+    "sourceMap": true,
+    // FSD Path Mapping
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
       "@app/*": [
-        "./src/app/*"
+        "src/app/*"
       ],
       "@pages/*": [
-        "./src/pages/*"
+        "src/pages/*"
       ],
       "@widgets/*": [
-        "./src/widgets/*"
+        "src/widgets/*"
       ],
       "@features/*": [
-        "./src/features/*"
+        "src/features/*"
       ],
       "@entities/*": [
-        "./src/entities/*"
+        "src/entities/*"
       ],
       "@shared/*": [
-        "./src/shared/*"
+        "src/shared/*"
+      ],
+      "@/*": [
+        "src/*"
       ]
-    }
+    },
+    // Vite/Node Support
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "allowJs": true
   },
   "include": [
-    "src",
-    "vite.config.ts"
+    "src/**/*",
+    "vite.config.ts",
+    "tailwind.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage"
   ]
 }

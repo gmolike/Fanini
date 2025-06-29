@@ -1,24 +1,24 @@
-import { QueryClient } from '@tanstack/react-query'
+import { type QueryClient } from '@tanstack/react-query';
 
 // Utility für optimistic Updates
 export function createOptimisticUpdate<T extends { id: string }>(
   queryClient: QueryClient,
-  queryKey: readonly unknown[],
+  queryKey: readonly unknown[]
 ) {
   return {
     onMutate: async (updatedData: T) => {
-      await queryClient.cancelQueries({ queryKey })
-      const previousData = queryClient.getQueryData(queryKey)
-      queryClient.setQueryData(queryKey, updatedData)
-      return { previousData }
+      await queryClient.cancelQueries({ queryKey });
+      const previousData = queryClient.getQueryData(queryKey);
+      queryClient.setQueryData(queryKey, updatedData);
+      return { previousData };
     },
-    onError: (_err: unknown, _updatedData: T, context: any) => {
-      if (context?.previousData) {
-        queryClient.setQueryData(queryKey, context.previousData)
+    onError: (_err: unknown, _updatedData: T, context: { previousData: unknown } | undefined) => {
+      if (context && context.previousData !== undefined) {
+        queryClient.setQueryData(queryKey, context.previousData);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey })
+      void queryClient.invalidateQueries({ queryKey });
     },
-  }
+  };
 }

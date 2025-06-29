@@ -1,16 +1,39 @@
-import ReactDOM from 'react-dom/client'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { RouterProvider } from '@tanstack/react-router'
-import { queryClient, router } from '@/shared/config'
-import './shared/styles/font.css'
-import './shared/styles/main.css'
+// frontend/src/main.tsx
+import { RouterProvider } from '@tanstack/react-router';
+import ReactDOM from 'react-dom/client';
 
-const rootElement = document.getElementById('root')!
+import { AppProvider } from '@/app/providers';
+import { router } from '@/shared/config';
+import './shared/styles/font.css';
+import './shared/styles/main.css';
 
-ReactDOM.createRoot(rootElement).render(
-  <QueryClientProvider client={queryClient}>
-    <RouterProvider router={router} />
-    <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
-  </QueryClientProvider>,
-)
+/**
+ * Prepare app before rendering
+ * @description Startet MSW in Development wenn aktiviert
+ */
+async function prepare(): Promise<void> {
+  if (import.meta.env.DEV && import.meta.env['VITE_MOCK_API_ENABLED'] === 'true') {
+    // Dynamischer Import nur wenn benötigt
+    const { startMockServer } = await import('@/testing');
+    await startMockServer();
+  }
+}
+
+// Root element
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  throw new Error('Root element not found');
+}
+
+// Start app
+prepare()
+  .then(() => {
+    ReactDOM.createRoot(rootElement).render(
+      <AppProvider>
+        <RouterProvider router={router} />
+      </AppProvider>
+    );
+  })
+  .catch((error: unknown) => {
+    console.error('Failed to start app:', error);
+  });

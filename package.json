@@ -2,6 +2,7 @@
   "name": "faninitiative-spandau",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup.ps1",
@@ -39,12 +40,20 @@
     "status": "powershell -ExecutionPolicy Bypass -File scripts/status.ps1",
     "stop": "powershell -ExecutionPolicy Bypass -File scripts/stop-all.ps1",
     "lint": "pnpm -r lint",
-    "format": "pnpm -r format",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "type-check": "pnpm -r type-check",
     "check:requirements": "powershell -ExecutionPolicy Bypass -File scripts/check-requirements.ps1",
     "install:tools": "powershell -ExecutionPolicy Bypass -File scripts/install-tools.ps1"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "globals": "^15.15.0",
+    "prettier": "^3.6.2"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
   }
 }

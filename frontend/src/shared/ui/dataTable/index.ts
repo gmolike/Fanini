@@ -1,130 +1,72 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
 export {
-  ActionsCell,
-  BooleanCell,
-  DateCell,
-  EmailCell,
-  PhoneCell,
-  TextCell,
-} from './components/CellTemplates';
+  type CellProps,
+  createTableDefinition,
+  type DataTableProps,
+  type ExtractedKey,
+  type FieldDefinition,
+  type FieldId,
+  TABLE_PRESETS,
+  type TableDataConstraint,
+  type TableDefinition,
+  type TablePreset,
+} from './model/types';
+// eslint-disable-next-line sort-exports/sort-exports
+export { ActionsCell, BooleanCell, DateCell, EmailCell, PhoneCell, TextCell } from './ui/cells';
+
 // ========================================
-// 3. WIEDERVERWENDBARE KOMPONENTEN
+// BUTTON COMPONENTS
 // ========================================
-// Components die oft extern verwendet werden
 export {
-  CompactDeleteButton,
-  TableDeleteButton,
-  type TableDeleteButtonProps,
-  TableEditButton,
-} from './components/CellButtons';
+  CompactDelete as CompactDeleteButton,
+  Delete as TableDeleteButton,
+  Edit as TableEditButton,
+} from './ui/buttons';
+
 // ========================================
-// 4. CELL COMPONENTS & TEMPLATES
+// MODEL EXPORTS
 // ========================================
-// Cell Templates
 export {
   convertTableDefinition,
   getColumnVisibility,
   getSearchableColumns,
-} from './model/TableConverter';
-export { createSkeletonData, createTableConfig, formatColumnLabels } from './utils/tableHelpers';
-// Cell Buttons
-export { createTableDefinition } from './model/tableDefinition';
-
-
-
-
-
-
-
-
-
+} from './model/converter';
 
 // ========================================
-// 2. TYPES (als type exports)
+// HELPER FUNCTIONS
 // ========================================
-// Core Types aus table-definition
-export { DataTable } from './DataTable';
-
-
-
-
-
+export { createSkeletonData, debounce, formatColumnLabels } from './lib/helpers';
+export { createTableConfig } from './lib/presets';
 
 /**
- * DataTable Public API - Optimiert für FSD ohne zirkuläre Abhängigkeiten
- *
- * Export-Regeln:
- * 1. Hauptkomponente direkt exportieren
- * 2. Types als Type-Exports für Tree-Shaking
- * 3. Wiederverwendbare Components
- * 4. Utils nur wenn extern benötigt
+ * @module dataTable
+ * @description Public API für die DataTable Komponente
  */
 // ========================================
-// 1. HAUPT-KOMPONENTE
+// HAUPTKOMPONENTE
 // ========================================
-export { EmptyState } from './components/EmptyState';
-
-// Erweiterte Types aus types.ts (falls vorhanden)
-export { ErrorState } from './components/ErrorState';
-
+export { DataTable } from './ui/DataTable';
 
 // ========================================
-// 7. UTILS & HELPERS
+// HEADER COMPONENTS
 // ========================================
-// Table Converter
-export { ExpandButton } from './components/ExpandButton';
-
-
-
-
-
-
-
-
-// Helper Functions (falls vorhanden)
 export {
-  FilterableHeader,
-  headerTemplates,
-  type HeaderType,
-  SimpleHeader,
-  SortableHeader,
-} from './components/CellHeaders';
-export { tablePresets } from './types';
-
-
-
-
+  Filterable as FilterableHeader,
+  Simple as SimpleHeader,
+  Sortable as SortableHeader,
+} from './ui/headers';
 
 // ========================================
-// 8. PRESETS (falls vorhanden)
+// CELL COMPONENTS
+// ========================================
+export { useDataTable } from './model/hooks';
+
+// ========================================
+// RE-EXPORT TYPES für Erweiterungen
 // ========================================
 export type {
-  BaseDataTableProps,
-  DataTableFeatures,
+  ErrorStateProps,
   ExpandButtonProps,
   PaginationProps,
-  RowSelectionState,
-  TableDataConstraint,
-  TableSkeletonProps,
+  SkeletonProps,
   ToolbarProps,
-} from './types';
-
-
-
-
-// ========================================
-// 5. HEADER COMPONENTS
-// ========================================
-export type { DataTableProps, FieldDefinition, TableDefinition } from './model/tableDefinition';
+} from './model/types';

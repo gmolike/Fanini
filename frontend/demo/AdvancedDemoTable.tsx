@@ -7,7 +7,7 @@ import {
   DataTable,
   DateCell,
   EmailCell,
-} from '@/shared/ui/dataTable-new';
+} from '@/shared/ui/dataTable';
 
 type Project = {
   id: string;

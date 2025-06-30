@@ -3,7 +3,7 @@
  * @description Standard Text Cell Component
  */
 
-import { TextDisplay } from '@/shared/ui/display';
+import { Text as TextDisplay } from '@/shared/ui/display/Text';
 
 import type { CellProps } from '../../model/types';
 
@@ -21,5 +21,5 @@ import type { CellProps } from '../../model/types';
  * ```
  */
 export const Text = <TData,>({ value }: CellProps<TData>) => (
-  <TextDisplay text={value as string | undefined | null} />
+  <TextDisplay text={value === undefined ? null : (value as string | number | null)} />
 );

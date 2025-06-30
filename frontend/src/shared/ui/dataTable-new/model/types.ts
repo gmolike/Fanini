@@ -5,93 +5,56 @@
 
 import type {
   ColumnDef,
-  SortingState,
-  VisibilityState,
   ColumnFiltersState,
-  Table as TanstackTable,
   Row,
+  SortingState,
+  Table as TanstackTable,
+  VisibilityState,
 } from '@tanstack/react-table';
 
-// ========================================
-// BASE TYPES
-// ========================================
-
 /**
- * Basis-Constraint für Tabellendaten
- * @description Minimal erforderliche Struktur für DataTable Rows
- */
-export type TableDataConstraint = {
-  id?: string;
-  [key: string]: unknown;
-};
-
-/**
- * Extrahiert alle Keys aus einem Type als String Union
- */
-export type ExtractedKey<T> = T extends Record<string, any> ? keyof T & string : never;
-
-/**
- * Field ID Type für TableDefinition
- */
-export type FieldId<TData> = ExtractedKey<TData> | 'actions';
-
-// ========================================
-// TABLE DEFINITION
-// ========================================
-
-/**
- * Definition eines einzelnen Tabellen-Feldes
+ * Props für die Haupt-DataTable Komponente
  * @template TData - Datentyp der Tabellenzeilen
- * @template TFieldId - Union Type der erlaubten Field IDs
+ * @template TTableDef - Typ der TableDefinition
  */
-export type FieldDefinition<TData = unknown, TFieldId extends string = string> = {
-  /** Eindeutige ID der Spalte */
-  id: TFieldId;
-
-  /** Accessor für den Wert */
-  accessor?: TFieldId extends 'actions' ? never : TFieldId | ((row: TData) => unknown);
-
-  /** Sortierbarkeit der Spalte */
-  sortable?: boolean;
-
-  /** Durchsuchbarkeit der Spalte */
-  searchable?: boolean;
-
-  /** Ausblendbarkeit der Spalte */
-  toggleable?: boolean;
-
-  /** Filterbarkeit der Spalte */
-  filterable?: boolean;
-
-  /** Standard-Sichtbarkeit */
-  defaultVisible?: boolean;
-
-  /** Cell Component oder Template */
-  cell?: React.ComponentType<CellProps<TData>> | 'default' | 'actions';
-
-  /** Breite der Spalte */
-  width?: number | string;
-};
-
-/**
- * Komplette Tabellen-Definition
- * @template TData - Datentyp der Tabellenzeilen
- */
-export type TableDefinition<TData = unknown> = {
-  /** Labels für alle Spalten */
-  labels: Record<FieldId<TData>, string>;
-
-  /** Feld-Definitionen */
-  fields: FieldDefinition<TData, FieldId<TData>>[];
-};
+export const createTableDefinition = <TData extends Record<string, unknown>>(
+  definition: TableDefinition<TData>
+): TableDefinition<TData> => definition;
 
 // ========================================
 // COMPONENT PROPS
 // ========================================
-
 /**
  * Props für Cell Components
  * @template TData - Datentyp der Tabellenzeile
+ */
+export const TABLE_PRESETS = {
+  simple: {
+    showColumnToggle: false,
+    pageSize: 10,
+  },
+  advanced: {
+    showColumnToggle: true,
+    pageSize: 20,
+  },
+  dashboard: {
+    expandable: true,
+    initialRowCount: 3,
+    showColumnToggle: false,
+    pageSize: 10,
+  },
+  compact: {
+    showColumnToggle: false,
+    pageSize: 5,
+    maxHeight: '400px',
+  },
+} as const;
+
+// ========================================
+// PRESETS
+// ========================================
+/**
+ * Vordefinierte Table-Konfigurationen
  */
 export type CellProps<TData> = {
   /** Zellenwert */
@@ -100,10 +63,50 @@ export type CellProps<TData> = {
   row: TData;
 };
 
+// ========================================
+// HOOK TYPES
+// ========================================
 /**
- * Props für die Haupt-DataTable Komponente
- * @template TData - Datentyp der Tabellenzeilen
- * @template TTableDef - Typ der TableDefinition
+ * State für den useDataTable Hook
+ */
+export type DataTableController<TData> = {
+  // Table Instance
+  table: TanstackTable<TData>;
+
+  // State
+  state: DataTableState;
+
+  // Computed Values
+  displayRows: Row<TData>[];
+  isLoading: boolean;
+  isEmpty: boolean;
+  error: Error | null;
+  showPagination: boolean;
+  showExpandButton: boolean;
+
+  // Props für Sub-Components
+  toolbarProps: ToolbarProps<TData>;
+  paginationProps: PaginationProps<TData>;
+  expandProps: ExpandButtonProps;
+  skeletonProps: SkeletonProps<TData>;
+  errorProps: ErrorStateProps;
+  emptyProps: Record<string, never>;
+  tableProps: {
+    className: string;
+    style?: React.CSSProperties | undefined;
+  };
+  coreTableProps: {
+    table: TanstackTable<TData>;
+    stickyHeader?: boolean;
+    stickyActionColumn?: boolean;
+  };
+};
+
+// ========================================
+// SUB-COMPONENT PROPS
+// ========================================
+/**
+ * Props für Error State Component
  */
 export type DataTableProps<
   TData extends TableDataConstraint = TableDataConstraint,
@@ -158,20 +161,19 @@ export type DataTableProps<
 };
 
 /**
- * Extrahiert Field IDs aus einer TableDefinition
+ * Props für Expand Button Component
  */
-export type ExtractFieldId<TTableDef> = TTableDef extends {
-  fields: readonly { id: infer TId }[];
-}
-  ? TId
-  : never;
-
-// ========================================
-// SUB-COMPONENT PROPS
-// ========================================
+export type DataTableState = {
+  sorting: SortingState;
+  columnFilters: ColumnFiltersState;
+  columnVisibility: VisibilityState;
+  globalFilter: string;
+  isExpanded: boolean;
+  selectedRows: Record<string, boolean>;
+};
 
 /**
- * Props für Error State Component
+ * Extrahiert alle Keys aus einem Type als String Union
  */
 export type ErrorStateProps = {
   error: Error;
@@ -179,7 +181,134 @@ export type ErrorStateProps = {
 };
 
 /**
+ * Extrahiert Field IDs aus einer TableDefinition
+ */
+export type ExpandButtonProps = {
+  isExpanded: boolean;
+  onToggle: () => void;
+  collapsedCount: number;
+  totalCount: number;
+  customText?:
+    | {
+        expand?: string;
+        collapse?: string;
+      }
+    | undefined;
+};
+
+// ========================================
+// TABLE DEFINITION
+// ========================================
+/**
+ * Definition eines einzelnen Tabellen-Feldes
+ * @template TData - Datentyp der Tabellenzeilen
+ * @template TFieldId - Union Type der erlaubten Field IDs
+ */
+/**
+ * Extrahiert alle Keys aus einem Type als String Union
+ */
+export type ExtractedKey<T> = T extends Record<string, unknown> ? keyof T & string : never;
+
+// ========================================
+// BASE TYPES
+// ========================================
+/**
+ * Basis-Constraint für Tabellendaten
+ * @description Minimal erforderliche Struktur für DataTable Rows
+ */
+export type ExtractFieldId<TTableDef> = TTableDef extends {
+  fields: readonly { id: infer TId }[];
+}
+  ? TId
+  : never;
+
+/**
+ * Komplette Tabellen-Definition
+ * @template TData - Datentyp der Tabellenzeilen
+ */
+export type FieldDefinition<TData = unknown, TFieldId extends string = string> = {
+  /** Eindeutige ID der Spalte */
+  id: TFieldId;
+
+  /** Accessor für den Wert */
+  accessor?: TFieldId extends 'actions' ? never : TFieldId | ((row: TData) => unknown);
+
+  /** Sortierbarkeit der Spalte */
+  sortable?: boolean;
+
+  /** Durchsuchbarkeit der Spalte */
+  searchable?: boolean;
+
+  /** Ausblendbarkeit der Spalte */
+  toggleable?: boolean;
+
+  /** Filterbarkeit der Spalte */
+  filterable?: boolean;
+
+  /** Standard-Sichtbarkeit */
+  defaultVisible?: boolean;
+
+  /** Cell Component oder Template */
+  cell?: React.ComponentType<CellProps<TData>> | 'default' | 'actions';
+
+  /** Breite der Spalte */
+  width?: number | string;
+};
+
+/**
  * Props für Toolbar Component
+ */
+export type FieldId<TData> = ExtractedKey<TData> | 'actions';
+
+/**
+ * Controller Return Type des useDataTable Hooks
+ */
+export type PaginationProps<TData> = {
+  table: TanstackTable<TData>;
+};
+
+/**
+ * Field ID Type für TableDefinition
+ */
+export type SkeletonProps<TData = unknown, TValue = unknown> = {
+  columns: ColumnDef<TData, TValue>[];
+  rows?: number;
+  showToolbar?: boolean;
+  showPagination?: boolean;
+};
+
+/**
+ * Props für Pagination Component
+ */
+export type TableDataConstraint = {
+  id?: string;
+  [key: string]: unknown;
+};
+
+/**
+ * Type für Table Preset Namen
+ */
+export type TableDefinition<TData = unknown> = {
+  /** Labels für alle Spalten */
+  labels: Record<FieldId<TData>, string>;
+
+  /** Feld-Definitionen */
+  fields: FieldDefinition<TData, FieldId<TData>>[];
+};
+
+/**
+ * Props für Skeleton Component
+ */
+export type TablePreset = keyof typeof TABLE_PRESETS;
+
+/**
+ * Erstellt eine typsichere TableDefinition
+ *
+ * @description Factory Function die TypeScript bei der korrekten Type-Inference unterstützt
+ *
+ * @template TData - Der Datentyp der Tabellenzeilen
+ * @param definition - Die Table Definition
+ * @returns Die unveränderte Definition mit korrekter Typisierung
  */
 export type ToolbarProps<TData> = {
   table: TanstackTable<TData>;
@@ -196,122 +325,3 @@ export type ToolbarProps<TData> = {
   disabledColumns?: string[] | undefined;
   tableDefinition?: TableDefinition<TData> | undefined;
 };
-
-/**
- * Props für Pagination Component
- */
-export type PaginationProps<TData> = {
-  table: TanstackTable<TData>;
-};
-
-/**
- * Props für Expand Button Component
- */
-export type ExpandButtonProps = {
-  isExpanded: boolean;
-  onToggle: () => void;
-  collapsedCount: number;
-  totalCount: number;
-  customText?:
-    | {
-        expand?: string;
-        collapse?: string;
-      }
-    | undefined;
-};
-
-/**
- * Props für Skeleton Component
- */
-export type SkeletonProps<TData = unknown, TValue = unknown> = {
-  columns: ColumnDef<TData, TValue>[];
-  rows?: number;
-  showToolbar?: boolean;
-  showPagination?: boolean;
-};
-
-// ========================================
-// HOOK TYPES
-// ========================================
-
-/**
- * State für den useDataTable Hook
- */
-export type DataTableState = {
-  sorting: SortingState;
-  columnFilters: ColumnFiltersState;
-  columnVisibility: VisibilityState;
-  globalFilter: string;
-  isExpanded: boolean;
-  selectedRows: Record<string, boolean>;
-};
-
-/**
- * Controller Return Type des useDataTable Hooks
- */
-export type DataTableController<TData> = {
-  // Table Instance
-  table: TanstackTable<TData>;
-
-  // State
-  state: DataTableState;
-
-  // Computed Values
-  displayRows: Row<TData>[];
-  isLoading: boolean;
-  isEmpty: boolean;
-  error: Error | null;
-  showPagination: boolean;
-  showExpandButton: boolean;
-
-  // Props für Sub-Components
-  toolbarProps: ToolbarProps<TData>;
-  paginationProps: PaginationProps<TData>;
-  expandProps: ExpandButtonProps;
-  skeletonProps: SkeletonProps<TData>;
-  errorProps: ErrorStateProps;
-  emptyProps: Record<string, never>;
-  tableProps: {
-    className: string;
-    style?: React.CSSProperties | undefined;
-  };
-  coreTableProps: {
-    table: TanstackTable<TData>;
-    stickyHeader?: boolean;
-    stickyActionColumn?: boolean;
-  };
-};
-
-// ========================================
-// PRESETS
-// ========================================
-
-/**
- * Vordefinierte Table-Konfigurationen
- */
-export const TABLE_PRESETS = {
-  simple: {
-    showColumnToggle: false,
-    pageSize: 10,
-  },
-  advanced: {
-    showColumnToggle: true,
-    pageSize: 20,
-  },
-  dashboard: {
-    expandable: true,
-    initialRowCount: 3,
-    showColumnToggle: false,
-    pageSize: 10,
-  },
-  compact: {
-    showColumnToggle: false,
-    pageSize: 5,
-    maxHeight: '400px',
-  },
-} as const;
-
-/**
- * Type für Table Preset Namen
- */
-export type TablePreset = keyof typeof TABLE_PRESETS;

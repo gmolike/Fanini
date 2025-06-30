@@ -21,5 +21,5 @@ import type { CellProps } from '../../model/types';
  * ```
  */
 export const DateCell = <TData,>({ value }: CellProps<TData>) => (
-  <DateDisplay date={value as string | Date | number | null | undefined} />
+  <DateDisplay date={(value as string | Date | number | null) ?? null} />
 );

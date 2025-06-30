@@ -75,7 +75,8 @@
     "vite.config.ts",
     "tailwind.config.ts",
     "src/pages/_public/.tsx",
-    "eslint/**/*"
+    "eslint/**/*",
+    "demo/**/*"
   ],
   "exclude": [
     "node_modules",

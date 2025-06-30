@@ -3,7 +3,7 @@
  * @description Custom Hooks für DataTable Funktionalität
  */
 
-import { useMemo, useRef, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 
 import {
   getCoreRowModel,
@@ -24,24 +24,6 @@ import type {
 
 /**
  * useDataTable Hook
- *
- * @description Zentraler Hook der die gesamte Table-Logik kapselt und einen
- * Controller mit allen benötigten Props für Sub-Components zurückgibt.
- *
- * @template TData - Datentyp der Tabellenzeilen
- * @param props - DataTable Properties
- * @returns Controller mit State und Props für alle Sub-Components
- *
- * @example
- * ```tsx
- * const tableController = useDataTable({
- *   tableDefinition,
- *   data,
- *   onRowClick: (row) => console.log(row)
- * });
- *
- * if (tableController.isLoading) return <Skeleton {...tableController.skeletonProps} />;
- * ```
  */
 export const useDataTable = <TData extends TableDataConstraint>(
   props: DataTableProps<TData>
@@ -79,8 +61,9 @@ export const useDataTable = <TData extends TableDataConstraint>(
   const [columnFilters, setColumnFilters] = useState<DataTableState['columnFilters']>([]);
   const [globalFilter, setGlobalFilter] = useState<DataTableState['globalFilter']>('');
   const [isExpanded, setIsExpanded] = useState(!expandable);
-  const [selectedRows, setSelectedRows] = useState<DataTableState['selectedRows']>({});
-  const tableRef = useRef<HTMLDivElement>(null);
+  const [columnVisibility, setColumnVisibility] = useState(() =>
+    getColumnVisibility(tableDefinition, effectiveSelectableColumns)
+  );
 
   // Effective columns
   const effectiveSelectableColumns = useMemo(
@@ -95,11 +78,6 @@ export const useDataTable = <TData extends TableDataConstraint>(
     if (onDelete) actions.onDelete = onDelete;
     return convertTableDefinition(tableDefinition, effectiveSelectableColumns, actions);
   }, [tableDefinition, effectiveSelectableColumns, onEdit, onDelete]);
-
-  // Column visibility
-  const [columnVisibility, setColumnVisibility] = useState(() =>
-    getColumnVisibility(tableDefinition, effectiveSelectableColumns)
-  );
 
   // Create table instance
   const table = useReactTable({
@@ -140,7 +118,7 @@ export const useDataTable = <TData extends TableDataConstraint>(
 
   // Handle selected row scrolling
   useEffect(() => {
-    if (selectedId && data.length > 0 && tableRef.current) {
+    if (selectedId && data.length > 0) {
       const rowIndex = data.findIndex(row => row[idKey] == selectedId);
 
       if (rowIndex !== -1) {
@@ -155,7 +133,7 @@ export const useDataTable = <TData extends TableDataConstraint>(
         }
 
         const timeoutId = setTimeout(() => {
-          const rowElement = tableRef.current?.querySelector(`[data-row-id="${selectedId}"]`);
+          const rowElement = document.querySelector(`[data-row-id="${selectedId}"]`);
           rowElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
 
@@ -174,7 +152,7 @@ export const useDataTable = <TData extends TableDataConstraint>(
     columnVisibility,
     globalFilter,
     isExpanded,
-    selectedRows,
+    selectedRows: {},
   };
 
   const controller: DataTableController<TData> = {

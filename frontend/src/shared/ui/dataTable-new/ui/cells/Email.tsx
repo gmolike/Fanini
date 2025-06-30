@@ -21,5 +21,5 @@ import type { CellProps } from '../../model/types';
  * ```
  */
 export const Email = <TData,>({ value }: CellProps<TData>) => (
-  <EmailDisplay email={value as string | undefined} withIcon />
+  <EmailDisplay email={value === undefined ? null : (value as string)} withIcon />
 );

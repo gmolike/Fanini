@@ -21,5 +21,5 @@ import type { CellProps } from '../../model/types';
  * ```
  */
 export const Phone = <TData,>({ value }: CellProps<TData>) => (
-  <PhoneDisplay phone={value as string | null | undefined} />
+  <PhoneDisplay phone={value === undefined ? null : (value as string | null)} />
 );

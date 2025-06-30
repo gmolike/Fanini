@@ -3,40 +3,24 @@
  * @description Konvertierung zwischen TableDefinition und TanStack Table Columns
  */
 
+import { Actions } from '../ui/cells/Actions';
+import { Text } from '../ui/cells/Text';
+import { Sortable } from '../ui/headers';
+
+import type { CellProps, ExtractedKey, FieldDefinition, TableDefinition } from './types';
 import type {
   AccessorColumnDef,
   CellContext,
   ColumnDef,
   DisplayColumnDef,
   HeaderContext,
-  VisibilityState
+  VisibilityState,
 } from '@tanstack/react-table';
-
-import { Actions } from '../ui/cells';
-import { Text } from '../ui/cells';
-import { Sortable } from '../ui/headers';
-
-import type {
-  ExtractedKey,
-  FieldDefinition,
-  TableDefinition,
-  CellProps
-} from './types';
 
 /**
  * Konvertiert eine TableDefinition zu TanStack Table Columns
- *
- * @description Transformiert die abstrakte TableDefinition in konkrete Column Definitions
- * die von TanStack Table verstanden werden. Behandelt spezielle Fälle wie Actions-Spalten
- * und Custom Cell Components.
- *
- * @template TData - Datentyp der Tabellenzeilen
- * @param definition - Die Table Definition
- * @param selectableColumns - Array der anzuzeigenden Spalten IDs
- * @param callbacks - Callbacks für Edit/Delete Actions
- * @returns Array von TanStack Column Definitions
  */
-export const convertTableDefinition = <TData>(
+export const convertTableDefinition = <TData extends Record<string, unknown>>(
   definition: TableDefinition<TData>,
   selectableColumns?: (ExtractedKey<TData> | 'actions')[],
   callbacks?: {
@@ -56,7 +40,7 @@ export const convertTableDefinition = <TData>(
 /**
  * Konvertiert ein einzelnes Field zu einer Column Definition
  */
-const convertFieldToColumn = <TData>(
+const convertFieldToColumn = <TData extends Record<string, unknown>>(
   field: FieldDefinition<TData, ExtractedKey<TData> | 'actions'>,
   label: string,
   callbacks?: {
@@ -80,8 +64,8 @@ const convertFieldToColumn = <TData>(
       cell: ({ row }: CellContext<TData, unknown>) => (
         <Actions
           row={row.original}
-          onEdit={callbacks?.onEdit}
-          onDelete={callbacks?.onDelete}
+          {...(callbacks?.onEdit ? { onEdit: callbacks.onEdit } : {})}
+          {...(callbacks?.onDelete ? { onDelete: callbacks.onDelete } : {})}
         />
       ),
     };
@@ -93,8 +77,10 @@ const convertFieldToColumn = <TData>(
     ...baseColumn,
     ...(typeof field.accessor === 'function'
       ? { accessorFn: field.accessor }
-      : { accessorKey: field.accessor || (field.id as keyof TData) }
-    ),
+      : {
+          accessorKey:
+            typeof field.accessor === 'string' ? field.accessor : (field.id as keyof TData),
+        }),
     cell: createCell(field),
   };
 
@@ -104,7 +90,7 @@ const convertFieldToColumn = <TData>(
 /**
  * Erstellt die Header-Komponente für eine Column
  */
-const createHeader = <TData>(label: string, sortable?: boolean) => {
+const createHeader = <TData extends Record<string, unknown>>(label: string, sortable?: boolean) => {
   if (sortable !== false) {
     return (props: HeaderContext<TData, unknown>) => (
       <Sortable label={label} column={props.column} />
@@ -116,7 +102,7 @@ const createHeader = <TData>(label: string, sortable?: boolean) => {
 /**
  * Erstellt die Cell-Komponente basierend auf der Field Definition
  */
-const createCell = <TData>(
+const createCell = <TData extends Record<string, unknown>>(
   field: FieldDefinition<TData, ExtractedKey<TData> | 'actions'>
 ) => {
   return ({ getValue, row }: CellContext<TData, unknown>) => {
@@ -124,7 +110,7 @@ const createCell = <TData>(
     const cellProps: CellProps<TData> = { value, row: row.original };
 
     // Default Text Cell
-    if (!field.cell || field.cell === 'default') {
+    if (field.cell === undefined) {
       return <Text {...cellProps} />;
     }
 
@@ -141,16 +127,8 @@ const createCell = <TData>(
 
 /**
  * Extrahiert die initiale Column Visibility aus der Definition
- *
- * @description Erstellt ein Visibility-Objekt für TanStack Table basierend auf
- * der TableDefinition und den ausgewählten Spalten.
- *
- * @template TData - Datentyp der Tabellenzeilen
- * @param definition - Die Table Definition
- * @param selectableColumns - Array der anzuzeigenden Spalten IDs
- * @returns Visibility State Object
  */
-export const getColumnVisibility = <TData>(
+export const getColumnVisibility = <TData extends Record<string, unknown>>(
   definition: TableDefinition<TData>,
   selectableColumns?: (ExtractedKey<TData> | 'actions')[]
 ): VisibilityState => {
@@ -167,16 +145,7 @@ export const getColumnVisibility = <TData>(
 
 /**
  * Extrahiert alle durchsuchbaren Spalten aus der Definition
- *
- * @description Findet alle Felder die als searchable markiert sind und
- * gibt deren IDs als Array zurück.
- *
- * @template TData - Datentyp der Tabellenzeilen
- * @param definition - Die Table Definition
- * @returns Array von Spalten-IDs die durchsuchbar sind
  */
-export const getSearchableColumns = <TData>(
+export const getSearchableColumns = <TData extends Record<string, unknown>>(
   definition: TableDefinition<TData>
-): string[] => definition.fields
-  .filter(field => field.searchable === true)
-  .map(field => field.id);
+): string[] => definition.fields.filter(field => field.searchable === true).map(field => field.id);

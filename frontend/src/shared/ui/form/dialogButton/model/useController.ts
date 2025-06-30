@@ -1,8 +1,8 @@
-import { type  ReactNode,useCallback, useState  } from 'react';
-import { type  FieldValues,useFormState  } from 'react-hook-form';
+import { type ReactNode, useCallback, useState } from 'react';
+
+import { type FieldValues, useFormState } from 'react-hook-form';
 
 import type { ControllerProps, ControllerResult } from './types';
-
 
 /**
  * Hook for DialogButton controller logic
@@ -26,14 +26,14 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   const { isSubmitting } = useFormState({ control });
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const isDisabled = disabled || isSubmitting;
+  const isDisabled = disabled ?? isSubmitting;
 
   /**
    * Check if the field has a value
    */
   const hasValue = useCallback(
     (value: unknown): boolean => value !== null && value !== undefined && value !== '',
-    [],
+    []
   );
 
   /**
@@ -59,7 +59,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
       // Otherwise return children as-is
       return children;
     },
-    [children, emptyText, hasValue],
+    [children, emptyText, hasValue]
   );
 
   /**

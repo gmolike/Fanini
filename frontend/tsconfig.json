@@ -41,6 +41,9 @@
     // FSD Path Mapping
     "baseUrl": ".",
     "paths": {
+      "@/*": [
+        "src/*"
+      ],
       "@app/*": [
         "src/app/*"
       ],
@@ -58,9 +61,6 @@
       ],
       "@shared/*": [
         "src/shared/*"
-      ],
-      "@/*": [
-        "src/*"
       ]
     },
     // Vite/Node Support
@@ -73,8 +73,10 @@
   "include": [
     "src/**/*",
     "vite.config.ts",
-    "tailwind.config.ts"
-, "src/pages/_public/.tsx"  ],
+    "tailwind.config.ts",
+    "src/pages/_public/.tsx",
+    "eslint/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",

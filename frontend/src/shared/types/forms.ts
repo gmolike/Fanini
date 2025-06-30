@@ -2,15 +2,17 @@ import { z } from 'zod'
 
 // Base Schemas
 export const emailSchema = z.string().email('Ungültige E-Mail-Adresse')
-export const passwordSchema = z.string().min(8, 'Mindestens 8 Zeichen')
-export const nameSchema = z.string().min(2, 'Mindestens 2 Zeichen')
-
 // Form Schemas
 export const loginFormSchema = z.object({
   email: emailSchema,
   password: passwordSchema,
   remember: z.boolean().optional(),
 })
+
+export const nameSchema = z.string().min(2, 'Mindestens 2 Zeichen')
+
+
+export const passwordSchema = z.string().min(8, 'Mindestens 8 Zeichen')
 
 export const signupFormSchema = z
   .object({

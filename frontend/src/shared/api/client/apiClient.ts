@@ -11,33 +11,8 @@ const apiErrorSchema = z.object({
   details: z.record(z.unknown()).optional(),
 });
 
-export type ApiError = z.infer<typeof apiErrorSchema>;
-
 /**
  * Custom API Error Class
- */
-export class ApiClientError extends Error {
-  constructor(
-    public statusCode: number,
-    public code?: string,
-    public details?: Record<string, unknown>
-  ) {
-    super(`API Error: ${statusCode.toString()}`);
-    this.name = 'ApiClientError';
-  }
-}
-
-/**
- * API Request Configuration
- */
-export type ApiRequestConfig = {
-  params?: Record<string, unknown>;
-  timeout?: number;
-  body?: unknown;
-} & Omit<RequestInit, 'body'>;
-
-/**
- * API Client Class
  */
 export class ApiClient {
   private readonly baseURL: string;
@@ -209,5 +184,32 @@ export class ApiClient {
   }
 }
 
-// Singleton Instance
+
+/**
+ * API Request Configuration
+ */
 export const apiClient = new ApiClient();
+
+
+export class ApiClientError extends Error {
+  constructor(
+    public statusCode: number,
+    public code?: string,
+    public details?: Record<string, unknown>
+  ) {
+    super(`API Error: ${statusCode.toString()}`);
+    this.name = 'ApiClientError';
+  }
+}
+
+/**
+ * API Client Class
+ */
+export type ApiError = z.infer<typeof apiErrorSchema>;
+
+// Singleton Instance
+export type ApiRequestConfig = {
+  params?: Record<string, unknown>;
+  timeout?: number;
+  body?: unknown;
+} & Omit<RequestInit, 'body'>;

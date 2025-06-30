@@ -1,14 +1,15 @@
+// frontend/src/shared/ui/layout/ui/ThemeToggle.tsx
 import { useEffect, useState } from 'react';
 
-import { Moon, Sun, Monitor } from 'lucide-react';
+import { Monitor,Moon, Sun } from 'lucide-react';
 
-import { Button } from '@/shared/shadcn/button';
 import {
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/shared/shadcn/dropdown-menu';
+} from '@/shared/shadcn';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -16,7 +17,7 @@ export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>('system');
 
   useEffect(() => {
-    const saved = localStorage.getItem('theme');
+    const saved = localStorage.getItem('theme') as Theme | null;
     if (saved === 'light' || saved === 'dark' || saved === 'system') {
       setTheme(saved);
     }
@@ -25,14 +26,46 @@ export function ThemeToggle() {
   useEffect(() => {
     const root = document.documentElement;
 
+    // Funktionen zum Anwenden des Themes
+    const applyDarkTheme = () => {
+      root.classList.add('dark');
+    };
+
+    const applyLightTheme = () => {
+      root.classList.remove('dark');
+    };
+
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.setAttribute('data-theme', systemTheme);
+      // System-Präferenz nutzen
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      if (mediaQuery.matches) {
+        applyDarkTheme();
+      } else {
+        applyLightTheme();
+      }
+
+      // Listener für Änderungen
+      const handleChange = (e: MediaQueryListEvent) => {
+        if (e.matches) {
+          applyDarkTheme();
+        } else {
+          applyLightTheme();
+        }
+      };
+      mediaQuery.addEventListener('change', handleChange);
+
       localStorage.removeItem('theme');
+
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
     } else {
-      root.setAttribute('data-theme', theme);
+      // Manuell gesetztes Theme
+      if (theme === 'dark') {
+        applyDarkTheme();
+      } else {
+        applyLightTheme();
+      }
       localStorage.setItem('theme', theme);
     }
   }, [theme]);

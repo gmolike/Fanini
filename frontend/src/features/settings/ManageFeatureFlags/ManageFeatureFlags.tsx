@@ -1,20 +1,20 @@
 ﻿// frontend/src/features/settings/ManageFeatureFlags/ManageFeatureFlags.tsx
 // Feature flags component
 
-import { Calendar, Users, Image } from 'lucide-react';
+import { Calendar, Image,Users } from 'lucide-react';
 
-import { useSettings, useUpdateSettings } from '@/entities/settings';
+import { type  Features,useSettings, useUpdateSettings  } from '@/entities/settings';
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-  Switch,
   Label,
+  Switch,
 } from '@/shared/shadcn';
 
-import type { Features } from '@/entities/settings';
 
 const FEATURE_CONFIG = {
   events: {

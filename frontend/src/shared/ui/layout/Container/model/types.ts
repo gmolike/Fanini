@@ -1,6 +1,4 @@
-import type { ReactNode, ElementType } from 'react'
-
-export type ContainerSize = 'sm' | 'default' | 'lg' | 'full'
+import type { ElementType,ReactNode } from 'react'
 
 export type ContainerProps = {
   children: ReactNode
@@ -8,3 +6,5 @@ export type ContainerProps = {
   className?: string
   as?: ElementType
 }
+
+export type ContainerSize = 'sm' | 'default' | 'lg' | 'full'

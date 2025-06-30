@@ -1,6 +1,8 @@
-﻿// frontend/src/shared/api/lib/index.ts
-// API library exports
+﻿
 
+
+export { type ApiEndpointConfig,createApiEndpoint } from './apiFactory';
 export { createQueryKeys } from './queryFactory';
-export { createApiEndpoint, type ApiEndpointConfig } from './apiFactory';
+// frontend/src/shared/api/lib/index.ts
+// API library exports
 export { getMockDelay, mockResponse } from './mockAdapter';

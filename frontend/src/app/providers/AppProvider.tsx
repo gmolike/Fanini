@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -6,6 +5,8 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from '@/shared/config'
 import { TooltipProvider } from '@/shared/shadcn'
 import { ErrorBoundary } from '@/shared/ui/feedback/ui/ErrorBoundary'
+
+import type { ReactNode } from 'react'
 
 type AppProviderProps = {
   children: ReactNode

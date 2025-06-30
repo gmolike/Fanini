@@ -1,7 +1,6 @@
-/* eslint-disable unicorn/filename-case */
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 
-import { Footer, Header } from '@widgets/Layout';
+import { Footer, Header } from '../widgets/layoutx';
 
 export const Route = createFileRoute('/_public')({
   component: PublicLayout,

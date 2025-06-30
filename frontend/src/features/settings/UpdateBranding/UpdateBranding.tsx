@@ -1,11 +1,12 @@
 ﻿// frontend/src/features/settings/UpdateBranding/UpdateBranding.tsx
-import { useState, useEffect } from 'react';
+import { useEffect,useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 
-import { brandingSchema, useBranding, useUpdateBranding, type Branding } from '@/entities/settings';
+import { type Branding,brandingSchema, useBranding, useUpdateBranding } from '@/entities/settings';
+
 import {
   Button,
   Card,

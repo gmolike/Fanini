@@ -4,13 +4,14 @@
 import { Settings } from 'lucide-react';
 
 import { useSettings } from '@/entities/settings';
+
 import {
   Button,
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuCheckboxItem,
   DropdownMenuTrigger,
 } from '@/shared/shadcn';
 

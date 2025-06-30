@@ -1,6 +1,17 @@
 // frontend/src/shared/api/client/types.ts
 import type { z } from 'zod';
 
+
+/**
+ * API Endpoint Configuration
+ */
+export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  endpoint: string | ((params: TParams) => string);
+  schema?: z.ZodSchema<TResponse>;
+};
+
+
 /**
  * Generic API Response Wrapper
  */
@@ -12,15 +23,6 @@ export type ApiResponse<T> = {
     total?: number;
     totalPages?: number;
   };
-};
-
-/**
- * API Endpoint Configuration
- */
-export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  endpoint: string | ((params: TParams) => string);
-  schema?: z.ZodSchema<TResponse>;
 };
 
 /**

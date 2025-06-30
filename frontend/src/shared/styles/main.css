@@ -31,6 +31,8 @@
   --color-warning-foreground: #ffffff;
 
   --radius: 0.5rem;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a2e38;
 }
 
 .dark {
@@ -51,6 +53,9 @@
   --color-destructive: #e85449;
   --color-success: #5d9b6f;
   --color-warning: #e8975a;
+
+  --color-popover: #1a2e38;
+  --color-popover-foreground: #e8f0f4;
 }
 
 * {

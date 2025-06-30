@@ -1,12 +1,16 @@
 import type { ComponentType } from 'react'
 
+export type BreadcrumbContextValue = {
+  items: BreadcrumbItem[]
+  setItems: (items: BreadcrumbItem[]) => void
+  resetToAuto: () => void
+}
+
 export type BreadcrumbItem = {
   label: string
   href?: string
   icon?: ComponentType<{ className?: string }>
 }
-
-export type BreadcrumbVariant = 'default' | 'compact' | 'large'
 
 export type BreadcrumbProps = {
   items: BreadcrumbItem[]
@@ -16,8 +20,4 @@ export type BreadcrumbProps = {
   variant?: BreadcrumbVariant
 }
 
-export type BreadcrumbContextValue = {
-  items: BreadcrumbItem[]
-  setItems: (items: BreadcrumbItem[]) => void
-  resetToAuto: () => void
-}
+export type BreadcrumbVariant = 'default' | 'compact' | 'large'

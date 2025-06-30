@@ -6,8 +6,6 @@ import { setupWorker } from 'msw/browser';
 
 import { handlers } from './handlers';
 
-// Create worker instance
-export const worker = setupWorker(...handlers);
 
 // Debug helper
 export function logActiveHandlers() {
@@ -22,3 +20,7 @@ export function logActiveHandlers() {
   });
   console.groupEnd();
 }
+
+
+// Create worker instance
+export const worker = setupWorker(...handlers);

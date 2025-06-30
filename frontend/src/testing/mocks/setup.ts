@@ -5,8 +5,11 @@ import { worker } from './browser';
  * Startet den Mock Service Worker
  */
 export async function startMockServer(): Promise<void> {
-  // Check if mocking is enabled
+  console.info('[MSW] Checking if mock server should start...');
+  console.info('[MSW] VITE_MOCK_API_ENABLED:', import.meta.env['VITE_MOCK_API_ENABLED']);
+
   if (import.meta.env['VITE_MOCK_API_ENABLED'] !== 'true') {
+    console.warn('[MSW] Mock server disabled - VITE_MOCK_API_ENABLED is not "true"');
     return;
   }
 

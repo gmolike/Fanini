@@ -1,9 +1,9 @@
-import { useContext } from 'react'
+import { useContext } from 'react';
 
-import { BreadcrumbContext } from '../ui/breadcrumb'
+import { BreadcrumbContext } from '../ui/breadcrumb';
 
 export const useBreadcrumb = () => {
-  const context = useContext(BreadcrumbContext)
+  const context = useContext(BreadcrumbContext);
 
-  return context
-}
+  return context;
+};

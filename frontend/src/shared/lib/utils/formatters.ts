@@ -1,3 +1,17 @@
+
+/**
+ * Formatiert einen Betrag als Währung
+ * @param amount - Betrag
+ * @returns Formatierter Währungsbetrag
+ */
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(amount)
+}
+
+
 /**
  * Formatiert ein Datum nach deutschem Standard
  * @param date - Datum als Date oder ISO String
@@ -16,16 +30,4 @@ export const formatDate = (date: Date | string, includeTime = false): string => 
     }),
   }
   return dateObj.toLocaleDateString('de-DE', options)
-}
-
-/**
- * Formatiert einen Betrag als Währung
- * @param amount - Betrag
- * @returns Formatierter Währungsbetrag
- */
-export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(amount)
 }

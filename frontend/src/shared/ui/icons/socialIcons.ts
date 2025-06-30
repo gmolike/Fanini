@@ -1,6 +1,6 @@
 // frontend/src/shared/ui/icons/socialIcons.ts
 // Import the icons we need
-import { siFacebook, siInstagram, siX, siYoutube, siTiktok } from 'simple-icons';
+import { siFacebook, siInstagram, siTiktok,siX, siYoutube } from 'simple-icons';
 
 export const socialIcons = {
   facebook: {

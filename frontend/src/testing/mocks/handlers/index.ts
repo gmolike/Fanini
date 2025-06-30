@@ -1,9 +1,4 @@
-// frontend/src/testing/mocks/handlers/index.ts
-import { settingsHandlers } from './settings.handlers';
-// Import weitere Handler hier
+import { eventsHandlers } from './public/events.handlers';
+import { statsHandlers } from './public/stats.handlers';
 
-export const handlers = [
-  ...settingsHandlers,
-  // ...eventHandlers,
-  // ...memberHandlers,
-];
+export const handlers = [...eventsHandlers, ...statsHandlers];

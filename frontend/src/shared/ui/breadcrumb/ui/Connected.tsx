@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { Breadcrumb } from './Breadcrumb';
 import { BreadcrumbContext } from '../model/context';
+
+import { Breadcrumb } from './Breadcrumb';
 
 import type { BreadcrumbProps } from '../model/types';
 

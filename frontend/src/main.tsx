@@ -1,11 +1,13 @@
 // frontend/src/main.tsx
-import { RouterProvider } from '@tanstack/react-router';
+// CSS imports in korrekter Reihenfolge
 import ReactDOM from 'react-dom/client';
 
+import { RouterProvider } from '@tanstack/react-router';
+
 import { AppProvider } from '@/app/providers';
+
 import { router } from '@/shared/config';
 
-// CSS imports in korrekter Reihenfolge
 import './shared/styles/font.css';
 import './shared/styles/main.css';
 

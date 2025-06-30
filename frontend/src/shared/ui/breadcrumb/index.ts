@@ -1,12 +1,13 @@
+
+export { Breadcrumb } from './ui/Breadcrumb'
 // Model
-export type {
-  BreadcrumbItem,
-  BreadcrumbProps,
-  BreadcrumbVariant,
-  BreadcrumbContextValue,
-} from './model/types'
 export { BreadcrumbContext } from './model/context'
 
 // UI
-export { Breadcrumb } from './ui/Breadcrumb'
+export type {
+  BreadcrumbContextValue,
+  BreadcrumbItem,
+  BreadcrumbProps,
+  BreadcrumbVariant,
+} from './model/types'
 export { ConnectedBreadcrumb } from './ui/Connected'

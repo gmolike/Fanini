@@ -1,21 +1,22 @@
 ﻿// frontend/src/shared/api/config/apiClient.ts
 import { z } from 'zod';
 
-/**
- * API Error Schema
- */
-export const apiErrorSchema = z.object({
-  message: z.string(),
-  code: z.string().optional(),
-  statusCode: z.number(),
-  details: z.record(z.unknown()).optional(),
-});
-
-export type ApiError = z.infer<typeof apiErrorSchema>;
 
 /**
  * Custom API Error Klasse
  */
+export const apiClient = new ApiClient();
+
+
+
+/**
+ * Request Options Type
+ */
+export { ApiClient };
+
+
+
+
 export class ApiClientError extends Error implements ApiError {
   code: string | undefined;
   statusCode: number;
@@ -30,12 +31,16 @@ export class ApiClientError extends Error implements ApiError {
   }
 }
 
+
 /**
- * Request Options Type
+ * API Error Schema
  */
-export type RequestOptions = {
-  params?: Record<string, string | number | boolean>;
-} & Omit<RequestInit, 'body' | 'method'>;
+export const apiErrorSchema = z.object({
+  message: z.string(),
+  code: z.string().optional(),
+  statusCode: z.number(),
+  details: z.record(z.unknown()).optional(),
+});
 
 /**
  * API Client Klasse
@@ -329,7 +334,9 @@ class ApiClient {
 }
 
 // Singleton Instance
-export const apiClient = new ApiClient();
+export type ApiError = z.infer<typeof apiErrorSchema>;
 
 // Export für Tests oder spezielle Use Cases
-export { ApiClient };
+export type RequestOptions = {
+  params?: Record<string, string | number | boolean>;
+} & Omit<RequestInit, 'body' | 'method'>;

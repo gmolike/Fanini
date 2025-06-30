@@ -1,6 +1,6 @@
 // frontend/src/pages/~app.tsx
-import { createFileRoute, Outlet, Link } from '@tanstack/react-router';
-import { LayoutDashboard, Calendar, Users, Activity, LogOut } from 'lucide-react';
+import { createFileRoute, Link,Outlet } from '@tanstack/react-router';
+import { Activity, Calendar, LayoutDashboard, LogOut,Users } from 'lucide-react';
 
 export const Route = createFileRoute('/app')({
   component: AppLayout,

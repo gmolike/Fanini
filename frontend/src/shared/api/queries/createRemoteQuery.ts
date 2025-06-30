@@ -1,23 +1,13 @@
 // frontend/src/shared/api/queries/createRemoteQuery.ts
 import {
+  type QueryKey,
   useQuery,
   type UseQueryOptions,
   type UseQueryResult,
-  type QueryKey,
 } from '@tanstack/react-query';
 import { type z, ZodError } from 'zod';
 
 import { apiClient, ApiClientError } from '../client';
-
-export type RemoteQueryConfig<TData, TParams = void> = {
-  queryKey: QueryKey | ((params: TParams) => QueryKey);
-  endpoint: string | ((params: TParams) => string);
-  schema?: z.ZodSchema<TData>;
-  staleTime?: number;
-  gcTime?: number;
-  refetchOnWindowFocus?: boolean;
-  enabled?: boolean | ((params: TParams) => boolean);
-}
 
 export function createRemoteQuery<TData, TParams = void>(
   config: RemoteQueryConfig<TData, TParams>
@@ -90,7 +80,6 @@ export function createRemoteQuery<TData, TParams = void>(
   };
 }
 
-// Vereinfachte Version ohne Parameter
 export function createSimpleRemoteQuery<TData>(
   config: Omit<RemoteQueryConfig<TData>, 'enabled'> & {
     enabled?: boolean;
@@ -108,4 +97,15 @@ export function createSimpleRemoteQuery<TData>(
     // Rufe sie mit undefined auf (da keine Parameter benötigt werden)
     return useParametrizedQuery(undefined, options);
   };
+}
+
+// Vereinfachte Version ohne Parameter
+export type RemoteQueryConfig<TData, TParams = void> = {
+  queryKey: QueryKey | ((params: TParams) => QueryKey);
+  endpoint: string | ((params: TParams) => string);
+  schema?: z.ZodSchema<TData>;
+  staleTime?: number;
+  gcTime?: number;
+  refetchOnWindowFocus?: boolean;
+  enabled?: boolean | ((params: TParams) => boolean);
 }

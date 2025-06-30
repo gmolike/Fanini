@@ -8,17 +8,6 @@ import { apiClient } from '../config/apiClient';
 /**
  * API Endpoint Konfiguration
  */
-export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-  url: string | ((params: TParams) => string);
-  schema?: z.ZodSchema<TResponse>;
-  transformResponse?: (data: unknown) => TResponse;
-}
-
-/**
- * Erstellt eine typsichere API-Funktion
- * @param config - Endpoint-Konfiguration
- */
 export const createApiEndpoint = <TParams = void, TResponse = unknown>(
   config: ApiEndpointConfig<TParams, TResponse>
 ) => {
@@ -68,9 +57,8 @@ export const createApiEndpoint = <TParams = void, TResponse = unknown>(
 };
 
 /**
- * Erstellt Batch-Operationen
- * @param endpoint - API Endpoint Funktion
- * @param options - Batch Optionen
+ * Erstellt eine typsichere API-Funktion
+ * @param config - Endpoint-Konfiguration
  */
 export const createBatchOperation = <TParams, TResponse>(
   endpoint: (params: TParams) => Promise<TResponse>,
@@ -98,3 +86,15 @@ export const createBatchOperation = <TParams, TResponse>(
     return results;
   };
 };
+
+/**
+ * Erstellt Batch-Operationen
+ * @param endpoint - API Endpoint Funktion
+ * @param options - Batch Optionen
+ */
+export type ApiEndpointConfig<TParams = void, TResponse = unknown> = {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  url: string | ((params: TParams) => string);
+  schema?: z.ZodSchema<TResponse>;
+  transformResponse?: (data: unknown) => TResponse;
+}

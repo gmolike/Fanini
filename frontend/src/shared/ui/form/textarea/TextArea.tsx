@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useEffect,useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 import { Textarea as ShadcnTextarea } from '@/shared/shadcn';
@@ -11,31 +11,35 @@ import type { Props } from './model/types';
 import type { FieldValues } from 'react-hook-form';
 
 /**
- * TextArea Component - Multi-line text input with reset functionality
- *
- * @template TFieldValues - Type of the form values
- *
- * @param control - React Hook Form control object
- * @param name - Field name in the form (must be a valid path in TFieldValues)
- * @param label - Label text to display above the textarea
- * @param description - Helper text to display below the textarea
- * @param required - Whether the field is required
- * @param placeholder - Placeholder text for the textarea
- * @param disabled - Whether the textarea is disabled
- * @param className - Additional CSS classes for the form item container
- * @param rows - Number of visible text rows
- * @param showReset - Whether to show reset to default button
+ * TextArea Component - Multi-line text input
  *
  * @example
  * ```tsx
+ * // Simple textarea
  * <FormTextArea
  *   control={form.control}
  *   name="description"
  *   label="Description"
- *   required
- *   placeholder="Enter a detailed description..."
  *   rows={5}
- *   showReset={true}
+ * />
+ *
+ * // With character count
+ * <FormTextArea
+ *   control={form.control}
+ *   name="bio"
+ *   label="Bio"
+ *   maxLength={500}
+ *   showCount
+ * />
+ *
+ * // Auto-resizing
+ * <FormTextArea
+ *   control={form.control}
+ *   name="notes"
+ *   label="Notes"
+ *   autoResize
+ *   minRows={3}
+ *   maxRows={10}
  * />
  * ```
  */
@@ -49,39 +53,101 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   disabled,
   className,
   rows = 3,
+  maxLength,
+  showCount = false,
+  autoResize = false,
+  minRows = 3,
+  maxRows = 10,
   showReset = true,
+  testId,
 }: Props<TFieldValues>) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const {
     isDisabled,
     rows: controllerRows,
     ariaProps,
+    currentLength,
   } = useController({
     control,
     name,
-    disabled: !!disabled,
-    required: !!required,
+    disabled,
+    required,
     rows,
+    maxLength,
+    label,
   });
+
+  // Auto-resize effect
+  useEffect(() => {
+    if (autoResize && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+
+      const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight);
+      const minHeight = minRows * lineHeight;
+      const maxHeight = maxRows * lineHeight;
+
+      const {scrollHeight} = textarea;
+      const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+
+      textarea.style.height = `${newHeight}px`;
+    }
+  }, [autoResize, minRows, maxRows]);
 
   return (
     <FormFieldWrapper
       control={control}
       name={name}
-      label={label ?? ''}
-      description={description ?? ''}
-      required={required ?? false}
-      className={className ?? ''}
+      label={label}
+      description={description}
+      required={required}
+      className={className}
       showReset={showReset}
       render={field => (
-        <ShadcnTextarea
-          {...field}
-          value={field.value ?? ''}
-          placeholder={placeholder}
-          disabled={isDisabled}
-          rows={controllerRows}
-          {...ariaProps}
-          className={cn(showReset && 'pr-10')}
-        />
+        <div className="space-y-1">
+          <ShadcnTextarea
+            {...field}
+            {...ariaProps}
+            ref={el => {
+              field.ref(el);
+              if (el && textareaRef.current !== el) {
+                textareaRef.current = el;
+              }
+            }}
+            value={field.value ?? ''}
+            placeholder={placeholder}
+            disabled={isDisabled}
+            rows={autoResize ? minRows : controllerRows}
+            maxLength={maxLength}
+            data-testid={testId}
+            className={cn(showReset && 'pr-10', autoResize && 'resize-none overflow-hidden')}
+            onChange={e => {
+              field.onChange(e);
+
+              // Trigger resize on change
+              if (autoResize && textareaRef.current) {
+                const textarea = textareaRef.current;
+                textarea.style.height = 'auto';
+
+                const lineHeight = parseInt(window.getComputedStyle(textarea).lineHeight);
+                const minHeight = minRows * lineHeight;
+                const maxHeight = maxRows * lineHeight;
+
+                const {scrollHeight} = textarea;
+                const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+
+                textarea.style.height = `${newHeight}px`;
+              }
+            }}
+          />
+
+          {showCount && maxLength ? (
+            <div className="text-muted-foreground text-right text-xs">
+              {currentLength} / {maxLength}
+            </div>
+          ) : null}
+        </div>
       )}
     />
   );

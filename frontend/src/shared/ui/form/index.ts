@@ -1,15 +1,25 @@
 /**
  * Form Components Library
  *
+ * A comprehensive set of form components built on React Hook Form
+ * with Zod validation and shadcn/ui styling
+ *
  * @module shared/ui/form
  */
 
-// Export our Form wrapper component
+// Core Form component
 export type { FormProps } from './form/Form';
 export { Form } from './form/Form';
 
-// Export FormFieldWrapper
+// Form utilities and hooks
+export * from './constants';
+export * from './hooks';
+export * from './types';
+export * from './utils';
+
+// Form field wrapper
 export { FormFieldWrapper } from './fieldWrapper';
+export type { FormFieldWrapperProps } from './fieldWrapper/model/types';
 
 // Re-export React Hook Form utilities
 export type {
@@ -17,71 +27,52 @@ export type {
   FieldErrors,
   FieldPath,
   FieldValues,
+  PathValue,
   SubmitHandler,
   UseFormProps,
   UseFormReturn,
 } from 'react-hook-form';
-export { FormProvider, useFormContext } from 'react-hook-form';
+export { FormProvider, useForm, useFormContext } from 'react-hook-form';
 
-// Field components with Form prefix
+// Input components
 export { Checkbox as FormCheckbox } from './checkbox';
 export { Combobox as FormCombobox } from './combobox';
 export { DatePicker as FormDatePicker } from './datePicker';
 export { DateRange as FormDateRange } from './dateRange';
-// Layout components with Form prefix
-export { Footer as FormFooter } from './footer';
+export { DialogButton as FormDialogButton } from './dialogButton';
+export { FileUpload as FormFileUpload } from './fileUpload';
+export { Input as FormInput } from './input';
+export { MultiSelect as FormMultiSelect } from './multiSelect';
 export { Select as FormSelect } from './select';
 export { TextArea as FormTextArea } from './textarea';
 
-// Re-export controllers for advanced usage
-export { useCheckboxController } from './checkbox';
-export { useComboboxController } from './combobox';
-export { useDatePickerController } from './datePicker';
-export { useFooterController } from './footer';
-export { useInputController } from './input';
-export { useSelectController } from './select';
-export { useTextareaController } from './textarea';
+// Layout components
+export { Footer as FormFooter } from './footer';
+export { Header as FormHeader } from './header';
 
-// Re-export types for all components
-// Field types
-export type {
-  ControllerProps as CheckboxControllerProps,
-  ControllerResult as CheckboxControllerResult,
-  Props as CheckboxProps,
-} from './checkbox/model/types';
-export type {
-  ControllerProps as ComboboxControllerProps,
-  ControllerResult as ComboboxControllerResult,
-  Option as ComboboxOption,
-  Props as ComboboxProps,
-} from './combobox/model/types';
-export type {
-  ControllerProps as DatePickerControllerProps,
-  ControllerResult as DatePickerControllerResult,
-  Props as DatePickerProps,
-} from './datePicker/model/types';
-export type { Props as DateRangeProps } from './dateRange/model/types';
-export type {
-  BaseFieldProps,
-  ControllerProps as InputControllerProps,
-  ControllerResult as InputControllerResult,
-  InputHTMLType,
-  Props as InputProps,
-} from './input/model/types';
-// Layout types
-export type {
-  ControllerProps as FooterControllerProps,
-  ControllerResult as FooterControllerResult,
-  Props as FooterProps,
-} from './footer/model/types';
-export { Input as FormInput } from './input/Input';
-export type {
-  ControllerProps as SelectControllerProps,
-  ControllerResult as SelectControllerResult,
-  Props as SelectProps,
-} from './select/model/types';
-export type {
-  ControllerProps as TextareaControllerProps,
-  ControllerResult as TextareaControllerResult,
-  Props as TextareaProps,
-} from './textarea/model/types';
+// Export all types
+export type * from './checkbox/model/types';
+export type * from './combobox/model/types';
+export type * from './datePicker/model/types';
+export type * from './dateRange/model/types';
+export type * from './dialogButton/model/types';
+export type * from './fileUpload/model/types';
+export type * from './footer/model/types';
+export type * from './header/model/types';
+export type * from './input/model/types';
+export type * from './multiSelect/model/types';
+export type * from './select/model/types';
+export type * from './textarea/model/types';
+
+// Export controllers for advanced usage
+export { useController as useCheckboxController } from './checkbox/model/useController';
+export { useController as useComboboxController } from './combobox/model/useController';
+export { useController as useDatePickerController } from './datePicker/model/useController';
+export { useController as useDialogButtonController } from './dialogButton/model/useController';
+export { useController as useFileUploadController } from './fileUpload/model/useController';
+export { useController as useFooterController } from './footer/model/useController';
+export { useController as useHeaderController } from './header/model/useController';
+export { useController as useInputController } from './input/model/useController';
+export { useController as useMultiSelectController } from './multiSelect/model/useController';
+export { useController as useSelectController } from './select/model/useController';
+export { useController as useTextareaController } from './textarea/model/useController';

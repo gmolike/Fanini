@@ -1,6 +1,6 @@
+import type { IconProps } from '../../types';
 import type { ComponentProps } from 'react';
 import type { Control, FieldPath, FieldValues } from 'react-hook-form';
-
 
 /**
  * Base field props shared by all form fields
@@ -62,9 +62,13 @@ export type BaseFieldProps<TFieldValues extends FieldValues = FieldValues> = {
    * Button appears when field value differs from default
    */
   showReset?: boolean;
+
+  /**
+   * Test ID for testing
+   * @optional Applied to the input element
+   */
+  testId?: string;
 };
-
-
 
 /**
  * Props for the Input controller hook
@@ -74,77 +78,83 @@ export type BaseFieldProps<TFieldValues extends FieldValues = FieldValues> = {
 export type ControllerProps<TFieldValues extends FieldValues = FieldValues> = {
   /**
    * React Hook Form control object
-   * Required to access form state and schema
    */
   control: Control<TFieldValues>;
 
   /**
    * Field name in the form
-   * Used to extract field schema and state
    */
   name: FieldPath<TFieldValues>;
 
   /**
    * Whether the field is disabled
-   * @optional Combined with form submission state
    */
   disabled?: boolean;
 
   /**
    * Whether the field is required
-   * @optional Used for aria-required attribute
    */
   required?: boolean;
 
   /**
-   * HTML input type (overrides schema detection)
-   * @optional If not provided, inferred from Zod schema
+   * HTML input type
    */
   type?: InputHTMLType;
+
+  /**
+   * Label for accessibility
+   */
+  label?: string;
 };
-
-
-
 
 /**
  * Return value of the Input controller hook
  */
 export type ControllerResult = {
   /**
-   * Whether the field is disabled (considering form state)
-   * True if explicitly disabled or form is submitting
+   * Whether the field is disabled
    */
   isDisabled: boolean;
 
   /**
-   * HTML input type (from schema or explicit)
-   * Inferred from Zod schema (email, number, etc.) or explicit prop
+   * HTML input type
    */
   inputType: InputHTMLType;
 
   /**
    * ARIA props for accessibility
    */
-  ariaProps: {
-    /**
-     * Whether the field has validation errors
-     */
-    'aria-invalid': boolean;
+  ariaProps: Record<string, unknown>;
 
-    /**
-     * Whether the field is required
-     */
-    'aria-required': boolean;
-
-    /**
-     * Whether the field is disabled
-     */
-    'aria-disabled': boolean;
+  /**
+   * Label props for the label element
+   */
+  labelProps: {
+    id: string;
+    htmlFor: string;
   };
+
+  /**
+   * Description props
+   */
+  descriptionProps: {
+    id: string;
+  };
+
+  /**
+   * Error props
+   */
+  errorProps: {
+    id: string;
+    role: string;
+    'aria-live': 'polite';
+  };
+
+  /**
+   * Whether field has error
+   */
+  hasError: boolean;
 };
-
-
-
 
 /**
  * Supported HTML input types
@@ -161,43 +171,68 @@ export type InputHTMLType =
   | 'time'
   | 'datetime-local'
   | 'month'
-  | 'week';
-
+  | 'week'
+  | 'color';
 
 /**
  * Props for the Input component
  *
  * @template TFieldValues - Type of the form values
  */
-export type Props<TFieldValues extends FieldValues = FieldValues> = BaseFieldProps<TFieldValues> & {
-  /**
-   * Additional CSS classes for the input element
-   * @optional Applied directly to the input element
-   */
-  inputClassName?: string;
+export type Props<TFieldValues extends FieldValues = FieldValues> = BaseFieldProps<TFieldValues> &
+  IconProps & {
+    /**
+     * Additional CSS classes for the input element
+     */
+    inputClassName?: string;
 
-  /**
-   * Additional CSS classes for the input wrapper div
-   * @optional Applied when icons are present
-   */
-  wrapperClassName?: string;
+    /**
+     * Additional CSS classes for the input wrapper div
+     */
+    wrapperClassName?: string;
 
-  /**
-   * Icon component to display at the start of the input
-   * @optional Renders inside the input field on the left
-   */
-  startIcon?: React.ReactNode;
+    /**
+     * Icon to display at the start of the input
+     */
+    startIcon?: IconProps['icon'];
 
-  /**
-   * Icon component to display at the end of the input
-   * @optional Renders inside the input field on the right
-   */
-  endIcon?: React.ReactNode;
+    /**
+     * Icon to display at the end of the input
+     */
+    endIcon?: IconProps['icon'];
 
-  /**
-   * HTML input type (overrides schema detection)
-   * @default 'text' or auto-detected from schema
-   * @optional If not provided, type is auto-detected from Zod schema
-   */
-  type?: InputHTMLType;
-} & Omit<ComponentProps<'input'>, 'name' | 'type' | 'required' | 'ref'>;
+    /**
+     * HTML input type
+     * @default 'text'
+     */
+    type?: InputHTMLType;
+
+    /**
+     * Minimum value (for number inputs)
+     */
+    min?: number | string;
+
+    /**
+     * Maximum value (for number inputs)
+     */
+    max?: number | string;
+
+    /**
+     * Step value (for number inputs)
+     */
+    step?: number | string;
+
+    /**
+     * Pattern for validation
+     */
+    pattern?: string;
+
+    /**
+     * Whether to show clear button
+     * @default false
+     */
+    showClear?: boolean;
+  } & Omit<
+    ComponentProps<'input'>,
+    'name' | 'type' | 'required' | 'ref' | 'value' | 'onChange' | 'onBlur'
+  >;

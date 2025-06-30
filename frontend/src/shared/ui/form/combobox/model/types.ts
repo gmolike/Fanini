@@ -1,212 +1,83 @@
 import type { BaseFieldProps } from '../../input/model/types';
+import type { LoadingState, Option } from '../../types';
 import type { Control, FieldPath, FieldValues, PathValue } from 'react-hook-form';
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * Props for the Combobox controller hook
- *
- * @template TFieldValues - Type of the form values
  */
-export type ControllerProps<TFieldValues extends FieldValues = FieldValues> = {
-  /**
-   * React Hook Form control object
-   * Required to access form state
-   */
+export type ControllerProps<TFieldValues extends FieldValues = FieldValues, TValue = string> = {
   control: Control<TFieldValues>;
-
-  /**
-   * Field name in the form
-   * Used to access field state
-   */
   name: FieldPath<TFieldValues>;
-
-  /**
-   * Whether the combobox is disabled
-   * @optional Combined with form submission state
-   */
   disabled?: boolean;
-
-  /**
-   * Whether the field is required
-   * @optional Used for aria-required attribute
-   */
   required?: boolean;
-
-  /**
-   * Array of options
-   * Used for filtering and selection
-   */
-  options: Option[];
-
-  /**
-   * Callback when search value changes
-   * @optional Called with debounced search value
-   */
+  options: Option<TValue>[];
   onSearchChange?: (search: string) => void;
-
-  /**
-   * Whether options are being loaded
-   * @optional Shows loading state
-   */
   loading?: boolean;
+  debounceDelay?: number;
+  label?: string;
 };
-
-
-
 
 /**
  * Return value of the Combobox controller hook
  */
-export type ControllerResult<TFieldValues extends FieldValues = FieldValues> = {
-  /**
-   * Whether the combobox is disabled (considering form state)
-   * True if explicitly disabled or form is submitting
-   */
+export type ControllerResult<TFieldValues extends FieldValues = FieldValues, TValue = string> = {
   isDisabled: boolean;
-
-  /**
-   * Whether the dropdown is open
-   */
   open: boolean;
-
-  /**
-   * Function to set the open state
-   * @param open - New open state
-   */
   setOpen: (open: boolean) => void;
-
-  /**
-   * Current search value
-   */
   searchValue: string;
-
-  /**
-   * Function to set the search value
-   * @param value - New search value
-   */
   setSearchValue: (value: string) => void;
-
-  /**
-   * Filtered options based on search
-   * Case-insensitive filtering by label
-   */
-  filteredOptions: Option[];
-
-  /**
-   * Currently selected option
-   * Found by matching field value with option value
-   */
-  selectedOption: Option | undefined;
-
-  /**
-   * Handle option selection
-   * @param value - Selected option value
-   * @param onChange - Form field onChange handler
-   */
+  filteredOptions: Option<TValue>[];
+  selectedOption: Option<TValue> | undefined;
   handleSelect: (
-    value: string,
-    onChange: (newValue: PathValue<TFieldValues, FieldPath<TFieldValues>>) => void,
+    option: Option<TValue>,
+    onChange: (newValue: PathValue<TFieldValues, FieldPath<TFieldValues>>) => void
   ) => void;
-
-  /**
-   * Handle clear button click
-   * @param onChange - Form field onChange handler
-   */
-  handleClear: (
-    onChange: (value: PathValue<TFieldValues, FieldPath<TFieldValues>>) => void,
-  ) => void;
-  /**
-   * Checks if the field is undefined in the form and set is ihn this case to empty string
-   */
-  checkValue: () => string | undefined;
+  ariaProps: Record<string, unknown>;
+  labelProps: {
+    id: string;
+    htmlFor: string;
+  };
 };
-
-
-
-
-/**
- * Option for Combobox dropdown
- */
-export type Option = {
-  value: unknown;
-  /**
-   * The value that will be submitted
-   * Used as the form field value when this option is selected
-   */
-  key: string;
-
-  /**
-   * The label displayed to the user
-   * Shown in the dropdown list and when selected
-   */
-  label: string;
-
-  /**
-   * Whether this option is disabled
-   * @optional Prevents selection of this option
-   */
-  disabled?: boolean;
-};
-
 
 /**
  * Props for the Combobox component
- *
- * @template TFieldValues - Type of the form values
  */
-export type Props<TFieldValues extends FieldValues = FieldValues> = BaseFieldProps<TFieldValues> & {
-  /**
-   * Array of options to display in the dropdown
-   * Each option must have a unique value
-   */
-  options: Option[];
+export type Props<
+  TFieldValues extends FieldValues = FieldValues,
+  TValue = string,
+> = BaseFieldProps<TFieldValues> &
+  LoadingState & {
+    /**
+     * Array of options to display
+     */
+    options: Option<TValue>[];
 
-  /**
-   * Placeholder text for the search input
-   * @default 'Suchen...'
-   */
-  searchPlaceholder?: string;
+    /**
+     * Placeholder for search input
+     * @default 'Suchen...'
+     */
+    searchPlaceholder?: string;
 
-  /**
-   * Text to show when no options match the search
-   * @default 'Keine Ergebnisse gefunden.'
-   */
-  emptyText?: string;
+    /**
+     * Text when no options match
+     * @default 'Keine Ergebnisse gefunden.'
+     */
+    emptyText?: string;
 
-  /**
-   * Whether to show clear button
-   * @default true
-   * Button appears when an option is selected
-   */
-  showClear?: boolean;
+    /**
+     * Whether to show clear button
+     * @default true
+     */
+    showClear?: boolean;
 
-  /**
-   * Callback when search value changes
-   * @optional Used for async search/filtering
-   * @param search - Current search value
-   */
-  onSearchChange?: (search: string) => void;
+    /**
+     * Callback when search value changes
+     */
+    onSearchChange?: (search: string) => void;
 
-  /**
-   * Whether options are being loaded
-   * @default false
-   * Shows loading state in dropdown
-   */
-  loading?: boolean;
-
-  /**
-   * Id for Testing
-   */
-  testId?: string;
-};
+    /**
+     * Debounce delay for search in ms
+     * @default 300
+     */
+    debounceDelay?: number;
+  };

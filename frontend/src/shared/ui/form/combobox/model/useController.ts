@@ -1,44 +1,38 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { type  FieldPath,type  FieldValues,type  PathValue,useWatch  } from 'react-hook-form';
 
-import {
-  type FieldPath,
-  type FieldValues,
-  type PathValue,
-  useFormState,
-  useWatch,
-} from 'react-hook-form';
+import { DEFAULT_DEBOUNCE_DELAY } from '../../constants';
+import { useDebounce, useFieldAccessibility, useFormFieldState } from '../../hooks';
 
+import type { Option } from '../../types';
 import type { ControllerProps, ControllerResult } from './types';
 
 /**
  * Hook for Combobox controller logic
- *
- * @template TFieldValues - Type of the form values
- *
- * @param props - Controller props
- * @param props.control - React Hook Form control object
- * @param props.name - Field name in the form
- * @param props.disabled - Whether the combobox is disabled
- * @param props.required - Whether the field is required
- * @param props.options - Array of options
- * @param props.onSearchChange - Callback when search changes
- * @param props.loading - Whether options are loading
- *
- * @returns Controller result with state and event handlers
  */
-export const useController = <TFieldValues extends FieldValues = FieldValues>({
+export const useController = <TFieldValues extends FieldValues = FieldValues, TValue = string>({
   control,
   name,
   disabled,
+  required,
   options,
   onSearchChange,
-}: ControllerProps<TFieldValues>): ControllerResult<TFieldValues> => {
-  const { isSubmitting } = useFormState({ control });
+  loading,
+  debounceDelay = DEFAULT_DEBOUNCE_DELAY,
+  label,
+}: ControllerProps<TFieldValues, TValue>): ControllerResult<TFieldValues, TValue> => {
+  const { isDisabled } = useFormFieldState(control, disabled);
+  const { ariaProps, labelProps } = useFieldAccessibility(
+    control,
+    name,
+    required,
+    isDisabled,
+    label
+  );
+
   const fieldValue = useWatch({ control, name });
   const [open, setOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-
-  const isDisabled = disabled ?? isSubmitting;
 
   // Find selected option
   const selectedOption = useMemo(
@@ -51,22 +45,24 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     if (!searchValue) return options;
 
     const search = searchValue.toLowerCase();
-    return options.filter(option => option.label.toLowerCase().includes(search));
+    return options.filter(
+      option =>
+        option.label.toLowerCase().includes(search) ||
+        option.description?.toLowerCase().includes(search)
+    );
   }, [options, searchValue]);
 
-  // Handle search change with optional callback
-  useEffect(() => {
-    if (onSearchChange && searchValue) {
-      const timer = setTimeout(() => {
-        onSearchChange(searchValue);
-      }, 300); // Debounce search
+  // Debounced search callback
+  const debouncedSearchChange = useDebounce((value: string) => {
+    onSearchChange?.(value);
+  }, debounceDelay);
 
-      return () => {
-        clearTimeout(timer);
-      };
+  // Handle search value change
+  useEffect(() => {
+    if (searchValue) {
+      debouncedSearchChange(searchValue);
     }
-    return undefined;
-  }, [searchValue, onSearchChange]);
+  }, [searchValue, debouncedSearchChange]);
 
   // Reset search when closing
   useEffect(() => {
@@ -75,34 +71,20 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     }
   }, [open]);
 
-  /**
-   * Handle option selection
-   */
   const handleSelect = useCallback(
     (
-      value: string,
+      option: Option<TValue>,
       onChange: (selectedValue: PathValue<TFieldValues, FieldPath<TFieldValues>>) => void
     ) => {
-      onChange(value as PathValue<TFieldValues, FieldPath<TFieldValues>>);
+      onChange(option.value as PathValue<TFieldValues, FieldPath<TFieldValues>>);
       setOpen(false);
       setSearchValue('');
     },
     []
   );
 
-  /**
-   * Handle clear button click
-   */
-  const handleClear = useCallback(
-    (onChange: (value: PathValue<TFieldValues, FieldPath<TFieldValues>>) => void) => {
-      onChange('' as PathValue<TFieldValues, FieldPath<TFieldValues>>);
-      setSearchValue('');
-    },
-    []
-  );
-
   return {
-    isDisabled,
+    isDisabled: isDisabled || loading,
     open,
     setOpen,
     searchValue,
@@ -110,7 +92,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     filteredOptions,
     selectedOption,
     handleSelect,
-    handleClear,
-    checkValue: () => fieldValue ?? '',
+    ariaProps,
+    labelProps,
   };
 };

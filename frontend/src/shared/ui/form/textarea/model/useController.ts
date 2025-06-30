@@ -1,20 +1,11 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import { type FieldValues,useFormState } from 'react-hook-form';
+import { type  FieldValues,useWatch  } from 'react-hook-form';
+
+import { useFieldAccessibility, useFormFieldState } from '../../hooks';
 
 import type { ControllerProps, ControllerResult } from './types';
 
 /**
  * Hook for TextArea controller logic
- *
- * @template TFieldValues - Type of the form values
- *
- * @param control - React Hook Form control object
- * @param name - Field name in the form
- * @param disabled - Whether the textarea is disabled
- * @param required - Whether the field is required
- * @param rows - Number of visible text rows
- *
- * @returns Controller result with disabled state and ARIA props
  */
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
@@ -22,21 +13,20 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   disabled,
   required,
   rows = 3,
+  maxLength,
+  label,
 }: ControllerProps<TFieldValues>): ControllerResult => {
-  const { isSubmitting, errors } = useFormState({ control });
-  const fieldError = errors[name];
+  const { isDisabled } = useFormFieldState(control, disabled);
+  const { ariaProps } = useFieldAccessibility(control, name, required, isDisabled, label);
 
-  const isDisabled = disabled ?? isSubmitting;
-
-  const ariaProps = {
-    'aria-invalid': !!fieldError,
-    'aria-required': !!required,
-    'aria-disabled': isDisabled,
-  };
+  const value = useWatch({ control, name });
+  const currentLength = String(value ?? '').length;
 
   return {
     isDisabled,
     rows,
     ariaProps,
+    currentLength,
+    maxLength,
   };
 };

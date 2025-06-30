@@ -10,7 +10,6 @@ export {
   type TableDefinition,
   type TablePreset,
 } from './model/types';
-// eslint-disable-next-line sort-exports/sort-exports
 export { ActionsCell, BooleanCell, DateCell, EmailCell, PhoneCell, TextCell } from './ui/cells';
 
 // ========================================

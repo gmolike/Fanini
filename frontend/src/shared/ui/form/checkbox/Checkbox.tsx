@@ -1,14 +1,19 @@
 import { memo } from 'react';
 
+import { X } from 'lucide-react';
+
 import {
+  Button,
   Checkbox as ShadcnCheckbox,
-  ShadCnFormControl,
-  ShadCnFormDescription,
-  ShadCnFormField,
-  ShadCnFormItem,
-  ShadCnFormLabel,
-  ShadCnFormMessage,
+  FormControl as ShadCnFormControl,
+  FormDescription as ShadCnFormDescription,
+  FormField as ShadCnFormField,
+  FormItem as ShadCnFormItem,
+  FormLabel as ShadCnFormLabel,
+  FormMessage as ShadCnFormMessage,
 } from '@/shared/shadcn';
+
+import { useFieldReset } from '../hooks';
 
 import { useController } from './model/useController';
 
@@ -16,29 +21,37 @@ import type { Props } from './model/types';
 import type { FieldValues } from 'react-hook-form';
 
 /**
- * Checkbox Component - Checkbox input with label positioning options
+ * Checkbox Component - Checkbox input with flexible label positioning
  *
  * @template TFieldValues - Type of the form values
  *
- * @param control - React Hook Form control object
- * @param name - Field name in the form (must be a valid path in TFieldValues)
- * @param label - Label text to display with the checkbox
- * @param description - Helper text to display below the checkbox
- * @param required - Whether the field is required
- * @param disabled - Whether the checkbox is disabled
- * @param className - Additional CSS classes for the form item container
- * @param side - Position of the label relative to the checkbox
- *
  * @example
  * ```tsx
- * const form = useForm<FormData>();
- *
- * <Checkbox
+ * // Simple checkbox
+ * <FormCheckbox
  *   control={form.control}
  *   name="acceptTerms"
  *   label="I accept the terms and conditions"
  *   required
+ * />
+ *
+ * // With headline and description
+ * <FormCheckbox
+ *   control={form.control}
+ *   name="newsletter"
+ *   headline="Newsletter Preferences"
+ *   label="Send me weekly updates"
+ *   description="You can unsubscribe at any time"
  *   side="right"
+ * />
+ *
+ * // With reset functionality
+ * <FormCheckbox
+ *   control={form.control}
+ *   name="rememberMe"
+ *   label="Remember me"
+ *   showReset
+ *   showClear
  * />
  * ```
  */
@@ -52,14 +65,20 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   disabled,
   className,
   side = 'right',
+  showReset = true,
+  showClear = false,
+  testId,
 }: Props<TFieldValues>) => {
-  const { isDisabled, groupClasses } = useController({
+  const { isDisabled, groupClasses, ariaProps, labelProps } = useController({
     control,
     name,
     disabled,
     required,
     side,
+    label,
   });
+
+  const { isDifferentFromDefault, handleReset, handleClear } = useFieldReset(control, name);
 
   return (
     <ShadCnFormField
@@ -69,21 +88,57 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
         <ShadCnFormItem className={className}>
           <div className="flex items-center justify-between">
             {headline ? <ShadCnFormLabel required={required}>{headline}</ShadCnFormLabel> : null}
+            <div className="flex items-center gap-1">
+              {showClear && field.value ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => { handleClear(); }}
+                  className="size-6"
+                  aria-label="Clear selection"
+                >
+                  <X className="size-3" />
+                </Button>
+              ) : null}
+              {showReset && isDifferentFromDefault ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleReset}
+                  className="size-6"
+                  aria-label="Reset to default"
+                >
+                  <RotateCcw className="size-3" />
+                </Button>
+              ) : null}
+            </div>
           </div>
+
           <div className={groupClasses}>
             <ShadCnFormControl>
               <ShadcnCheckbox
+                {...ariaProps}
                 checked={field.value ?? false}
                 onCheckedChange={field.onChange}
                 disabled={isDisabled}
-                aria-required={required}
+                data-testid={testId}
                 className="cursor-pointer"
               />
             </ShadCnFormControl>
-            {label ? <ShadCnFormLabel required={required} className="font-normal">
+
+            {label ? (
+              <ShadCnFormLabel
+                {...labelProps}
+                required={required}
+                className="cursor-pointer font-normal"
+              >
                 {label}
-              </ShadCnFormLabel> : null}
+              </ShadCnFormLabel>
+            ) : null}
           </div>
+
           {description ? <ShadCnFormDescription>{description}</ShadCnFormDescription> : null}
           <ShadCnFormMessage />
         </ShadCnFormItem>

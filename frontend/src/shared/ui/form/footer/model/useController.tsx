@@ -1,4 +1,4 @@
-import { type  FieldValues,useFormContext  } from 'react-hook-form';
+import { type FieldValues, useFormContext } from 'react-hook-form';
 
 import { useRouter } from '@tanstack/react-router';
 
@@ -30,8 +30,12 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
 
   const handleCancel = () => {
     if (!onCancel) {
-      router.history.back();
-    } else onCancel();
+      // Fire and forget navigation, do not await
+      // eslint-disable-next-line sonarjs/void-use
+      void router.navigate({ to: '..', replace: true });
+    } else {
+      onCancel();
+    }
   };
 
   const handleReset = () => {

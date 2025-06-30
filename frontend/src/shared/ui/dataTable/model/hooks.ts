@@ -3,7 +3,7 @@
  * @description Custom Hooks für DataTable Funktionalität
  */
 
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   getCoreRowModel,

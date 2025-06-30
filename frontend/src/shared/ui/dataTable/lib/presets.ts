@@ -4,8 +4,8 @@
  */
 
 import {
-  TABLE_PRESETS,
   type DataTableProps,
+  TABLE_PRESETS,
   type TableDataConstraint,
   type TablePreset,
 } from '../model/types';

@@ -1,9 +1,14 @@
 import { memo } from 'react';
 
-import { cn } from '@/shared/lib';
-import { Input as InputShadcn } from '@/shared/shadcn';
+import { X } from 'lucide-react';
 
+import { cn } from '@/shared/lib';
+import { Button, Input as InputShadcn } from '@/shared/shadcn';
+
+import { ICON_SIZES } from '../constants';
 import { FormFieldWrapper } from '../fieldWrapper';
+import { useFieldReset } from '../hooks';
+import { formatPhoneNumber, parseNumber } from '../utils';
 
 import { useController } from './model/useController';
 
@@ -11,35 +16,40 @@ import type { Props } from './model/types';
 import type { FieldValues } from 'react-hook-form';
 
 /**
- * Input Component - Form input field with icons and reset functionality
+ * Input Component - Form input field with comprehensive features
  *
  * @template TFieldValues - Type of the form values
  *
- * @param control - React Hook Form control object
- * @param name - Field name in the form (must be a valid path in TFieldValues)
- * @param label - Label text to display above the input
- * @param description - Helper text to display below the input
- * @param required - Whether the field is required
- * @param placeholder - Placeholder text for the input
- * @param className - Additional CSS classes for the form item container
- * @param inputClassName - Additional CSS classes for the input element
- * @param wrapperClassName - Additional CSS classes for the input wrapper
- * @param startIcon - Icon component to display at the start of the input
- * @param endIcon - Icon component to display at the end of the input
- * @param disabled - Whether the input is disabled
- * @param type - HTML input type
- * @param showReset - Whether to show reset to default button
- * @param ...inputProps - Additional props passed to the underlying input element
- *
  * @example
  * ```tsx
+ * // Simple text input
  * <FormInput
  *   control={form.control}
  *   name="email"
  *   label="Email Address"
+ *   type="email"
  *   placeholder="Enter your email"
- *   startIcon={<Mail className="size-4" />}
- *   showReset={true}
+ *   startIcon={Mail}
+ * />
+ *
+ * // Number input with formatting
+ * <FormInput
+ *   control={form.control}
+ *   name="salary"
+ *   label="Salary"
+ *   type="number"
+ *   min={0}
+ *   step={1000}
+ *   startIcon={Euro}
+ * />
+ *
+ * // Phone input with formatting
+ * <FormInput
+ *   control={form.control}
+ *   name="phone"
+ *   label="Phone"
+ *   type="tel"
+ *   startIcon={Phone}
  * />
  * ```
  */
@@ -53,62 +63,126 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   className,
   inputClassName,
   wrapperClassName,
-  startIcon,
-  endIcon,
+  startIcon: StartIcon,
+  endIcon: EndIcon,
+  iconSize = 'default',
   disabled,
   type,
+  min,
+  max,
+  step,
+  pattern,
   showReset = true,
+  showClear = false,
+  testId,
   ...inputProps
 }: Props<TFieldValues>) => {
-  const { isDisabled, ariaProps, inputType } = useController({
+  const { isDisabled, ariaProps, inputType, hasError } = useController({
     control,
     name,
-    disabled,
-    required,
-    type,
+    disabled: !!disabled,
+    required: !!required,
+    ...(type !== undefined ? { type } : {}),
+    ...(label !== undefined ? { label } : {}),
   });
+
+  const { handleClear } = useFieldReset(control, name);
+
+  const iconSizeClass = ICON_SIZES[iconSize];
 
   return (
     <FormFieldWrapper
       control={control}
       name={name}
-      label={label ?? ''}
+      label={label}
       description={description}
       required={required}
       className={className}
       showReset={showReset}
-      render={field => (
-        <div className={cn('relative', wrapperClassName)}>
-          {startIcon ? (
-            <div className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2">
-              {startIcon}
-            </div>
-          ) : null}
-          <InputShadcn
-            {...inputProps}
-            {...ariaProps}
-            onChange={field.onChange}
-            onBlur={field.onBlur}
-            name={field.name}
-            value={field.value ?? ''}
-            ref={field.ref}
-            type={inputType}
-            placeholder={placeholder}
-            disabled={isDisabled}
-            className={cn(
-              startIcon && 'pl-10',
-              endIcon && 'pr-10',
-              showReset && !endIcon && 'pr-10',
-              inputClassName
-            )}
-          />
-          {endIcon ? (
-            <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2">
-              {endIcon}
-            </div>
-          ) : null}
-        </div>
-      )}
+      render={field => {
+        // Format display value based on type
+        let displayValue = field.value ?? '';
+
+        if (inputType === 'tel' && displayValue) {
+          displayValue = formatPhoneNumber(displayValue);
+        }
+
+        return (
+          <div className={cn('relative', wrapperClassName)}>
+            {StartIcon ? (
+              <div className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2">
+                <StartIcon className={iconSizeClass} />
+              </div>
+            ) : null}
+
+            <InputShadcn
+              {...inputProps}
+              {...ariaProps}
+              onChange={e => {
+                const { value }: { value: string } = e.target;
+
+                // Handle number input
+                if (inputType === 'number' && value !== '') {
+                  const parsed = parseNumber(value);
+                  if (parsed !== null) {
+                    // Convert the parsed number to string before passing to field.onChange
+                    field.onChange(String(parsed));
+                    return;
+                  }
+                }
+
+                field.onChange(e);
+              }}
+              onBlur={field.onBlur}
+              name={field.name}
+              value={displayValue}
+              ref={field.ref}
+              type={inputType}
+              placeholder={placeholder}
+              disabled={isDisabled}
+              min={min}
+              max={max}
+              step={step}
+              pattern={pattern}
+              data-testid={testId}
+              className={cn(
+                StartIcon && 'pl-10',
+                EndIcon && 'pr-10',
+                !EndIcon && showClear && 'pr-10',
+                hasError && 'border-destructive focus-visible:ring-destructive',
+                inputClassName
+              )}
+            />
+
+            {(() => {
+              let content = null;
+              if (showClear && Boolean(field.value)) {
+                content = (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      handleClear();
+                    }}
+                    className="absolute top-1/2 right-1 size-8 -translate-y-1/2"
+                    aria-label="Clear"
+                  >
+                    <X className="size-3" />
+                  </Button>
+                );
+              } else if (EndIcon) {
+                content = (
+                  <div className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 -translate-y-1/2">
+                    <EndIcon className={iconSizeClass} />
+                  </div>
+                );
+              }
+              return content;
+            })()}
+          </div>
+        );
+      }}
     />
   );
 };

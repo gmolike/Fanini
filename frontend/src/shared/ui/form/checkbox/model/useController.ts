@@ -1,28 +1,29 @@
 import { useMemo } from 'react';
-import { type  FieldValues,useFormState  } from 'react-hook-form';
+
+import { useFieldAccessibility, useFormFieldState } from '../../hooks';
 
 import type { ControllerProps, ControllerResult } from './types';
+import type { FieldValues } from 'react-hook-form';
 
 /**
  * Hook for Checkbox controller logic
- *
- * @template TFieldValues - Type of the form values
- *
- * @param control - React Hook Form control object
- * @param name - Field name in the form
- * @param disabled - Whether the checkbox is disabled
- * @param required - Whether the field is required
- * @param side - Label position relative to checkbox
- *
- * @returns Controller result with disabled state and layout classes
  */
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
+  name,
   disabled,
+  required,
   side = 'right',
+  label,
 }: ControllerProps<TFieldValues>): ControllerResult => {
-  const { isSubmitting } = useFormState({ control });
-  const isDisabled = disabled ?? isSubmitting;
+  const { isDisabled } = useFormFieldState(control, disabled);
+  const { ariaProps, labelProps } = useFieldAccessibility(
+    control,
+    name,
+    required,
+    isDisabled,
+    label
+  );
 
   // Determine layout classes based on side
   const groupClasses = useMemo(() => {
@@ -33,7 +34,6 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
         return 'flex flex-row-reverse justify-end gap-2';
       case 'bottom':
         return 'flex flex-col gap-2';
-
       default:
         return 'flex items-center space-x-2';
     }
@@ -42,5 +42,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   return {
     isDisabled,
     groupClasses,
+    ariaProps,
+    labelProps,
   };
 };

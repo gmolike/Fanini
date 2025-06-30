@@ -1,36 +1,60 @@
-import { type  FieldValues,useFormState  } from 'react-hook-form';
-
 import { z } from 'zod';
 
+import { useFieldAccessibility, useFormFieldState } from '../../hooks';
+
 import type { ControllerProps, ControllerResult, InputHTMLType } from './types';
+import type { Control,FieldValues } from 'react-hook-form';
+
+/**
+ * Type for resolver with Zod schema
+ * @internal
+ */
+type ResolverWithSchema = {
+  zodSchema?: z.ZodObject<z.ZodRawShape>;
+};
+
+/**
+ * Type for control options
+ * @internal
+ */
+type ControlOptions = {
+  resolver?: ResolverWithSchema;
+};
 
 /**
  * Extract schema metadata from the form's resolver
+ * @internal
  */
 const getFieldSchema = <TFieldValues extends FieldValues>(
-  control: ControllerProps<TFieldValues>['control'],
-  fieldName: string,
+  control: Control<TFieldValues>,
+  fieldName: string
 ): z.ZodTypeAny | undefined => {
   try {
-    // Access the schema through the resolver
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const resolver = (control as any)._options?.resolver;
-    if (!resolver) return undefined;
+    // Type-safe access to resolver
+    const options = control._options as ControlOptions | undefined;
+    const resolver = options?.resolver;
 
-    // Try to get the schema from the resolver context
-    const schema = resolver.__zodSchema;
-    if (schema?.shape) return undefined;
+    if (!resolver?.zodSchema) return undefined;
 
-    // Get the field schema
+    const schema = resolver.zodSchema;
+    // Navigate through nested schema
     const fieldParts = fieldName.split('.');
-    let currentSchema = schema.shape;
+    let currentSchema: unknown = schema.shape;
 
     for (const part of fieldParts) {
-      currentSchema = currentSchema[part];
-      if (!currentSchema) return undefined;
+      if (
+        currentSchema !== undefined &&
+        currentSchema !== null &&
+        typeof currentSchema === 'object' &&
+        part in (currentSchema as Record<string, unknown>)
+      ) {
+        currentSchema = (currentSchema as Record<string, unknown>)[part];
+      } else {
+        return undefined;
+      }
     }
 
-    return currentSchema;
+    return currentSchema as z.ZodTypeAny;
   } catch {
     return undefined;
   }
@@ -38,6 +62,7 @@ const getFieldSchema = <TFieldValues extends FieldValues>(
 
 /**
  * Infer input type from Zod schema
+ * @internal
  */
 const inferInputType = (schema: z.ZodTypeAny): InputHTMLType => {
   // Unwrap optional/nullable/default
@@ -47,12 +72,12 @@ const inferInputType = (schema: z.ZodTypeAny): InputHTMLType => {
     baseSchema instanceof z.ZodNullable ||
     baseSchema instanceof z.ZodDefault
   ) {
-    baseSchema = baseSchema._def.innerType;
+    baseSchema = baseSchema._def.innerType as z.ZodTypeAny;
   }
 
   // Check for string with specific checks
   if (baseSchema instanceof z.ZodString) {
-    const {checks} = baseSchema._def;
+    const { checks } = baseSchema._def;
     for (const check of checks) {
       if (check.kind === 'email') return 'email';
       if (check.kind === 'url') return 'url';
@@ -79,13 +104,7 @@ const inferInputType = (schema: z.ZodTypeAny): InputHTMLType => {
  * @template TFieldValues - Type of the form values
  *
  * @param props - Controller props
- * @param props.control - React Hook Form control object
- * @param props.name - Field name in the form
- * @param props.disabled - Whether the field is disabled
- * @param props.required - Whether the field is required
- * @param props.type - HTML input type (overrides schema detection)
- *
- * @returns Controller result with disabled state, input type, and ARIA props
+ * @returns Controller result with state and props
  */
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
@@ -93,27 +112,30 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   disabled,
   required,
   type: explicitType,
+  label,
 }: ControllerProps<TFieldValues>): ControllerResult => {
-  const { isSubmitting, errors } = useFormState({ control });
-  const fieldError = errors[name];
+  const { isDisabled } = useFormFieldState(control, disabled);
+  const { ariaProps, labelProps, descriptionProps, errorProps, hasError } = useFieldAccessibility(
+    control,
+    name,
+    required,
+    isDisabled,
+    label
+  );
 
-  // Get field schema for type inference only
+  // Get field schema for type inference
   const fieldSchema = getFieldSchema(control, name as string);
 
-  // Determine input type (explicit takes precedence)
-  const inputType = explicitType ?? inferInputType(fieldSchema ?? z.string());
-
-  const isDisabled = disabled || isSubmitting;
-
-  const ariaProps = {
-    'aria-invalid': !!fieldError,
-    'aria-required': !!required,
-    'aria-disabled': isDisabled,
-  };
+  // Determine input type
+  const inputType = explicitType ?? (fieldSchema ? inferInputType(fieldSchema) : 'text');
 
   return {
     isDisabled,
     inputType,
     ariaProps,
+    labelProps,
+    descriptionProps,
+    errorProps,
+    hasError,
   };
 };

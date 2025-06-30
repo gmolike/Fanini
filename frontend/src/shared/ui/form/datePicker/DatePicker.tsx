@@ -5,7 +5,9 @@ import { CalendarIcon, X } from 'lucide-react';
 import { cn } from '@/shared/lib';
 import { Button, Calendar, Input, Popover, PopoverContent, PopoverTrigger } from '@/shared/shadcn';
 
+import { ICON_SIZES, TRANSITIONS } from '../constants';
 import { FormFieldWrapper } from '../fieldWrapper';
+import { useFieldReset } from '../hooks';
 
 import { useController } from './model/useController';
 
@@ -15,36 +17,23 @@ import type { FieldValues } from 'react-hook-form';
 /**
  * DatePicker Component - Date selection with calendar and input
  *
- * @template TFieldValues - Type of the form values
- *
- * @param control - React Hook Form control object
- * @param name - Field name in the form (must be a valid path in TFieldValues)
- * @param label - Label text to display above the date picker
- * @param description - Helper text to display below the date picker
- * @param required - Whether the field is required
- * @param placeholder - Placeholder text when no date is selected
- * @param disabled - Whether the date picker is disabled
- * @param className - Additional CSS classes for the form item container
- * @param dateFormat - Date format string (using date-fns format)
- * @param min - Minimum allowed date
- * @param max - Maximum allowed date
- * @param locale - Locale for date formatting
- * @param showReset - Whether to show reset to default button
- * @param showClear - Whether to show clear date button
- * @param allowInput - Whether to allow manual date input
- *
  * @example
  * ```tsx
+ * // Simple date picker
  * <FormDatePicker
  *   control={form.control}
  *   name="birthDate"
  *   label="Birth Date"
- *   required
- *   placeholder="Select your birth date"
  *   max={new Date()}
- *   dateFormat="dd/MM/yyyy"
- *   showClear={true}
- *   allowInput={true}
+ * />
+ *
+ * // With custom format
+ * <FormDatePicker
+ *   control={form.control}
+ *   name="eventDate"
+ *   label="Event Date"
+ *   dateFormat="yyyy-MM-dd"
+ *   min={new Date()}
  * />
  * ```
  */
@@ -58,12 +47,14 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   disabled,
   className,
   dateFormat = 'dd.MM.yyyy',
+  showTime = false,
   min,
   max,
   locale,
   showReset = true,
   showClear = true,
   allowInput = true,
+  testId,
 }: Props<TFieldValues>) => {
   const {
     isDisabled,
@@ -75,7 +66,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
     setOpen,
     handleInputChange,
     handleCalendarSelect,
-    handleClear,
+    ariaProps,
   } = useController({
     control,
     name,
@@ -85,37 +76,45 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
     min,
     max,
     locale,
+    label,
   });
+
+  const { handleClear } = useFieldReset(control, name);
 
   return (
     <FormFieldWrapper
       control={control}
       name={name}
-      label={label ?? ''}
-      description={description ?? ''}
-      required={!!required}
-      className={className ?? ''}
+      label={label}
+      description={description}
+      required={required}
+      className={className}
       showReset={showReset}
       render={field => {
         const dateValue = field.value ? new Date(field.value as string | Date) : undefined;
+        const hasValue = Boolean(field.value);
 
         return (
           <div className="flex items-center gap-2">
             <Popover open={open} onOpenChange={setOpen} modal>
               <PopoverTrigger asChild>
                 <Button
+                  {...ariaProps}
                   variant="outline"
                   className={cn(
                     'flex-1 justify-start text-left font-normal',
-                    !field.value && 'text-muted-foreground'
+                    !hasValue && 'text-muted-foreground',
+                    TRANSITIONS.default
                   )}
                   disabled={isDisabled}
                   type="button"
+                  data-testid={testId}
                 >
                   {formattedValue || placeholder}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  <CalendarIcon className={cn('ml-auto', ICON_SIZES.default, 'opacity-50')} />
                 </Button>
               </PopoverTrigger>
+
               <PopoverContent className="w-auto p-3" align="start">
                 <div className="space-y-3">
                   {allowInput ? (
@@ -125,11 +124,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                         type="text"
                         placeholder={dateFormat}
                         value={inputValue || formattedValue}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                          handleInputChange(e.target.value, field.onChange);
-                        }}
+                        onChange={e => { handleInputChange(e.target.value, field.onChange); }}
                         onBlur={() => {
-                          if (inputValue && !field.value) {
+                          if (inputValue && !hasValue) {
                             setInputValue('');
                           }
                         }}
@@ -137,30 +134,36 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                       />
                     </div>
                   ) : null}
+
                   <Calendar
                     mode="single"
                     selected={dateValue}
-                    onSelect={(date: Date | undefined) => {
-                      handleCalendarSelect(date, field.onChange);
-                    }}
+                    onSelect={date => { handleCalendarSelect(date, field.onChange); }}
                     disabled={isDateDisabled}
                     autoFocus={!allowInput}
                   />
+
+                  {showTime ? (
+                    <div className="border-t pt-3">
+                      <p className="text-muted-foreground text-sm">
+                        Zeit-Auswahl wird in zukünftiger Version hinzugefügt
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
               </PopoverContent>
             </Popover>
-            {showClear && field.value ? (
+
+            {showClear && hasValue ? (
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => {
-                  handleClear(field.onChange);
-                }}
-                aria-label="Auswahl löschen"
+                onClick={() => { handleClear(); }}
+                aria-label="Datum löschen"
                 className="shrink-0"
               >
-                <X className="h-4 w-4" />
+                <X className={ICON_SIZES.default} />
               </Button>
             ) : null}
           </div>

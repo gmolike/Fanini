@@ -1,34 +1,19 @@
 import { memo } from 'react';
+import { type  FieldValues,useWatch  } from 'react-hook-form';
 
-import { ShadCnFormDescription, ShadCnFormLabel } from '@/shared/shadcn';
+import { cn } from '@/shared/lib';
+import { FormDescription, FormLabel } from '@/shared/shadcn';
 
 import { DatePicker } from '../datePicker';
 
 import type { Props } from './model/types';
-import type { FieldValues } from 'react-hook-form';
 
 /**
  * DateRange Component - Two date pickers for selecting a date range
  *
- * @template TFieldValues - Type of the form values
- *
- * @param control - React Hook Form control object
- * @param startName - Field name for the start date
- * @param endName - Field name for the end date
- * @param label - Main label for the date range
- * @param startLabel - Label for the start date picker
- * @param endLabel - Label for the end date picker
- * @param description - Helper text to display below the date range
- * @param required - Whether both fields are required
- * @param disabled - Whether both date pickers are disabled
- * @param className - Additional CSS classes for the container
- * @param dateFormat - Date format string for both pickers
- *
  * @example
  * ```tsx
- * const form = useForm<FormData>();
- *
- * <DateRange
+ * <FormDateRange
  *   control={form.control}
  *   startName="startDate"
  *   endName="endDate"
@@ -47,30 +32,66 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   startLabel = 'Von',
   endLabel = 'Bis',
   description,
+  required,
   disabled,
   className,
   dateFormat,
-}: Props<TFieldValues>) => (
-  <div className={className}>
-    {label ? <ShadCnFormLabel>{label}</ShadCnFormLabel> : null}
-    <div className="grid grid-cols-2 gap-4">
-      <DatePicker
-        control={control}
-        name={startName}
-        label={startLabel}
-        disabled={disabled}
-        dateFormat={dateFormat}
-      />
-      <DatePicker
-        control={control}
-        name={endName}
-        label={endLabel}
-        disabled={disabled}
-        dateFormat={dateFormat}
-      />
+  locale,
+  minDate,
+  maxDate,
+  showClear = true,
+  showReset = true,
+}: Props<TFieldValues>) => {
+  // Watch start date to use as min for end date
+  const startDate = useWatch({ control, name: startName });
+  const startDateObj = startDate ? new Date(startDate) : undefined;
+
+  // Watch end date to use as max for start date
+  const endDate = useWatch({ control, name: endName });
+  const endDateObj = endDate ? new Date(endDate) : undefined;
+
+  return (
+    <div className={cn('space-y-3', className)}>
+      {label ? (
+        <FormLabel>
+          {label}
+          {required ? <span className="text-destructive ml-1">*</span> : null}
+        </FormLabel>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <DatePicker
+          control={control}
+          name={startName}
+          label={startLabel}
+          disabled={disabled}
+          dateFormat={dateFormat}
+          locale={locale}
+          min={minDate}
+          max={endDateObj ?? maxDate}
+          showClear={showClear}
+          showReset={showReset}
+          required={required}
+        />
+
+        <DatePicker
+          control={control}
+          name={endName}
+          label={endLabel}
+          disabled={disabled}
+          dateFormat={dateFormat}
+          locale={locale}
+          min={startDateObj ?? minDate}
+          max={maxDate}
+          showClear={showClear}
+          showReset={showReset}
+          required={required}
+        />
+      </div>
+
+      {description ? <FormDescription>{description}</FormDescription> : null}
     </div>
-    {description ? <ShadCnFormDescription>{description}</ShadCnFormDescription> : null}
-  </div>
-);
+  );
+};
 
 export const DateRange = memo(Component) as typeof Component;

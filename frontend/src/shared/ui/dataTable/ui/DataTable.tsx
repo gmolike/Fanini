@@ -19,9 +19,9 @@ import {
   ShadCnTableRow,
 } from '@/shared/shadcn';
 
-import { EmptyState, ErrorState, ExpandButton, Pagination, Skeleton, Toolbar } from './parts';
 import { useDataTable } from '../model/hooks';
 
+import { EmptyState, ErrorState, ExpandButton, Pagination, Skeleton, Toolbar } from './parts';
 
 import type { DataTableProps, TableDataConstraint } from '../model/types';
 

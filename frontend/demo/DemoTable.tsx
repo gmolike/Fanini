@@ -10,7 +10,7 @@ import {
   EmailCell,
   PhoneCell,
   TextCell,
-} from '@/shared/ui/dataTable;
+} from '@/shared/ui/dataTable';
 
 // Datentyp definieren
 type DemoUser = {

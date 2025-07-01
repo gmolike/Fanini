@@ -18,8 +18,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const hasValue = useCallback(
-    (value: unknown): boolean =>
-      value !== null && value !== undefined && value !== '',
+    (value: unknown): boolean => value !== null && value !== undefined && value !== '',
     []
   );
 
@@ -31,7 +30,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
         if ((result === null || result === undefined || result === '') && !hasValue(value)) {
           return placeholder;
         }
-        return result;
+        return result ?? placeholder;
       }
 
       return hasValue(value) ? children : placeholder;

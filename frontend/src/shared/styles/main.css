@@ -33,6 +33,22 @@
   --radius: 0.5rem;
   --color-popover: #ffffff;
   --color-popover-foreground: #1a2e38;
+  button[data-variant="default"] {
+    background-color: var(--color-fanini-blue);
+    color: white;
+  }
+
+  /* Outline button */
+  button[data-variant="outline"] {
+    border-color: var(--color-border);
+    color: var(--color-foreground);
+  }
+
+  button[data-variant="outline"]:hover {
+    background-color: var(--color-fanini-blue);
+    color: white;
+    border-color: var(--color-fanini-blue);
+  }
 }
 
 .dark {
@@ -71,4 +87,30 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+[data-slot="dialog-overlay"] {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+[data-slot="dialog-content"] {
+  background-color: var(--color-card);
+  border-color: var(--color-border);
+}
+
+/* Button Fixes für besseren Kontrast */
+[data-slot="button"][data-variant="default"] {
+  background-color: var(--color-fanini-blue);
+  color: white;
+}
+
+[data-slot="button"][data-variant="outline"] {
+  color: var(--color-fanini-blue);
+  border-color: var(--color-fanini-blue);
+}
+
+[data-slot="button"][data-variant="outline"]:hover {
+  background-color: var(--color-fanini-blue);
+  color: white;
 }

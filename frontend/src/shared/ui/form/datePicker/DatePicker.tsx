@@ -91,7 +91,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
       className={className}
       showReset={showReset}
       render={field => {
-        const dateValue = field.value ? new Date(field.value as string | Date) : undefined;
+        const dateValue =
+          field.value !== null && field.value !== undefined
+            ? new Date(field.value as string | Date)
+            : undefined;
         const hasValue = Boolean(field.value);
 
         return (
@@ -124,7 +127,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                         type="text"
                         placeholder={dateFormat}
                         value={inputValue || formattedValue}
-                        onChange={e => { handleInputChange(e.target.value, field.onChange); }}
+                        onChange={e => {
+                          handleInputChange(e.target.value, field.onChange);
+                        }}
                         onBlur={() => {
                           if (inputValue && !hasValue) {
                             setInputValue('');
@@ -138,7 +143,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                   <Calendar
                     mode="single"
                     selected={dateValue}
-                    onSelect={date => { handleCalendarSelect(date, field.onChange); }}
+                    onSelect={date => {
+                      handleCalendarSelect(date, field.onChange);
+                    }}
                     disabled={isDateDisabled}
                     autoFocus={!allowInput}
                   />
@@ -159,7 +166,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => { handleClear(); }}
+                onClick={() => {
+                  handleClear();
+                }}
                 aria-label="Datum löschen"
                 className="shrink-0"
               >

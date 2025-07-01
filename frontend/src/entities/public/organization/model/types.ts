@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // entities/public/organization/model/types.ts
-import { z } from 'zod';
+import { type z } from 'zod';
+
 import type {
   boardMemberSchema,
   boardMembersResponseSchema,

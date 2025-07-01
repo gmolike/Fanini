@@ -1,6 +1,6 @@
 // frontend/src/testing/mocks/setup.ts
-import { worker } from './browser';
 import { seedDevelopmentData } from './db/seeds';
+import { worker } from './browser';
 
 /**
  * Startet den Mock Service Worker

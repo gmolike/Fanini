@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { X } from 'lucide-react';
+import { RotateCcw, X } from 'lucide-react';
 
 import {
   Button,
@@ -55,6 +55,17 @@ import type { FieldValues } from 'react-hook-form';
  * />
  * ```
  */
+// Headline label component moved outside of main component
+type HeadlineLabelProps = {
+  headline: React.ReactNode;
+  required?: boolean | undefined;
+};
+
+const HeadlineLabel = ({ headline, required }: HeadlineLabelProps) => {
+  const labelProps = required !== undefined ? { required } : {};
+  return <ShadCnFormLabel {...labelProps}>{headline}</ShadCnFormLabel>;
+};
+
 const Component = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
@@ -87,14 +98,16 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
       render={({ field }) => (
         <ShadCnFormItem className={className}>
           <div className="flex items-center justify-between">
-            {headline ? <ShadCnFormLabel required={required}>{headline}</ShadCnFormLabel> : null}
+            {headline ? <HeadlineLabel headline={headline} required={required} /> : null}
             <div className="flex items-center gap-1">
-              {showClear && field.value ? (
+              {showClear && Boolean(field.value) ? (
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  onClick={() => { handleClear(); }}
+                  onClick={() => {
+                    handleClear();
+                  }}
                   className="size-6"
                   aria-label="Clear selection"
                 >

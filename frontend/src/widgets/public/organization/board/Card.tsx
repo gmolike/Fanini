@@ -1,7 +1,9 @@
 // widgets/public/organization/board/Card.tsx
-import { Mail, Calendar } from 'lucide-react';
-import { Card as UICard, CardContent, CardHeader, Badge } from '@/shared/shadcn';
+import { Calendar,Mail } from 'lucide-react';
+
 import type { BoardMember } from '@/entities/public/organization';
+
+import { Badge,Card as UICard, CardContent, CardHeader } from '@/shared/shadcn';
 
 type CardProps = {
   member: BoardMember;
@@ -43,19 +45,15 @@ export const Card = ({ member, onSelect }: CardProps) => {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {member.description && (
-          <p className="line-clamp-2 text-sm text-[var(--color-muted-foreground)]">
+        {member.description ? <p className="line-clamp-2 text-sm text-[var(--color-muted-foreground)]">
             {member.description}
-          </p>
-        )}
+          </p> : null}
 
         <div className="space-y-2 text-sm">
-          {member.email && (
-            <div className="flex items-center gap-2">
+          {member.email ? <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-[var(--color-muted-foreground)]" />
               <span className="truncate">{member.email}</span>
-            </div>
-          )}
+            </div> : null}
 
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-[var(--color-muted-foreground)]" />

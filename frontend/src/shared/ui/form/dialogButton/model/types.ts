@@ -69,7 +69,7 @@ export type Props<TFieldValues extends FieldValues = FieldValues> = BaseFieldPro
       open: boolean;
       onOpenChange: (open: boolean) => void;
       value: unknown;
-      onChange: (value: any) => void;
+      onChange: (value: unknown) => void;
       name: string;
     }) => ReactNode;
 

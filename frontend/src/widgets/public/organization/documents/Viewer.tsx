@@ -1,10 +1,15 @@
 // widgets/public/organization/documents/Viewer.tsx
 import { useState } from 'react';
-import { FileText, Download, ExternalLink, Eye, Grid2X2, List as ListIcon } from 'lucide-react';
+
+import { Download, ExternalLink, Eye, Grid2X2, List as ListIcon } from 'lucide-react';
+
+import type { Document } from '@/entities/public/organization';
+
+import { cn } from '@/shared/lib';
 import {
-  Card,
-  Button,
   Badge,
+  Button,
+  Card,
   Dialog,
   DialogContent,
   DialogHeader,
@@ -13,8 +18,6 @@ import {
   ToggleGroupItem,
 } from '@/shared/shadcn';
 import { PdfViewer } from '@/shared/ui/document';
-import { cn } from '@/shared/lib';
-import type { Document } from '@/entities/public/organization';
 
 type ViewerProps = {
   documents: Document[];
@@ -31,7 +34,7 @@ export const Viewer = ({ documents, className }: ViewerProps) => {
   const [viewMode, setViewMode] = useState<'list' | 'inline'>('list');
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024) return `${String(bytes)} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
@@ -69,7 +72,9 @@ export const Viewer = ({ documents, className }: ViewerProps) => {
         <ToggleGroup
           type="single"
           value={viewMode}
-          onValueChange={v => v && setViewMode(v as 'list' | 'inline')}
+          onValueChange={v => {
+            if (v) setViewMode(v as 'list' | 'inline');
+          }}
         >
           <ToggleGroupItem value="list" aria-label="Listenansicht">
             <ListIcon className="mr-2 h-4 w-4" />
@@ -107,7 +112,9 @@ export const Viewer = ({ documents, className }: ViewerProps) => {
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => setSelectedDoc(doc)}
+                      onClick={() => {
+                        setSelectedDoc(doc);
+                      }}
                       className="bg-[var(--color-fanini-blue)] hover:bg-[var(--color-fanini-blue)]/90"
                     >
                       <Eye className="mr-2 h-4 w-4" />
@@ -139,25 +146,36 @@ export const Viewer = ({ documents, className }: ViewerProps) => {
                 <h3 className="text-lg font-semibold">{doc.title}</h3>
                 <Badge variant="secondary">{formatFileSize(doc.fileSize)}</Badge>
               </div>
-              <PdfViewer url={doc.fileUrl} title={doc.title} height="800px" />
+              <PdfViewer url={doc.fileUrl} title={doc.title} />
             </div>
           ))}
         </div>
       )}
 
-      {/* PDF Modal */}
-      <Dialog open={!!selectedDoc} onOpenChange={open => !open && setSelectedDoc(null)}>
-        <DialogContent className="h-[90vh] max-w-6xl p-0">
-          <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="flex items-center gap-2">
-              <span className="text-2xl">{selectedDoc && getDocumentIcon(selectedDoc.type)}</span>
+      {/* PDF Modal - Maximale Breite erhöhen */}
+      <Dialog
+        open={!!selectedDoc}
+        onOpenChange={open => {
+          if (!open) setSelectedDoc(null);
+        }}
+      >
+        <DialogContent
+          className="flex h-[90vh] w-full max-w-[95vw] flex-col overflow-hidden p-0 xl:max-w-[1400px]"
+          showCloseButton
+        >
+          <DialogHeader className="shrink-0 border-b px-6 pt-6 pb-4">
+            <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
+              <span className="text-2xl">
+                {selectedDoc ? getDocumentIcon(selectedDoc.type) : null}
+              </span>
               {selectedDoc?.title}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 p-6 pt-0">
-            {selectedDoc && (
-              <PdfViewer url={selectedDoc.fileUrl} title={selectedDoc.title} height="100%" />
-            )}
+
+          <div className="flex-1 overflow-hidden">
+            {selectedDoc ? (
+              <PdfViewer url={selectedDoc.fileUrl} title={selectedDoc.title} className="h-full" />
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>

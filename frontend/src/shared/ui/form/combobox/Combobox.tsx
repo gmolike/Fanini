@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { Check, ChevronsUpDown, Loader2, type  LucideIcon,X  } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2, X } from 'lucide-react';
 
 import { cn } from '@/shared/lib';
 import {
@@ -153,10 +153,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                         <span className="ml-2">{loadingText}</span>
                       </CommandEmpty>
                     )}
-                    {!loading && filteredOptions.length === 0 && (
+                    {loading === false && filteredOptions.length === 0 && (
                       <CommandEmpty>{emptyText}</CommandEmpty>
                     )}
-                    {!loading && filteredOptions.length > 0 && (
+                    {loading === false && filteredOptions.length > 0 && (
                       <CommandGroup>
                         {filteredOptions.map(option => {
                           const value = String(option.value);
@@ -167,7 +167,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                             <CommandItem
                               key={value}
                               value={value}
-                              onSelect={() => { handleSelect(option, field.onChange); }}
+                              onSelect={() => {
+                                handleSelect(option, field.onChange);
+                              }}
                               disabled={option.disabled ?? false}
                             >
                               <Check
@@ -203,7 +205,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                 type="button"
                 variant="outline"
                 size="icon"
-                onClick={() => { handleClear(); }}
+                onClick={() => {
+                  handleClear();
+                }}
                 aria-label="Auswahl löschen"
                 className="shrink-0"
               >

@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { type  FieldValues,useWatch  } from 'react-hook-form';
+import { type FieldValues, useWatch } from 'react-hook-form';
 
 import { cn } from '@/shared/lib';
 import { FormDescription, FormLabel } from '@/shared/shadcn';
@@ -44,11 +44,12 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
 }: Props<TFieldValues>) => {
   // Watch start date to use as min for end date
   const startDate = useWatch({ control, name: startName });
-  const startDateObj = startDate ? new Date(startDate) : undefined;
+  const startDateObj =
+    startDate !== null && startDate !== undefined ? new Date(startDate) : undefined;
 
   // Watch end date to use as max for start date
   const endDate = useWatch({ control, name: endName });
-  const endDateObj = endDate ? new Date(endDate) : undefined;
+  const endDateObj = endDate !== null && endDate !== undefined ? new Date(endDate) : undefined;
 
   return (
     <div className={cn('space-y-3', className)}>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { type  FieldPath,type  FieldValues,type  PathValue,useWatch  } from 'react-hook-form';
+import { type FieldPath, type FieldValues, type PathValue, useWatch } from 'react-hook-form';
 
 import { format, isValid, parse, parseISO } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -38,7 +38,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
 
   const formatDate = useCallback(
     (date: Date | string | null | undefined): string => {
-      if (!date) return '';
+      if (date === null || date === undefined) return '';
 
       try {
         const dateObj = typeof date === 'string' ? parseISO(date) : date;
@@ -53,7 +53,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   const formattedValue = formatDate(value);
 
   const isDateDisabled = useCallback(
-    (date: Date) => Boolean((min && date < min) || (max && date > max)),
+    (date: Date) => Boolean((min && date < min) ?? (max && date > max)),
     [min, max]
   );
 

@@ -1,7 +1,17 @@
 // widgets/public/organization/board/DetailModal.tsx
-import { Mail, Phone, Calendar, User, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, Badge, Button } from '@/shared/shadcn';
+import { Calendar, Mail, Phone, User, X } from 'lucide-react';
+
 import type { BoardMember } from '@/entities/public/organization';
+
+import {
+  Badge,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogOverlay,
+  DialogTitle,
+} from '@/shared/shadcn';
 
 type DetailModalProps = {
   member: BoardMember | null;
@@ -20,6 +30,7 @@ export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
+      <DialogOverlay className="fixed inset-0 bg-white dark:bg-gray-900" />
       <DialogContent className="max-w-2xl">
         <DialogHeader className="pb-0">
           <div className="flex items-start justify-between">
@@ -51,9 +62,9 @@ export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
               <Badge className="mt-2 bg-[var(--color-fanini-blue)] text-white">
                 {member.roleLabel}
               </Badge>
-              {member.description && (
+              {member.description ? (
                 <p className="mt-3 text-[var(--color-muted-foreground)]">{member.description}</p>
-              )}
+              ) : null}
             </div>
           </div>
 
@@ -61,7 +72,7 @@ export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
           <div className="space-y-3 border-t pt-6">
             <h3 className="mb-3 font-semibold">Kontaktinformationen</h3>
 
-            {member.email && (
+            {member.email ? (
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-muted)]">
                   <Mail className="h-4 w-4 text-[var(--color-muted-foreground)]" />
@@ -73,9 +84,9 @@ export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
                   {member.email}
                 </a>
               </div>
-            )}
+            ) : null}
 
-            {member.phone && (
+            {member.phone ? (
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-muted)]">
                   <Phone className="h-4 w-4 text-[var(--color-muted-foreground)]" />
@@ -87,7 +98,7 @@ export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
                   {member.phone}
                 </a>
               </div>
-            )}
+            ) : null}
 
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-muted)]">

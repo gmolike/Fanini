@@ -25,7 +25,7 @@ export const boardMemberSchema = z.object({
   order: z.number(),
 });
 
-export const organizationNodeSchema = z.object({
+export const organizationNodeSchema: z.ZodType = z.object({
   id: z.string(),
   name: z.string(),
   type: z.enum(['board', 'advisory', 'team', 'audit']),

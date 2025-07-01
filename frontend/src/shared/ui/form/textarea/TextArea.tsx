@@ -1,4 +1,4 @@
-import { memo, useEffect,useRef } from 'react';
+import { memo, useEffect, useRef } from 'react';
 
 import { cn } from '@/shared/lib';
 import { Textarea as ShadcnTextarea } from '@/shared/shadcn';
@@ -88,10 +88,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
       const minHeight = minRows * lineHeight;
       const maxHeight = maxRows * lineHeight;
 
-      const {scrollHeight} = textarea;
+      const { scrollHeight } = textarea;
       const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
 
-      textarea.style.height = `${newHeight}px`;
+      textarea.style.height = `${String(newHeight)}px`;
     }
   }, [autoResize, minRows, maxRows]);
 
@@ -134,10 +134,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                 const minHeight = minRows * lineHeight;
                 const maxHeight = maxRows * lineHeight;
 
-                const {scrollHeight} = textarea;
+                const { scrollHeight } = textarea;
                 const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
 
-                textarea.style.height = `${newHeight}px`;
+                textarea.style.height = `${String(newHeight)}px`;
               }
             }}
           />

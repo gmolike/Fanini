@@ -103,6 +103,7 @@
     "@mswjs/data": "^0.16.2",
     "@tanstack/router-devtools": "^1.91.4",
     "@tanstack/router-plugin": "^1.122.0",
+    "@types/d3": "^7.4.3",
     "@types/node": "^24.0.7",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.1",

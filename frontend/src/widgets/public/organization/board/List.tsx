@@ -1,6 +1,8 @@
 // widgets/public/organization/board/List.tsx
 import { useState } from 'react';
+
 import type { BoardMember } from '@/entities/public/organization';
+
 import { Card } from './Card';
 import { DetailModal } from './DetailModal';
 
@@ -26,7 +28,7 @@ export const List = ({ members }: ListProps) => {
       <DetailModal
         member={selectedMember}
         open={!!selectedMember}
-        onClose={() => setSelectedMember(null)}
+        onClose={() => { setSelectedMember(null); }}
       />
     </>
   );

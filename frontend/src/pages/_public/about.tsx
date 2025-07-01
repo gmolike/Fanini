@@ -1,17 +1,23 @@
 // pages/_public/about.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { FileText, Users, Building, ScrollText } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/shadcn';
-import { Container } from '@/shared/ui/layout';
-import { LoadingState } from '@/shared/ui/feedback';
+import { Building, FileText, ScrollText, Users } from 'lucide-react';
+
 import {
+  Chart as OrgChart,
+  List as BoardList,
+  Viewer as DocsViewer,
+} from '@/widgets/public/organization';
+
+import {
+  type OrganizationNode,
   useBoardMembers,
-  useOrganizationStructure,
   useOrganizationDocuments,
+  useOrganizationStructure,
 } from '@/entities/public/organization';
-import { List as BoardList } from '@/widgets/public/organization/board';
-import { Chart as OrgChart } from '@/widgets/public/organization/structure';
-import { Viewer as DocsViewer } from '@/widgets/public/organization/documents';
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/shadcn';
+import { LoadingState } from '@/shared/ui/feedback';
+import { Container } from '@/shared/ui/layout';
 
 export const Route = createFileRoute('/_public/about')({
   component: AboutPage,
@@ -30,7 +36,7 @@ function AboutPage() {
           Über die Faninitiative Spandau
         </h1>
         <p className="max-w-3xl text-lg text-[var(--color-muted-foreground)]">
-          Seit 2022 vereinen wir die Fans der Eintracht Spandau.
+          Seit 2025 vereinen wir die Fans der Eintracht Spandau.
         </p>
       </div>
 
@@ -58,7 +64,7 @@ function AboutPage() {
         <TabsContent value="structure">
           <h2 className="mb-6 text-2xl font-semibold">Organisationsstruktur</h2>
           <LoadingState query={structureQuery}>
-            {response => <OrgChart data={response.data} />}
+            {response => <OrgChart data={response.data as OrganizationNode[]} />}
           </LoadingState>
         </TabsContent>
 

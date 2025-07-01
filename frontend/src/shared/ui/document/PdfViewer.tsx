@@ -1,14 +1,15 @@
 // shared/ui/document/PdfViewer.tsx
 import { useState } from 'react';
+
 import { Download, ExternalLink, FileText, Loader2, X } from 'lucide-react';
-import { Button, Card } from '@/shared/shadcn';
+
 import { cn } from '@/shared/lib';
+import { Button } from '@/shared/shadcn';
 
 type PdfViewerProps = {
   url: string;
   title: string;
   className?: string;
-  height?: string;
 };
 
 /**
@@ -18,7 +19,7 @@ type PdfViewerProps = {
  * @param className - Zusätzliche CSS-Klassen
  * @param height - Höhe des Viewers (Standard: 600px)
  */
-export const PdfViewer = ({ url, title, className, height = '600px' }: PdfViewerProps) => {
+export const PdfViewer = ({ url, title, className }: PdfViewerProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -40,46 +41,38 @@ export const PdfViewer = ({ url, title, className, height = '600px' }: PdfViewer
   };
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
-      <div className="flex items-center justify-between border-b bg-[var(--color-muted)] p-4">
+    <div className={cn('flex h-full flex-col', className)}>
+      {/* Header mit Aktionen */}
+      <div className="flex shrink-0 items-center justify-between border-b bg-[var(--color-muted)] px-4 py-3">
         <div className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-[var(--color-fanini-blue)]" />
-          <h3 className="font-medium">{title}</h3>
+          <h3 className="text-sm font-medium">{title}</h3>
         </div>
         <div className="flex gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleDownload}
-            className="transition-colors hover:bg-[var(--color-fanini-blue)] hover:text-white"
-          >
-            <Download className="mr-2 h-4 w-4" />
-            Download
+          <Button size="sm" variant="outline" onClick={handleDownload}>
+            <Download className="h-4 w-4" />
+            <span className="ml-2 hidden sm:inline">Download</span>
           </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            asChild
-            className="transition-colors hover:bg-[var(--color-fanini-blue)] hover:text-white"
-          >
+          <Button size="sm" variant="outline" asChild>
             <a href={url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Neuer Tab
+              <ExternalLink className="h-4 w-4" />
+              <span className="ml-2 hidden sm:inline">Neuer Tab</span>
             </a>
           </Button>
         </div>
       </div>
 
-      <div className="relative bg-gray-50" style={{ height }}>
-        {loading && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-muted)]">
+      {/* PDF Container */}
+      <div className="relative flex-1 bg-gray-100 dark:bg-gray-800">
+        {loading && !error ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
             <Loader2 className="mb-4 h-8 w-8 animate-spin text-[var(--color-muted-foreground)]" />
             <p className="text-sm text-[var(--color-muted-foreground)]">PDF wird geladen...</p>
           </div>
-        )}
+        ) : null}
 
-        {error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-muted)]">
+        {error ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
             <X className="mb-4 h-8 w-8 text-[var(--color-destructive)]" />
             <p className="mb-4 text-sm text-[var(--color-muted-foreground)]">
               PDF konnte nicht geladen werden.
@@ -89,10 +82,10 @@ export const PdfViewer = ({ url, title, className, height = '600px' }: PdfViewer
               Stattdessen herunterladen
             </Button>
           </div>
-        )}
+        ) : null}
 
         <iframe
-          src={`${url}#toolbar=0&navpanes=0&scrollbar=0`}
+          src={`${url}#view=FitH&toolbar=0`}
           className="h-full w-full border-0"
           onLoad={handleLoad}
           onError={handleError}
@@ -100,6 +93,6 @@ export const PdfViewer = ({ url, title, className, height = '600px' }: PdfViewer
           style={{ display: error ? 'none' : 'block' }}
         />
       </div>
-    </Card>
+    </div>
   );
 };

@@ -29,6 +29,7 @@ export type ControllerResult<TFieldValues extends FieldValues = FieldValues> = {
   errorProps: {
     id: string;
     role: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'aria-live': 'polite';
   };
 };

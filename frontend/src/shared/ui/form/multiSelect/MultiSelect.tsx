@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { Check, ChevronsUpDown, type  LucideIcon,X  } from 'lucide-react';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 
 import { cn } from '@/shared/lib';
 import {
@@ -96,7 +96,6 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
               <Button
                 {...ariaProps}
                 variant="outline"
-                role="combobox"
                 className={cn(
                   'w-full justify-between font-normal',
                   selectedOptions.length === 0 && 'text-muted-foreground'
@@ -107,9 +106,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
               >
                 <span className="truncate">
                   {selectedOptions.length > 0
-                    ? `${selectedOptions.length} ausgewählt`
+                    ? `${String(selectedOptions.length)} ausgewählt`
                     : placeholder}
-                  {showCount && max !== undefined ? ` (max. ${max})` : ''}
+                  {showCount && max !== undefined ? ` (max. ${String(max)})` : ''}
                 </span>
                 <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
               </Button>
@@ -128,7 +127,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                           return (
                             <CommandItem
                               key={String(option.value)}
-                              onSelect={() => { toggleOption(option); }}
+                              onSelect={() => {
+                                toggleOption(option);
+                              }}
                             >
                               <Check className="mr-2 size-4 opacity-100" />
                               {Icon ? <Icon className="mr-2 size-4" /> : null}
@@ -147,8 +148,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                       return (
                         <CommandItem
                           key={String(option.value)}
-                          onSelect={() => { toggleOption(option); }}
-                          disabled={option.disabled || !canAddMore}
+                          onSelect={() => {
+                            toggleOption(option);
+                          }}
+                          disabled={option.disabled ?? !canAddMore}
                         >
                           <Check className="mr-2 size-4 opacity-0" />
                           {Icon ? <Icon className="mr-2 size-4" /> : null}
@@ -172,7 +175,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                     <span>{option.label}</span>
                     <button
                       type="button"
-                      onClick={() => { removeOption(option); }}
+                      onClick={() => {
+                        removeOption(option);
+                      }}
                       className="ring-offset-background hover:bg-secondary focus:ring-ring ml-1 rounded-full transition-colors outline-none focus:ring-2 focus:ring-offset-2"
                       aria-label={`Remove ${option.label}`}
                     >

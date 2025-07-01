@@ -1,20 +1,21 @@
-// widgets/public/organization/structure/Chart.tsx
 import { useEffect, useRef, useState } from 'react';
+
 import * as d3 from 'd3';
-import { Card, Badge } from '@/shared/shadcn';
-import { cn } from '@/shared/lib';
+
 import type { OrganizationNode } from '@/entities/public/organization';
+
+import { cn } from '@/shared/lib';
+import { Badge, Button, Card } from '@/shared/shadcn';
 
 type ChartProps = {
   data: OrganizationNode;
   className?: string;
 };
 
-/**
- * Interaktives Organigramm zur Darstellung der Vereinsstruktur
- * @param data - Hierarchische Struktur
- * @param className - CSS-Klassen
- */
+// D3 Type Definitionen
+type D3Node = d3.HierarchyNode<OrganizationNode>;
+type D3PointNode = d3.HierarchyPointNode<OrganizationNode>;
+
 export const Chart = ({ data, className }: ChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedNode, setSelectedNode] = useState<OrganizationNode | null>(null);
@@ -38,12 +39,12 @@ export const Chart = ({ data, className }: ChartProps) => {
     // Create container for zoom
     const g = svg.append('g');
 
-    // Add zoom behavior
+    // Add zoom behavior mit korrekten Typen
     const zoom = d3
       .zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 2])
-      .on('zoom', event => {
-        g.attr('transform', event.transform);
+      .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+        g.attr('transform', event.transform.toString());
       });
 
     svg.call(zoom);
@@ -55,7 +56,7 @@ export const Chart = ({ data, className }: ChartProps) => {
       .size([width - 200, height - 150])
       .nodeSize([nodeWidth + 40, nodeHeight + 60]);
 
-    treeLayout(root);
+    const treeData = treeLayout(root);
 
     // Create gradient definitions
     const defs = svg.append('defs');
@@ -82,18 +83,20 @@ export const Chart = ({ data, className }: ChartProps) => {
       .style('stop-opacity', 0.8);
 
     // Create links with animation
-    const links = g
-      .selectAll('.link')
-      .data(root.links())
+    g.selectAll('.link')
+      .data(treeData.links())
       .enter()
       .append('path')
       .attr('class', 'link')
       .attr(
         'd',
         d3
-          .linkVertical()
-          .x((d: any) => d.x + width / 2)
-          .y((d: any) => d.y + 50)
+          .linkVertical<
+            d3.HierarchyPointLink<OrganizationNode>,
+            d3.HierarchyPointNode<OrganizationNode>
+          >()
+          .x((d: D3PointNode) => d.x + width / 2)
+          .y((d: D3PointNode) => d.y + 50)
       )
       .style('fill', 'none')
       .style('stroke', 'var(--color-border)')
@@ -107,11 +110,11 @@ export const Chart = ({ data, className }: ChartProps) => {
     // Create node groups
     const nodes = g
       .selectAll('.node')
-      .data(root.descendants())
+      .data(treeData.descendants())
       .enter()
       .append('g')
       .attr('class', 'node')
-      .attr('transform', (d: any) => `translate(${d.x + width / 2 - nodeWidth / 2},${d.y})`)
+      .attr('transform', (d: D3PointNode) => `translate(${d.x + width / 2 - nodeWidth / 2},${d.y})`)
       .style('opacity', 0);
 
     // Add shadows
@@ -137,7 +140,7 @@ export const Chart = ({ data, className }: ChartProps) => {
       .attr('width', nodeWidth)
       .attr('height', nodeHeight)
       .attr('rx', 8)
-      .style('fill', (d: any) => {
+      .style('fill', (d: D3PointNode) => {
         switch (d.data.type) {
           case 'board':
             return 'url(#board-gradient)';
@@ -151,7 +154,7 @@ export const Chart = ({ data, className }: ChartProps) => {
       })
       .style('filter', 'url(#shadow)')
       .style('cursor', 'pointer')
-      .on('click', (event, d: any) => {
+      .on('click', (event: MouseEvent, d: D3PointNode) => {
         event.stopPropagation();
         setSelectedNode(d.data);
       })
@@ -181,11 +184,11 @@ export const Chart = ({ data, className }: ChartProps) => {
       .style('font-weight', 'bold')
       .style('font-size', '14px')
       .style('pointer-events', 'none')
-      .text((d: any) => d.data.name);
+      .text((d: D3PointNode) => d.data.name);
 
     // Add level/description text
     nodes
-      .filter((d: any) => d.data.description || d.data.level !== undefined)
+      .filter((d: D3PointNode) => Boolean(d.data.description) || d.data.level !== undefined)
       .append('text')
       .attr('x', nodeWidth / 2)
       .attr('y', nodeHeight / 2 + 10)
@@ -194,17 +197,19 @@ export const Chart = ({ data, className }: ChartProps) => {
       .style('font-size', '12px')
       .style('opacity', 0.8)
       .style('pointer-events', 'none')
-      .text((d: any) => d.data.description || `Ebene ${d.data.level + 1}`);
+      .text((d: D3PointNode) => d.data.description ?? `Ebene ${d.data.level + 1}`);
 
     // Animate nodes appearing
     nodes
       .transition()
       .duration(500)
-      .delay((d: any) => d.depth * 100)
+      .delay((d: D3PointNode) => d.depth * 100)
       .style('opacity', 1);
 
     // Click outside to deselect
-    svg.on('click', () => setSelectedNode(null));
+    svg.on('click', () => {
+      setSelectedNode(null);
+    });
   }, [data]);
 
   return (
@@ -249,7 +254,7 @@ export const Chart = ({ data, className }: ChartProps) => {
         </div>
 
         {/* Selected Node Details */}
-        {selectedNode && (
+        {selectedNode ? (
           <div className="animate-in slide-in-from-bottom-2 rounded-lg bg-[var(--color-muted)] p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -262,28 +267,34 @@ export const Chart = ({ data, className }: ChartProps) => {
                     {selectedNode.type === 'team' && 'Team'}
                   </Badge>
                 </h4>
-                {selectedNode.description && (
+                {selectedNode.description ? (
                   <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
                     {selectedNode.description}
                   </p>
-                )}
+                ) : null}
                 {selectedNode.level !== undefined && (
                   <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
                     Hierarchieebene: {selectedNode.level + 1}
                   </p>
                 )}
-                {selectedNode.members && selectedNode.members.length > 0 && (
+                {selectedNode.members && selectedNode.members.length > 0 ? (
                   <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
                     {selectedNode.members.length} Mitglieder
                   </p>
-                )}
+                ) : null}
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedNode(null)}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setSelectedNode(null);
+                }}
+              >
                 Schließen
               </Button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </Card>
   );

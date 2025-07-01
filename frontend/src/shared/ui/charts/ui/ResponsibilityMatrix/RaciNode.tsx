@@ -11,7 +11,10 @@ import type { RACINodeData, RACIRole } from '../../types';
 /**
  * RACI-Matrix Knoten zur Darstellung von Verantwortlichkeiten
  */
-export const RACINode = memo<NodeProps<RACINodeData>>(({ data, selected = false }) => {
+export const RACINode = memo<NodeProps>(({ data, selected = false }) => {
+  // Explizite Typisierung
+  const nodeData = data as RACINodeData;
+
   const getRoleConfig = (role: RACIRole) => {
     const configs = {
       Responsible: {
@@ -38,7 +41,7 @@ export const RACINode = memo<NodeProps<RACINodeData>>(({ data, selected = false 
     return configs[role];
   };
 
-  const sortedAssignments = Array.from(data.assignments.entries()).sort(([, a], [, b]) => {
+  const sortedAssignments = Array.from(nodeData.assignments.entries()).sort(([, a], [, b]) => {
     const order: RACIRole[] = ['Accountable', 'Responsible', 'Consulted', 'Informed'];
     return order.indexOf(a) - order.indexOf(b);
   });
@@ -47,11 +50,11 @@ export const RACINode = memo<NodeProps<RACINodeData>>(({ data, selected = false 
     <Card
       className={cn(
         'min-w-[320px] transition-all duration-200',
-        selected === true ? 'ring-primary shadow-lg ring-2' : ''
+        selected && 'ring-primary shadow-lg ring-2'
       )}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-base">{data.taskName}</CardTitle>
+        <CardTitle className="text-base">{nodeData.taskName}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         {sortedAssignments.map(([person, role]) => {
@@ -75,3 +78,6 @@ export const RACINode = memo<NodeProps<RACINodeData>>(({ data, selected = false 
 });
 
 RACINode.displayName = 'RACINode';
+
+// Export der RACILegend aus separater Datei
+export { RACILegend } from './RaciLegend';

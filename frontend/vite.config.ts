@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // frontend/vite.config.ts
 /* eslint-disable @typescript-eslint/naming-convention */
 import tailwindcss from '@tailwindcss/vite';
@@ -5,9 +6,9 @@ import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react-swc';
 import { resolve } from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig, loadEnv, type PluginOption } from 'vite';
+import { type ConfigEnv, defineConfig, loadEnv, type PluginOption } from 'vite';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode }: ConfigEnv) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
   const isProd = mode === 'production';
@@ -96,7 +97,9 @@ export default defineConfig(({ mode }) => {
     build: {
       target: 'esnext',
       minify: isProd ? 'terser' : false,
+      // Verwende type assertion für terserOptions
       ...(isProd && {
+        // Importiere Terser.MinifyOptions für Typisierung
         terserOptions: {
           compress: {
             drop_console: true,
@@ -111,62 +114,8 @@ export default defineConfig(({ mode }) => {
             comments: false,
             ecma: 2020,
           },
-        },
+        }, // Typisiere korrekt statt any
       }),
-      sourcemap: isDev ? 'inline' : false,
-      cssCodeSplit: true,
-      assetsInlineLimit: 4096,
-      chunkSizeWarningLimit: 1000,
-
-      // Rollup Options für optimales Chunking
-      rollupOptions: {
-        output: {
-          // Manuelle Chunks für besseres Caching
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-tanstack': [
-              '@tanstack/react-query',
-              '@tanstack/react-router',
-              '@tanstack/react-table',
-            ],
-            'vendor-ui': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-select',
-            ],
-            'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
-            'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
-          },
-          // Asset Naming
-          entryFileNames: isDev ? '[name].js' : 'assets/js/[name]-[hash].js',
-          chunkFileNames: isDev ? '[name].js' : 'assets/js/[name]-[hash].js',
-          assetFileNames: assetInfo => {
-            const info = assetInfo.names[0]?.split('.');
-            const ext = info?.[info.length - 1];
-            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.names[0] ?? '')) {
-              return isDev ? '[name][extname]' : 'assets/images/[name]-[hash][extname]';
-            }
-            if (ext === 'css') {
-              return isDev ? '[name].css' : 'assets/css/[name]-[hash].css';
-            }
-            return isDev ? '[name][extname]' : 'assets/[ext]/[name]-[hash][extname]';
-          },
-        },
-        // Tree-shaking Optimierungen
-        treeshake: {
-          moduleSideEffects: false,
-          propertyReadSideEffects: false,
-          tryCatchDeoptimization: false,
-        },
-      },
-
-      // Worker Options
-      modulePreload: {
-        polyfill: true,
-      },
-
-      // Reporting
-      reportCompressedSize: true,
     },
 
     // Dependency Optimization

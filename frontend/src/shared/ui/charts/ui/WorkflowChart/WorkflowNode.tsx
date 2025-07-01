@@ -21,8 +21,11 @@ import type { ChecklistItem, WorkflowNodeData } from '../../types';
 /**
  * Workflow-Knoten mit Status, Checklisten und Kommentaren
  */
-export const WorkflowNode = memo<NodeProps<WorkflowNodeData>>(({ data, selected = false }) => {
+export const WorkflowNode = memo<NodeProps>(({ data, selected = false }) => {
   const [showChecklist, setShowChecklist] = useState(false);
+
+  // Explizite Typisierung
+  const nodeData = data as WorkflowNodeData;
 
   const getNodeConfig = () => {
     const configs = {
@@ -47,26 +50,27 @@ export const WorkflowNode = memo<NodeProps<WorkflowNodeData>>(({ data, selected 
         color: 'bg-gray-100 border-gray-300 text-gray-800',
       },
     };
-    return configs[data.type];
+    return configs[nodeData.type];
   };
 
   const getStatusIcon = () => {
     const icons = {
       pending: null,
+
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'in-progress': <Loader2 className="h-4 w-4 animate-spin" />,
       completed: <CheckCircle2 className="h-4 w-4 text-green-600" />,
       blocked: <XCircle className="h-4 w-4 text-red-600" />,
     };
-    return icons[data.status];
+    return icons[nodeData.status];
   };
 
   const config = getNodeConfig();
   const Icon = config.icon;
   const StatusIcon = getStatusIcon();
 
-  const completedChecklist = data.checklist?.filter(item => item.completed).length ?? 0;
-  const totalChecklist = data.checklist?.length ?? 0;
+  const completedChecklist = nodeData.checklist?.filter(item => item.completed).length ?? 0;
+  const totalChecklist = nodeData.checklist?.length ?? 0;
 
   return (
     <div
@@ -76,28 +80,28 @@ export const WorkflowNode = memo<NodeProps<WorkflowNodeData>>(({ data, selected 
         config.shape,
         config.color,
         selected && 'border-primary scale-105 shadow-lg',
-        data.type === 'decision' && 'transform-gpu'
+        nodeData.type === 'decision' && 'transform-gpu'
       )}
     >
       <Handle
         type="target"
         position={Position.Top}
-        className={cn('h-3 w-3', data.type === 'decision' && '-rotate-45')}
+        className={cn('h-3 w-3', nodeData.type === 'decision' && '-rotate-45')}
       />
 
-      <div className={cn('space-y-2', data.type === 'decision' && '-rotate-45')}>
+      <div className={cn('space-y-2', nodeData.type === 'decision' && '-rotate-45')}>
         <div className="flex items-start justify-between">
           <Icon className="h-5 w-5" />
           {StatusIcon}
         </div>
 
         <div>
-          <h3 className="font-semibold">{data.label}</h3>
-          {data.assignee ? <p className="text-sm opacity-75">→ {data.assignee}</p> : null}
+          <h3 className="font-semibold">{nodeData.label}</h3>
+          {nodeData.assignee ? <p className="text-sm opacity-75">→ {nodeData.assignee}</p> : null}
         </div>
 
         <div className="mt-2 flex gap-2">
-          {data.checklist && data.checklist.length > 0 ? (
+          {nodeData.checklist && nodeData.checklist.length > 0 ? (
             <Popover open={showChecklist} onOpenChange={setShowChecklist}>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
@@ -106,15 +110,15 @@ export const WorkflowNode = memo<NodeProps<WorkflowNodeData>>(({ data, selected 
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-64">
-                <ChecklistPanel items={data.checklist} />
+                <ChecklistPanel items={nodeData.checklist} />
               </PopoverContent>
             </Popover>
           ) : null}
 
-          {data.comments && data.comments.length > 0 ? (
+          {nodeData.comments && nodeData.comments.length > 0 ? (
             <Badge variant="secondary" className="text-xs">
               <MessageSquare className="mr-1 h-3 w-3" />
-              {data.comments.length}
+              {nodeData.comments.length}
             </Badge>
           ) : null}
         </div>
@@ -123,7 +127,7 @@ export const WorkflowNode = memo<NodeProps<WorkflowNodeData>>(({ data, selected 
       <Handle
         type="source"
         position={Position.Bottom}
-        className={cn('h-3 w-3', data.type === 'decision' && '-rotate-45')}
+        className={cn('h-3 w-3', nodeData.type === 'decision' && '-rotate-45')}
       />
     </div>
   );

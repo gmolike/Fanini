@@ -27,4 +27,27 @@ export const overridesConfig = [
       'boundaries/entry-point': 'off',
     },
   },
+  {
+    files: ['**/shared/ui/charts/**/*.{ts,tsx}'],
+    rules: {
+      // React Flow hat nicht perfekte Types, daher lockern
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      // Naming convention exception für 'in-progress'
+      '@typescript-eslint/naming-convention': [
+        'error',
+        {
+          selector: 'objectLiteralProperty',
+          format: null,
+          filter: {
+            regex: '^(in-progress|[a-zA-Z][a-zA-Z0-9]*)$',
+            match: true,
+          },
+        },
+      ],
+    },
+  },
 ];

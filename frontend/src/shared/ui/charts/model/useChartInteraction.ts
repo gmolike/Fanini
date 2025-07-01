@@ -8,9 +8,11 @@ import type { BaseNodeData } from '../types';
 /**
  * Hook für Chart-Interaktionen mit Undo/Redo Support
  */
-export const useChartInteraction = <T extends BaseNodeData>() => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<T>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+export const useChartInteraction = <T extends BaseNodeData = BaseNodeData>() => {
+  // Wichtig: useNodesState erwartet Node<T>[], nicht T[]
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<T>>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-arguments
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { screenToFlowPosition } = useReactFlow();
 
   const historyRef = useRef<{
@@ -102,8 +104,8 @@ export const useChartInteraction = <T extends BaseNodeData>() => {
     (nodeId: string) => {
       saveToHistory();
 
-      setNodes((nds: Node<T>[]) => nds.filter(node => node.id !== nodeId));
-      setEdges((eds: Edge[]) => eds.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
+      setNodes(nds => nds.filter(node => node.id !== nodeId));
+      setEdges(eds => eds.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
     },
     [saveToHistory, setNodes, setEdges]
   );

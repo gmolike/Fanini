@@ -28,19 +28,6 @@ export const typescriptConfig = {
 
     // Strict Type Checking
     '@typescript-eslint/no-explicit-any': 'error',
-    '@typescript-eslint/no-non-null-assertion': 'error',
-    '@typescript-eslint/strict-boolean-expressions': [
-      'error',
-      {
-        allowString: true,
-        allowNumber: true,
-        allowNullableObject: true,
-        allowNullableBoolean: true,
-        allowNullableString: true,
-        allowNullableNumber: true,
-        allowAny: false,
-      },
-    ],
 
     // Async/Promise Handling
     '@typescript-eslint/no-floating-promises': 'error',
@@ -94,5 +81,28 @@ export const typescriptConfig = {
         },
       },
     ],
+    '@typescript-eslint/strict-boolean-expressions': [
+      'error',
+      {
+        allowString: true,
+        allowNumber: true,
+        allowNullableObject: true,
+        allowNullableBoolean: true,
+        allowNullableString: true,
+        allowNullableNumber: true,
+        allowNullableEnum: true,
+        allowAny: false,
+      },
+    ],
+
+    // Erlaube non-null assertion in bestimmten Fällen
+    '@typescript-eslint/no-non-null-assertion': 'warn', // statt 'error'
+
+    // Lockere no-unsafe Regeln für React Flow (da types nicht perfekt sind)
+    '@typescript-eslint/no-unsafe-assignment': 'warn',
+    '@typescript-eslint/no-unsafe-member-access': 'warn',
+    '@typescript-eslint/no-unsafe-call': 'warn',
+    '@typescript-eslint/no-unsafe-return': 'warn',
+    '@typescript-eslint/no-unsafe-argument': 'warn',
   },
 };

@@ -1,189 +1,215 @@
-import { useEffect, useRef, useState } from 'react';
+// frontend/src/widgets/public/organization/structure/Chart.tsx
+import { useCallback, useMemo, useRef, useState } from 'react';
 
-import * as d3 from 'd3';
+import {
+  Background,
+  BackgroundVariant,
+  type Edge,
+  type Node,
+  ReactFlow,
+  type ReactFlowInstance,
+} from '@xyflow/react';
 
 import type { OrganizationNode } from '@/entities/public/organization';
 
 import { cn } from '@/shared/lib';
 import { Badge, Button, Card } from '@/shared/shadcn';
+import {
+  CompactToolbar,
+  exportChart,
+  getLayoutedElements,
+  type OrgChartNode,
+  OrgNode,
+  type OrgNodeData,
+} from '@/shared/ui/charts';
+
+import '@xyflow/react/dist/style.css';
 
 type ChartProps = {
   data: OrganizationNode;
   className?: string;
 };
 
-// Explizite D3 Types
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-interface D3HierarchyNode extends d3.HierarchyPointNode<OrganizationNode> {
-  x: number;
-  y: number;
-}
+// Node Types für React Flow
+const nodeTypes = {
+  org: OrgNode,
+};
+
+/**
+ * Konvertiert hierarchische Daten in React Flow Nodes und Edges
+ */
+const convertToFlowElements = (
+  node: OrganizationNode,
+  parentId: string | null = null,
+  level = 0
+): { nodes: OrgChartNode[]; edges: Edge[] } => {
+  const nodes: OrgChartNode[] = [];
+  const edges: Edge[] = [];
+
+  // Typsichere Konvertierung
+  const orgNode = node as {
+    name?: unknown;
+    description?: unknown;
+    type?: unknown;
+    members?: unknown;
+    children?: unknown;
+  };
+
+  // Node-ID generieren - sicherer Zugriff
+  const nodeName = typeof orgNode.name === 'string' ? orgNode.name : 'unnamed';
+  const nodeId = `node-${nodeName.replace(/\s+/g, '-').toLowerCase()}`;
+
+  // Type Mapping - prüfe welche Werte tatsächlich kommen
+  const getNodeType = (): 'board' | 'advisory' | 'audit' | 'team' => {
+    const typeValue = String(orgNode.type).toLowerCase();
+
+    // Mapping verschiedener möglicher Werte
+    if (typeValue.includes('vorstand') || typeValue === 'board') return 'board';
+    if (typeValue.includes('beirat') || typeValue === 'advisory') return 'advisory';
+    if (typeValue.includes('kassenprüf') || typeValue.includes('prüf') || typeValue === 'audit')
+      return 'audit';
+
+    return 'team';
+  };
+
+  // Node erstellen
+  const baseData = {
+    id: nodeId,
+    label: nodeName,
+    department: typeof orgNode.description === 'string' ? orgNode.description : nodeName,
+    level,
+    type: getNodeType(),
+  };
+
+  const memberCount =
+    Array.isArray(orgNode.members) && orgNode.members.length > 0
+      ? orgNode.members.length
+      : undefined;
+
+  const flowNode: OrgChartNode = {
+    id: nodeId,
+    type: 'org',
+    position: { x: 0, y: level * 200 }, // Mehr vertikaler Abstand
+    data: memberCount !== undefined ? { ...baseData, memberCount } : baseData,
+  };
+
+  nodes.push(flowNode);
+
+  // Edge zum Parent erstellen
+  if (parentId) {
+    edges.push({
+      id: `edge-${parentId}-${nodeId}`,
+      source: parentId,
+      target: nodeId,
+      type: 'smoothstep',
+    });
+  }
+
+  // Rekursiv Children verarbeiten
+  if (Boolean(orgNode.children) && Array.isArray(orgNode.children)) {
+    orgNode.children.forEach((child: OrganizationNode) => {
+      const childElements = convertToFlowElements(child, nodeId, level + 1);
+      nodes.push(...childElements.nodes);
+      edges.push(...childElements.edges);
+    });
+  }
+
+  return { nodes, edges };
+};
 
 /**
  * Interaktives Organigramm zur Darstellung der Vereinsstruktur
- * @param data - Hierarchische Struktur
- * @param className - CSS-Klassen
  */
 export const Chart = ({ data, className }: ChartProps) => {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [selectedNode, setSelectedNode] = useState<OrganizationNode | null>(null);
+  const [selectedNode, setSelectedNode] = useState<OrgNodeData | null>(null);
+  const reactFlowInstanceRef = useRef<ReactFlowInstance<Node<OrgNodeData>> | null>(null);
 
-  useEffect(() => {
-    if (!svgRef.current) return;
-
-    const width = 1200;
-    const height = 600;
-    const nodeWidth = 240;
-    const nodeHeight = 80;
-    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
-
-    // Clear previous chart
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
-
-    // Setup SVG
-    svg
-      .attr('width', '100%')
-      .attr('height', '100%')
-      .attr('viewBox', [0, 0, width, height].join(' '))
-      .attr('preserveAspectRatio', 'xMidYMid meet');
-
-    // Create container group
-    const g = svg
-      .append('g')
-      .attr('transform', `translate(${margin.left.toString()},${margin.top.toString()})`);
-
-    // Create hierarchy
-    const hierarchy = d3.hierarchy(data);
-
-    // Create tree layout
-    const treeLayout = d3
-      .tree<OrganizationNode>()
-      .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
-      .separation(() => 1.5);
-
-    // Generate the tree
-    const root = treeLayout(hierarchy) as D3HierarchyNode;
-
-    // Create link path generator
-    const linkPath = d3
-      .linkVertical<d3.HierarchyPointLink<OrganizationNode>, D3HierarchyNode>()
-      .x((d: D3HierarchyNode) => d.x)
-      .y((d: D3HierarchyNode) => d.y);
-
-    // Create links
-    g.selectAll<SVGPathElement, d3.HierarchyPointLink<OrganizationNode>>('.link')
-      .data(root.links())
-      .enter()
-      .append('path')
-      .attr('class', 'link')
-      .attr('d', linkPath)
-      .style('fill', 'none')
-      .style('stroke', 'var(--color-border)')
-      .style('stroke-width', 2);
-
-    // Create nodes
-    const nodeGroups = g
-      .selectAll<SVGGElement, D3HierarchyNode>('.node')
-      .data(root.descendants())
-      .enter()
-      .append('g')
-      .attr('class', 'node')
-      .attr('transform', (d: D3HierarchyNode) => `translate(${d.x.toString()},${d.y.toString()})`);
-
-    // Add rectangles for nodes
-    nodeGroups
-      .append('rect')
-      .attr('width', nodeWidth)
-      .attr('height', nodeHeight)
-      .attr('x', -nodeWidth / 2)
-      .attr('y', -nodeHeight / 2)
-      .attr('rx', 8)
-      .style('fill', (d: D3HierarchyNode) => {
-        switch (d.data.type) {
-          case 'board':
-            return 'var(--color-fanini-blue)';
-          case 'advisory':
-            return 'var(--color-fanini-red)';
-          case 'audit':
-            return 'var(--color-warning)';
-          default:
-            return 'var(--color-muted)';
-        }
-      })
-      .style('stroke', '#fff')
-      .style('stroke-width', 2)
-      .style('cursor', 'pointer')
-      .on('click', function (event: MouseEvent, d: D3HierarchyNode) {
-        event.stopPropagation();
-        setSelectedNode(d.data);
-      });
-
-    // Add main text
-    nodeGroups
-      .append('text')
-      .attr('dy', '-0.2em')
-      .attr('text-anchor', 'middle')
-      .style('fill', 'white')
-      .style('font-weight', 'bold')
-      .style('font-size', '14px')
-      .style('pointer-events', 'none')
-      .text((d: D3HierarchyNode) => d.data.name);
-
-    // Add level text
-    nodeGroups
-      .filter((d: D3HierarchyNode) => d.data.level !== undefined)
-      .append('text')
-      .attr('dy', '1.2em')
-      .attr('text-anchor', 'middle')
-      .style('fill', 'white')
-      .style('font-size', '12px')
-      .style('opacity', 0.8)
-      .style('pointer-events', 'none')
-      .text((d: D3HierarchyNode) => `Ebene ${(d.data.level + 1).toString()}`);
-
-    // Click outside to deselect
-    svg.on('click', () => {
-      setSelectedNode(null);
-    });
+  // Konvertiere Daten zu React Flow Format
+  const flowElements = useMemo(() => {
+    const { nodes, edges } = convertToFlowElements(data);
+    // Automatisches Layout anwenden
+    return getLayoutedElements(nodes, edges, 'TB');
   }, [data]);
+
+  // Node Click Handler
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    setSelectedNode(node.data as OrgNodeData);
+  }, []);
+
+  // Export Handler
+  const handleExport = useCallback(async (format: 'png' | 'svg' | 'pdf') => {
+    if (reactFlowInstanceRef.current) {
+      await exportChart(
+        reactFlowInstanceRef.current as unknown as ReactFlowInstance,
+        format,
+        'organigramm'
+      );
+    }
+  }, []);
+
+  // React Flow Init Handler
+  const onInit = useCallback((instance: ReactFlowInstance<Node<OrgNodeData>>) => {
+    reactFlowInstanceRef.current = instance;
+  }, []);
 
   return (
     <Card className={cn('overflow-hidden', className)}>
       <div className="space-y-4 p-6">
         {/* Legend */}
         <div className="flex items-center justify-between">
-          <h3 className="text-sm text-[var(--color-muted-foreground)]">
-            Klicke auf ein Element für mehr Details
+          <h3 className="text-muted-foreground text-sm">
+            Klicke auf ein Element für mehr Details • Scrolle zum Zoomen
           </h3>
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded bg-[var(--color-fanini-blue)]" />
+              <div className="h-4 w-4 rounded bg-gradient-to-b from-blue-500 to-blue-600" />
               <span>Vorstand</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded bg-[var(--color-fanini-red)]" />
+              <div className="h-4 w-4 rounded bg-gradient-to-b from-red-500 to-red-600" />
               <span>Beirat</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded bg-[var(--color-warning)]" />
+              <div className="h-4 w-4 rounded bg-gradient-to-b from-amber-500 to-amber-600" />
               <span>Prüfung</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="bg-muted h-4 w-4 rounded" />
+              <span>Team</span>
             </div>
           </div>
         </div>
 
-        {/* SVG Container */}
-        <div className="rounded-lg bg-[var(--color-muted)] p-4">
-          <svg ref={svgRef} className="w-full" style={{ height: '500px' }} />
+        {/* React Flow Container */}
+        <div className="bg-muted relative h-[500px] rounded-lg">
+          <ReactFlow<Node<OrgNodeData>>
+            nodes={flowElements.nodes}
+            edges={flowElements.edges}
+            nodeTypes={nodeTypes}
+            onNodeClick={onNodeClick}
+            fitView
+            fitViewOptions={{ padding: 0.2 }}
+            attributionPosition="bottom-left"
+            onInit={onInit}
+          >
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={16}
+              size={1}
+              color="var(--color-border)"
+              className="opacity-50"
+            />
+            <CompactToolbar onExport={handleExport} />
+          </ReactFlow>
         </div>
 
         {/* Selected Node Details */}
-        {selectedNode !== null && (
-          <div className="animate-in slide-in-from-bottom-2 rounded-lg bg-[var(--color-muted)] p-4">
+        {selectedNode ? (
+          <div className="animate-in slide-in-from-bottom-2 bg-muted rounded-lg p-4">
             <div className="flex items-start justify-between">
-              <div>
+              <div className="space-y-2">
                 <h4 className="flex items-center gap-2 text-lg font-semibold">
-                  {selectedNode.name}
+                  {selectedNode.label}
                   <Badge variant="secondary" className="text-xs">
                     {selectedNode.type === 'board' && 'Vorstand'}
                     {selectedNode.type === 'advisory' && 'Beirat'}
@@ -191,9 +217,15 @@ export const Chart = ({ data, className }: ChartProps) => {
                     {selectedNode.type === 'team' && 'Team'}
                   </Badge>
                 </h4>
-                {selectedNode.description !== undefined && (
-                  <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-                    {selectedNode.description}
+                {selectedNode.department && selectedNode.department !== selectedNode.label ? (
+                  <p className="text-muted-foreground text-sm">{selectedNode.department}</p>
+                ) : null}
+                <p className="text-muted-foreground text-sm">
+                  Hierarchieebene: {selectedNode.level + 1}
+                </p>
+                {selectedNode.memberCount !== undefined && selectedNode.memberCount > 0 && (
+                  <p className="text-muted-foreground text-sm">
+                    {selectedNode.memberCount} Mitglieder
                   </p>
                 )}
               </div>
@@ -208,7 +240,7 @@ export const Chart = ({ data, className }: ChartProps) => {
               </Button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </Card>
   );

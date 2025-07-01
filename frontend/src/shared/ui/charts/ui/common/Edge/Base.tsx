@@ -35,6 +35,11 @@ export const BaseEdge = memo<EdgeProps>(
       targetPosition,
     });
 
+    // Sichere Label-Extraktion
+    const label = data?.['label'];
+    // eslint-disable-next-line no-nested-ternary, sonarjs/no-nested-conditional, @typescript-eslint/no-base-to-string
+    const labelText = typeof label === 'string' ? label : label != null ? String(label) : undefined;
+
     return (
       <>
         <XyflowBaseEdge
@@ -43,7 +48,7 @@ export const BaseEdge = memo<EdgeProps>(
           markerEnd={markerEnd ?? ''}
           className={cn('stroke-2', selected ? 'stroke-primary' : 'stroke-muted-foreground')}
         />
-        {data?.['label'] !== undefined ? (
+        {labelText !== undefined ? (
           <EdgeLabelRenderer>
             <div
               style={{
@@ -56,7 +61,7 @@ export const BaseEdge = memo<EdgeProps>(
                 'pointer-events-all'
               )}
             >
-              {String(data['label'])}
+              {labelText}
             </div>
           </EdgeLabelRenderer>
         ) : null}

@@ -60,7 +60,52 @@ export const organizationHandlers = [
       type: 'board',
       level: 0,
       children: [
-        // ... rest bleibt gleich
+        {
+          id: 'vorstand',
+          name: 'Vorstand',
+          type: 'board',
+          level: 1,
+          description: 'Geschäftsführendes Organ',
+          children: [
+            {
+              id: 'geschaeftsfuehrung',
+              name: 'Geschäftsführender Vorstand',
+              type: 'board',
+              level: 2,
+              description: '1. und 2. Vorsitzende, Kassenwartin',
+            },
+            {
+              id: 'erweiterter-vorstand',
+              name: 'Erweiterter Vorstand',
+              type: 'board',
+              level: 2,
+              description: 'Schriftführung',
+            },
+          ],
+        },
+        {
+          id: 'beirat',
+          name: 'Beirat',
+          type: 'advisory',
+          level: 1,
+          description: 'Beratende und operative Funktionen',
+          children: [
+            {
+              id: 'beirat-members',
+              name: 'Beiratsmitglieder',
+              type: 'advisory',
+              level: 2,
+              description: 'Event, Medien, Technik, Mitglieder',
+            },
+          ],
+        },
+        {
+          id: 'kassenpruefung',
+          name: 'Kassenprüfung',
+          type: 'audit',
+          level: 1,
+          description: 'Unabhängige Finanzprüfung',
+        },
       ],
     };
 

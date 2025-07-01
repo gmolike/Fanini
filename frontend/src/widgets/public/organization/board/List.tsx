@@ -28,7 +28,9 @@ export const List = ({ members }: ListProps) => {
       <DetailModal
         member={selectedMember}
         open={!!selectedMember}
-        onClose={() => { setSelectedMember(null); }}
+        onClose={() => {
+          setSelectedMember(null);
+        }}
       />
     </>
   );

@@ -12,138 +12,97 @@ type ChartProps = {
   className?: string;
 };
 
-// D3 Type Definitionen
-type D3Node = d3.HierarchyNode<OrganizationNode>;
-type D3PointNode = d3.HierarchyPointNode<OrganizationNode>;
+// Explizite D3 Types
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+interface D3HierarchyNode extends d3.HierarchyPointNode<OrganizationNode> {
+  x: number;
+  y: number;
+}
 
+/**
+ * Interaktives Organigramm zur Darstellung der Vereinsstruktur
+ * @param data - Hierarchische Struktur
+ * @param className - CSS-Klassen
+ */
 export const Chart = ({ data, className }: ChartProps) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [selectedNode, setSelectedNode] = useState<OrganizationNode | null>(null);
 
   useEffect(() => {
-    if (!svgRef.current || !data) return;
+    if (!svgRef.current) return;
 
     const width = 1200;
     const height = 600;
-    const nodeWidth = 220;
+    const nodeWidth = 240;
     const nodeHeight = 80;
+    const margin = { top: 50, right: 50, bottom: 50, left: 50 };
 
     // Clear previous chart
-    d3.select(svgRef.current).selectAll('*').remove();
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
 
-    const svg = d3
-      .select(svgRef.current)
-      .attr('viewBox', `0 0 ${width} ${height}`)
+    // Setup SVG
+    svg
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', [0, 0, width, height].join(' '))
       .attr('preserveAspectRatio', 'xMidYMid meet');
 
-    // Create container for zoom
-    const g = svg.append('g');
+    // Create container group
+    const g = svg
+      .append('g')
+      .attr('transform', `translate(${margin.left.toString()},${margin.top.toString()})`);
 
-    // Add zoom behavior mit korrekten Typen
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.5, 2])
-      .on('zoom', (event: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
-        g.attr('transform', event.transform.toString());
-      });
-
-    svg.call(zoom);
+    // Create hierarchy
+    const hierarchy = d3.hierarchy(data);
 
     // Create tree layout
-    const root = d3.hierarchy(data);
     const treeLayout = d3
       .tree<OrganizationNode>()
-      .size([width - 200, height - 150])
-      .nodeSize([nodeWidth + 40, nodeHeight + 60]);
+      .size([width - margin.left - margin.right, height - margin.top - margin.bottom])
+      .separation(() => 1.5);
 
-    const treeData = treeLayout(root);
+    // Generate the tree
+    const root = treeLayout(hierarchy) as D3HierarchyNode;
 
-    // Create gradient definitions
-    const defs = svg.append('defs');
+    // Create link path generator
+    const linkPath = d3
+      .linkVertical<d3.HierarchyPointLink<OrganizationNode>, D3HierarchyNode>()
+      .x((d: D3HierarchyNode) => d.x)
+      .y((d: D3HierarchyNode) => d.y);
 
-    // Board gradient
-    const boardGradient = defs
-      .append('linearGradient')
-      .attr('id', 'board-gradient')
-      .attr('x1', '0%')
-      .attr('y1', '0%')
-      .attr('x2', '0%')
-      .attr('y2', '100%');
-
-    boardGradient
-      .append('stop')
-      .attr('offset', '0%')
-      .style('stop-color', 'var(--color-fanini-blue)')
-      .style('stop-opacity', 1);
-
-    boardGradient
-      .append('stop')
-      .attr('offset', '100%')
-      .style('stop-color', 'var(--color-fanini-blue)')
-      .style('stop-opacity', 0.8);
-
-    // Create links with animation
-    g.selectAll('.link')
-      .data(treeData.links())
+    // Create links
+    g.selectAll<SVGPathElement, d3.HierarchyPointLink<OrganizationNode>>('.link')
+      .data(root.links())
       .enter()
       .append('path')
       .attr('class', 'link')
-      .attr(
-        'd',
-        d3
-          .linkVertical<
-            d3.HierarchyPointLink<OrganizationNode>,
-            d3.HierarchyPointNode<OrganizationNode>
-          >()
-          .x((d: D3PointNode) => d.x + width / 2)
-          .y((d: D3PointNode) => d.y + 50)
-      )
+      .attr('d', linkPath)
       .style('fill', 'none')
       .style('stroke', 'var(--color-border)')
-      .style('stroke-width', 2)
-      .style('stroke-dasharray', '5,5')
-      .style('opacity', 0)
-      .transition()
-      .duration(500)
-      .style('opacity', 1);
+      .style('stroke-width', 2);
 
-    // Create node groups
-    const nodes = g
-      .selectAll('.node')
-      .data(treeData.descendants())
+    // Create nodes
+    const nodeGroups = g
+      .selectAll<SVGGElement, D3HierarchyNode>('.node')
+      .data(root.descendants())
       .enter()
       .append('g')
       .attr('class', 'node')
-      .attr('transform', (d: D3PointNode) => `translate(${d.x + width / 2 - nodeWidth / 2},${d.y})`)
-      .style('opacity', 0);
+      .attr('transform', (d: D3HierarchyNode) => `translate(${d.x.toString()},${d.y.toString()})`);
 
-    // Add shadows
-    const filter = defs
-      .append('filter')
-      .attr('id', 'shadow')
-      .attr('x', '-50%')
-      .attr('y', '-50%')
-      .attr('width', '200%')
-      .attr('height', '200%');
-
-    filter.append('feGaussianBlur').attr('in', 'SourceAlpha').attr('stdDeviation', 3);
-
-    filter.append('feOffset').attr('dx', 2).attr('dy', 2).attr('result', 'offsetblur');
-
-    const feMerge = filter.append('feMerge');
-    feMerge.append('feMergeNode').attr('in', 'offsetblur');
-    feMerge.append('feMergeNode').attr('in', 'SourceGraphic');
-
-    // Add rectangles with hover effects
-    nodes
+    // Add rectangles for nodes
+    nodeGroups
       .append('rect')
       .attr('width', nodeWidth)
       .attr('height', nodeHeight)
+      .attr('x', -nodeWidth / 2)
+      .attr('y', -nodeHeight / 2)
       .attr('rx', 8)
-      .style('fill', (d: D3PointNode) => {
+      .style('fill', (d: D3HierarchyNode) => {
         switch (d.data.type) {
           case 'board':
-            return 'url(#board-gradient)';
+            return 'var(--color-fanini-blue)';
           case 'advisory':
             return 'var(--color-fanini-red)';
           case 'audit':
@@ -152,59 +111,36 @@ export const Chart = ({ data, className }: ChartProps) => {
             return 'var(--color-muted)';
         }
       })
-      .style('filter', 'url(#shadow)')
+      .style('stroke', '#fff')
+      .style('stroke-width', 2)
       .style('cursor', 'pointer')
-      .on('click', (event: MouseEvent, d: D3PointNode) => {
+      .on('click', function (event: MouseEvent, d: D3HierarchyNode) {
         event.stopPropagation();
         setSelectedNode(d.data);
-      })
-      .on('mouseenter', function () {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style('transform', 'scale(1.05)')
-          .style('filter', 'url(#shadow) brightness(1.1)');
-      })
-      .on('mouseleave', function () {
-        d3.select(this)
-          .transition()
-          .duration(200)
-          .style('transform', 'scale(1)')
-          .style('filter', 'url(#shadow) brightness(1)');
       });
 
     // Add main text
-    nodes
+    nodeGroups
       .append('text')
-      .attr('x', nodeWidth / 2)
-      .attr('y', nodeHeight / 2 - 10)
+      .attr('dy', '-0.2em')
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
       .style('fill', 'white')
       .style('font-weight', 'bold')
       .style('font-size', '14px')
       .style('pointer-events', 'none')
-      .text((d: D3PointNode) => d.data.name);
+      .text((d: D3HierarchyNode) => d.data.name);
 
-    // Add level/description text
-    nodes
-      .filter((d: D3PointNode) => Boolean(d.data.description) || d.data.level !== undefined)
+    // Add level text
+    nodeGroups
+      .filter((d: D3HierarchyNode) => d.data.level !== undefined)
       .append('text')
-      .attr('x', nodeWidth / 2)
-      .attr('y', nodeHeight / 2 + 10)
+      .attr('dy', '1.2em')
       .attr('text-anchor', 'middle')
       .style('fill', 'white')
       .style('font-size', '12px')
       .style('opacity', 0.8)
       .style('pointer-events', 'none')
-      .text((d: D3PointNode) => d.data.description ?? `Ebene ${d.data.level + 1}`);
-
-    // Animate nodes appearing
-    nodes
-      .transition()
-      .duration(500)
-      .delay((d: D3PointNode) => d.depth * 100)
-      .style('opacity', 1);
+      .text((d: D3HierarchyNode) => `Ebene ${(d.data.level + 1).toString()}`);
 
     // Click outside to deselect
     svg.on('click', () => {
@@ -218,43 +154,31 @@ export const Chart = ({ data, className }: ChartProps) => {
         {/* Legend */}
         <div className="flex items-center justify-between">
           <h3 className="text-sm text-[var(--color-muted-foreground)]">
-            Klicke auf ein Element für mehr Details • Scrolle zum Zoomen
+            Klicke auf ein Element für mehr Details
           </h3>
           <div className="flex gap-4 text-sm">
             <div className="flex items-center gap-2">
-              <div
-                className="h-4 w-4 rounded"
-                style={{
-                  background:
-                    'linear-gradient(var(--color-fanini-blue), var(--color-fanini-blue) 80%)',
-                }}
-              />
+              <div className="h-4 w-4 rounded bg-[var(--color-fanini-blue)]" />
               <span>Vorstand</span>
             </div>
             <div className="flex items-center gap-2">
-              <div
-                className="h-4 w-4 rounded"
-                style={{ backgroundColor: 'var(--color-fanini-red)' }}
-              />
+              <div className="h-4 w-4 rounded bg-[var(--color-fanini-red)]" />
               <span>Beirat</span>
             </div>
             <div className="flex items-center gap-2">
-              <div
-                className="h-4 w-4 rounded"
-                style={{ backgroundColor: 'var(--color-warning)' }}
-              />
+              <div className="h-4 w-4 rounded bg-[var(--color-warning)]" />
               <span>Prüfung</span>
             </div>
           </div>
         </div>
 
         {/* SVG Container */}
-        <div className="rounded-lg bg-[var(--color-muted)]">
-          <svg ref={svgRef} className="h-[600px] w-full" />
+        <div className="rounded-lg bg-[var(--color-muted)] p-4">
+          <svg ref={svgRef} className="w-full" style={{ height: '500px' }} />
         </div>
 
         {/* Selected Node Details */}
-        {selectedNode ? (
+        {selectedNode !== null && (
           <div className="animate-in slide-in-from-bottom-2 rounded-lg bg-[var(--color-muted)] p-4">
             <div className="flex items-start justify-between">
               <div>
@@ -267,21 +191,11 @@ export const Chart = ({ data, className }: ChartProps) => {
                     {selectedNode.type === 'team' && 'Team'}
                   </Badge>
                 </h4>
-                {selectedNode.description ? (
+                {selectedNode.description !== undefined && (
                   <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
                     {selectedNode.description}
                   </p>
-                ) : null}
-                {selectedNode.level !== undefined && (
-                  <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-                    Hierarchieebene: {selectedNode.level + 1}
-                  </p>
                 )}
-                {selectedNode.members && selectedNode.members.length > 0 ? (
-                  <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
-                    {selectedNode.members.length} Mitglieder
-                  </p>
-                ) : null}
               </div>
               <Button
                 variant="ghost"
@@ -294,7 +208,7 @@ export const Chart = ({ data, className }: ChartProps) => {
               </Button>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </Card>
   );

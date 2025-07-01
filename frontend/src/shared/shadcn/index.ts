@@ -24,6 +24,7 @@ export * from './label';
 export * from './LoadingSpinner';
 export * from './popover';
 export * from './resizable';
+export * from './scroll-area';
 export * from './select';
 export * from './separator';
 export * from './sheet';

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // frontend/vite.config.ts
 /* eslint-disable @typescript-eslint/naming-convention */
 import tailwindcss from '@tailwindcss/vite';
@@ -97,9 +96,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     build: {
       target: 'esnext',
       minify: isProd ? 'terser' : false,
-      // Verwende type assertion für terserOptions
       ...(isProd && {
-        // Importiere Terser.MinifyOptions für Typisierung
         terserOptions: {
           compress: {
             drop_console: true,
@@ -114,7 +111,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
             comments: false,
             ecma: 2020,
           },
-        }, // Typisiere korrekt statt any
+        },
       }),
     },
 

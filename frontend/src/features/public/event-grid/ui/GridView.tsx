@@ -1,21 +1,21 @@
-// frontend/src/features/public/event-grid/ui/EventsGridView.tsx
-import { useState, useMemo } from 'react';
-import { Search, Filter } from 'lucide-react';
+// frontend/src/features/public/event-grid/ui/GridView.tsx
+import { useMemo, useState } from 'react';
+
+import { Filter, Search } from 'lucide-react';
 
 import { usePublicEventList } from '@/entities/public/event';
-import { Input, Button } from '@/shared/shadcn';
+
+import { Button, Input } from '@/shared/shadcn';
 import { LoadingState } from '@/shared/ui';
 
-import { EventFilters } from './EventFilters';
-import { EventCard } from './EventCard';
-
-import type { PublicEventListItem } from '@/entities/public/event';
+import { Card } from './Card';
+import { Filters } from './Filters';
 
 /**
- * EventsGridView Feature
+ * GridView Feature
  * @description Grid-Ansicht mit Filterung für Events
  */
-export const EventsGridView = () => {
+export const GridView = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [organizerFilter, setOrganizerFilter] = useState<string>('all');
@@ -52,12 +52,14 @@ export const EventsGridView = () => {
             <Input
               placeholder="Events durchsuchen..."
               value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
+              onChange={e => {
+                setSearchTerm(e.target.value);
+              }}
               className="pl-9"
             />
           </div>
 
-          <EventFilters
+          <Filters
             categoryFilter={categoryFilter}
             organizerFilter={organizerFilter}
             onCategoryChange={setCategoryFilter}
@@ -84,7 +86,7 @@ export const EventsGridView = () => {
             ) : (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredEvents.map(event => (
-                  <EventCard key={event.id} event={event} />
+                  <Card key={event.id} event={event} />
                 ))}
               </div>
             )}

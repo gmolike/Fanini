@@ -1,23 +1,24 @@
-// frontend/src/features/public/event-detail/ui/EventDetailPanel.tsx
+// frontend/src/features/public/event-detail/ui/DetailPanel.tsx
 import { usePublicEventDetail } from '@/entities/public/event';
+
 import { LoadingState } from '@/shared/ui';
 
-import { EventDetailContent } from './EventDetailContent';
+import { DetailContent } from './DetailContent';
 
-type EventDetailPanelProps = {
+type DetailPanelProps = {
   eventId: string;
 };
 
 /**
- * EventDetailPanel Feature
+ * DetailPanel Feature
  * @description Lädt und zeigt Event-Details
  */
-export const EventDetailPanel = ({ eventId }: EventDetailPanelProps) => {
+export const DetailPanel = ({ eventId }: DetailPanelProps) => {
   const eventDetailQuery = usePublicEventDetail(eventId);
 
   return (
     <LoadingState query={eventDetailQuery}>
-      {response => <EventDetailContent event={response.data} />}
+      {response => <DetailContent event={response.data} />}
     </LoadingState>
   );
 };

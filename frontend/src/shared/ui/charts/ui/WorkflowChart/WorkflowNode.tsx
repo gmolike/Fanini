@@ -57,7 +57,7 @@ export const WorkflowNode = memo<NodeProps>(({ data, selected = false }) => {
     const icons = {
       pending: null,
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+       
       'in-progress': <Loader2 className="h-4 w-4 animate-spin" />,
       completed: <CheckCircle2 className="h-4 w-4 text-green-600" />,
       blocked: <XCircle className="h-4 w-4 text-red-600" />,

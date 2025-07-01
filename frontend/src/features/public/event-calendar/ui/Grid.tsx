@@ -1,9 +1,7 @@
-// frontend/src/features/public/event-calendar/ui/CalendarGrid.tsx
-import { cn } from '@/shared/lib';
-import { Badge } from '@/shared/shadcn';
-import { EVENT_ORGANIZER_CONFIG } from '@/entities/public/event';
+// frontend/src/features/public/event-calendar/ui/Grid.tsx
+import { EVENT_ORGANIZER_CONFIG, type PublicEventListItem } from '@/entities/public/event';
 
-import type { PublicEventListItem } from '@/entities/public/event';
+import { cn } from '@/shared/lib';
 
 type CalendarGridProps = {
   events: PublicEventListItem[];
@@ -39,15 +37,12 @@ export const CalendarGrid = ({
   }
 
   // Events nach Datum gruppieren
-  const eventsByDate = events.reduce(
-    (acc, event) => {
-      const dateKey = new Date(event.date).toDateString();
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(event);
-      return acc;
-    },
-    {} as Record<string, PublicEventListItem[]>
-  );
+  const eventsByDate = events.reduce<Record<string, PublicEventListItem[]>>((acc, event) => {
+    const dateKey = new Date(event.date).toDateString();
+    acc[dateKey] ??= [];
+    acc[dateKey].push(event);
+    return acc;
+  }, {});
 
   return (
     <div className="bg-muted grid grid-cols-7 gap-px overflow-hidden rounded-lg">
@@ -59,14 +54,14 @@ export const CalendarGrid = ({
       ))}
 
       {/* Kalendertage */}
-      {days.map((day, index) => {
+      {days.map((day) => {
         const isCurrentMonth = day.getMonth() === currentMonth;
         const isToday = day.toDateString() === new Date().toDateString();
-        const dayEvents = eventsByDate[day.toDateString()] || [];
+        const dayEvents = eventsByDate[day.toDateString()] ?? [];
 
         return (
           <div
-            key={index}
+            key={day.toISOString()}
             className={cn(
               'bg-background min-h-[100px] border border-transparent p-2',
               !isCurrentMonth && 'text-muted-foreground',
@@ -82,7 +77,9 @@ export const CalendarGrid = ({
                 return (
                   <button
                     key={event.id}
-                    onClick={() => onEventSelect(event.id)}
+                    onClick={() => {
+                      onEventSelect(event.id);
+                    }}
                     className={cn(
                       'w-full truncate rounded px-1 py-0.5 text-left text-xs transition-colors',
                       selectedEventId === event.id

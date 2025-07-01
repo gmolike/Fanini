@@ -1,5 +1,8 @@
-// frontend/src/features/public/event-detail/ui/components/EventComments.tsx
-import { MessageSquare, Info } from 'lucide-react';
+// frontend/src/features/public/event-detail/ui/Comments.tsx
+import { Info, MessageSquare } from 'lucide-react';
+
+import type { PublicEventDetail } from '@/entities/public/event';
+
 import {
   Alert,
   AlertDescription,
@@ -9,17 +12,15 @@ import {
   Badge,
 } from '@/shared/shadcn';
 
-import type { PublicEventDetail } from '@/entities/public/event';
-
-type EventCommentsProps = {
+type CommentsProps = {
   comments: NonNullable<PublicEventDetail['comments']>;
 };
 
 /**
- * EventComments Component
+ * Comments Component
  * @description Zeigt Kommentare mit Hinweis auf Vereinsmitglieder
  */
-export const EventComments = ({ comments }: EventCommentsProps) => {
+export const Comments = ({ comments }: CommentsProps) => {
   return (
     <div>
       <h3 className="mb-3 flex items-center gap-2 font-semibold">
@@ -39,9 +40,9 @@ export const EventComments = ({ comments }: EventCommentsProps) => {
         {comments.map(comment => (
           <div key={comment.id} className="flex gap-3">
             <Avatar className="h-8 w-8">
-              {comment.author.avatar && (
+              {comment.author.avatar ? (
                 <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
-              )}
+              ) : null}
               <AvatarFallback>
                 {comment.author.name
                   .split(' ')
@@ -53,16 +54,16 @@ export const EventComments = ({ comments }: EventCommentsProps) => {
             <div className="flex-1 space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{comment.author.name}</span>
-                {comment.author.role && (
+                {comment.author.role ? (
                   <Badge variant="secondary" className="text-xs">
                     {comment.author.role}
                   </Badge>
-                )}
-                {comment.isOfficial && (
+                ) : null}
+                {comment.isOfficial ? (
                   <Badge className="bg-[var(--color-fanini-blue)] text-xs">
                     Offizieller Kommentar
                   </Badge>
-                )}
+                ) : null}
               </div>
               <p className="text-muted-foreground text-sm">{comment.content}</p>
               <p className="text-muted-foreground text-xs">

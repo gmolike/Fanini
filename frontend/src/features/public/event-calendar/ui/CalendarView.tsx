@@ -1,4 +1,4 @@
-// frontend/src/features/public/event-calendar/ui/EventsCalendarView.tsx
+// frontend/src/features/public/event-calendar/ui/CalendarView.tsx
 import { useState } from 'react';
 
 import { Calendar } from 'lucide-react';
@@ -10,14 +10,14 @@ import { usePublicEventList } from '@/entities/public/event';
 import { Card, ScrollArea } from '@/shared/shadcn';
 import { LoadingState } from '@/shared/ui';
 
-import { CalendarGrid } from './CalendarGrid';
-import { CalendarHeader } from './CalendarHeader';
+import { CalendarGrid } from './Grid';
+import { CalendarHeader } from './Header';
 
 /**
- * EventsCalendarView Feature
+ * CalendarView Feature
  * @description Kalender-Ansicht mit Split-View für Event-Details
  */
-export const EventsCalendarView = () => {
+export const CalendarView = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 

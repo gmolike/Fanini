@@ -1,5 +1,6 @@
-// frontend/src/features/public/event-calendar/ui/CalendarHeader.tsx
+// frontend/src/features/public/event-calendar/ui/Header.tsx
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 import { Button } from '@/shared/shadcn';
 
 type CalendarHeaderProps = {
@@ -27,13 +28,25 @@ export const CalendarHeader = ({
       </h2>
 
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={() => onNavigateMonth('prev')}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            onNavigateMonth('prev');
+          }}
+        >
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <Button variant="outline" size="sm" onClick={onGoToToday}>
           Heute
         </Button>
-        <Button variant="outline" size="icon" onClick={() => onNavigateMonth('next')}>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => {
+            onNavigateMonth('next');
+          }}
+        >
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>

@@ -1,56 +1,56 @@
-// frontend/src/features/public/event-detail/ui/EventDetailContent.tsx
-import { Separator } from '@/shared/shadcn';
-
-import { EventHeader } from './EventHeader';
-import { EventInfo } from './EventInfo';
-import { EventDescription } from './EventDescription';
-import { EventRegistration } from './EventRegistration';
-import { EventHistory } from './EventHistory';
-import { EventComments } from './Comments';
-
+// frontend/src/features/public/event-detail/ui/DetailContent.tsx
 import type { PublicEventDetail } from '@/entities/public/event';
 
-type EventDetailContentProps = {
+import { Separator } from '@/shared/shadcn';
+
+import { Comments } from './Comments';
+import { Description } from './Description';
+import { Header } from './Header';
+import { History } from './History';
+import { Info } from './Info';
+import { Registration } from './Registration';
+
+type DetailContentProps = {
   event: PublicEventDetail;
 };
 
 /**
- * EventDetailContent Component
+ * DetailContent Component
  * @description Strukturiert die Event-Detail Anzeige
  */
-export const EventDetailContent = ({ event }: EventDetailContentProps) => {
+export const DetailContent = ({ event }: DetailContentProps) => {
   return (
     <div className="space-y-6 p-6">
-      <EventHeader event={event} />
+      <Header event={event} />
 
       <Separator />
 
-      <EventInfo event={event} />
+      <Info event={event} />
 
       <Separator />
 
-      <EventDescription description={event.description} />
+      <Description description={event.description} />
 
-      {(event.registrationRequired || event.ticketLink) && (
+      {event.registrationRequired || event.ticketLink ? (
         <>
           <Separator />
-          <EventRegistration event={event} />
+          <Registration event={event} />
         </>
-      )}
+      ) : null}
 
-      {event.history && event.history.length > 0 && (
+      {event.history && event.history.length > 0 ? (
         <>
           <Separator />
-          <EventHistory history={event.history} />
+          <History history={event.history} />
         </>
-      )}
+      ) : null}
 
-      {event.status === 'completed' && event.comments && (
+      {event.status === 'completed' && event.comments ? (
         <>
           <Separator />
-          <EventComments comments={event.comments} />
+          <Comments comments={event.comments} />
         </>
-      )}
+      ) : null}
     </div>
   );
 };

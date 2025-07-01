@@ -1,8 +1,9 @@
-// frontend/src/features/public/event-grid/ui/EventFilters.tsx
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/shadcn';
+// frontend/src/features/public/event-grid/ui/Filters.tsx
 import { EVENT_CATEGORY_CONFIG, EVENT_ORGANIZER_CONFIG } from '@/entities/public/event';
 
-type EventFiltersProps = {
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/shadcn';
+
+type FiltersProps = {
   categoryFilter: string;
   organizerFilter: string;
   onCategoryChange: (value: string) => void;
@@ -10,15 +11,15 @@ type EventFiltersProps = {
 };
 
 /**
- * EventFilters Component
+ * Filters Component
  * @description Filter-Komponenten für Event-Grid
  */
-export const EventFilters = ({
+export const Filters = ({
   categoryFilter,
   organizerFilter,
   onCategoryChange,
   onOrganizerChange,
-}: EventFiltersProps) => {
+}: FiltersProps) => {
   return (
     <>
       <Select value={categoryFilter} onValueChange={onCategoryChange}>

@@ -1,26 +1,25 @@
-// frontend/src/features/public/event-grid/ui/EventCard.tsx
+// frontend/src/features/public/event-grid/ui/Card.tsx
 import { Calendar, MapPin, Users } from 'lucide-react';
 
-import { Badge, Card, CardContent } from '@/shared/shadcn';
+import { EVENT_CATEGORY_CONFIG,EVENT_ORGANIZER_CONFIG,type PublicEventListItem  } from '@/entities/public/event';
+
+import { Badge, Card as ShadcnCard, CardContent } from '@/shared/shadcn';
 import { Image } from '@/shared/ui';
-import { EVENT_ORGANIZER_CONFIG, EVENT_CATEGORY_CONFIG } from '@/entities/public/event';
 
-import type { PublicEventListItem } from '@/entities/public/event';
-
-type EventCardProps = {
+type CardProps = {
   event: PublicEventListItem;
 };
 
 /**
- * EventCard Component
+ * Card Component
  * @description Einzelne Event-Karte für Grid-Ansicht
  */
-export const EventCard = ({ event }: EventCardProps) => {
+export const Card = ({ event }: CardProps) => {
   const organizerConfig = EVENT_ORGANIZER_CONFIG[event.organizer];
   const categoryConfig = EVENT_CATEGORY_CONFIG[event.category];
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
+    <ShadcnCard className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
       {/* Organizer Color Bar */}
       <div className="h-1" style={{ backgroundColor: organizerConfig.color }} />
 
@@ -75,19 +74,16 @@ export const EventCard = ({ event }: EventCardProps) => {
             <span className="truncate">{event.location}</span>
           </div>
 
-          {event.maxParticipants && (
-            <div className="flex items-center gap-2">
+          {event.maxParticipants ? <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span>
                 {event.currentParticipants || 0} / {event.maxParticipants} Teilnehmer
               </span>
-            </div>
-          )}
+            </div> : null}
         </div>
 
         {/* Progress Bar für Teilnehmer */}
-        {event.maxParticipants && (
-          <div className="mt-4">
+        {event.maxParticipants ? <div className="mt-4">
             <div className="h-2 overflow-hidden rounded-full bg-gray-200">
               <div
                 className="h-full bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] transition-all duration-500"
@@ -96,9 +92,8 @@ export const EventCard = ({ event }: EventCardProps) => {
                 }}
               />
             </div>
-          </div>
-        )}
+          </div> : null}
       </CardContent>
-    </Card>
+    </ShadcnCard>
   );
 };

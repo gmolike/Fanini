@@ -1,5 +1,5 @@
 // frontend/src/testing/mocks/handlers/stats.handlers.ts
-import { delay,http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 
 export const statsHandlers = [
   // GET /api/stats/public
@@ -8,9 +8,9 @@ export const statsHandlers = [
 
     return HttpResponse.json({
       data: {
-        memberCount: 156,
-        eventsPerYear: 24,
-        foundedYear: 2022,
+        memberCount: 70,
+        eventsPerYear: 12,
+        foundedYear: 2025,
         passionPercentage: 100,
       },
     });

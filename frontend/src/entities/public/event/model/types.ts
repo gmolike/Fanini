@@ -1,3 +1,6 @@
+import type { publicEventSchema, publicEventsResponseSchema } from '@/entities/public/event';
+
+import type z from 'zod';
 
 export const EVENT_TYPE_CONFIG = {
   party: {
@@ -21,26 +24,5 @@ export const EVENT_TYPE_CONFIG = {
 // frontend/src/entities/public/event/model/types.ts
 export type EventType = 'party' | 'away' | 'meeting' | 'match';
 
-export type PublicEvent = {
-  id: string;
-  title: string;
-  date: string;
-  time: string;
-  location: string;
-  type: EventType;
-  description: string;
-  shortDescription?: string;
-  image?: string;
-  maxParticipants?: number;
-  currentParticipants?: number;
-  isPublic: true;
-};
-
-export type PublicEventsResponse = {
-  data: PublicEvent[];
-  meta?: {
-    total: number;
-    page: number;
-    limit: number;
-  };
-};
+export type PublicEvent = z.infer<typeof publicEventSchema>;
+export type PublicEventsResponse = z.infer<typeof publicEventsResponseSchema>;

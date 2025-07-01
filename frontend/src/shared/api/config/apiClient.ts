@@ -1,47 +1,6 @@
 ﻿// frontend/src/shared/api/config/apiClient.ts
 import { z } from 'zod';
 
-
-/**
- * Custom API Error Klasse
- */
-export const apiClient = new ApiClient();
-
-
-
-/**
- * Request Options Type
- */
-export { ApiClient };
-
-
-
-
-export class ApiClientError extends Error implements ApiError {
-  code: string | undefined;
-  statusCode: number;
-  details: Record<string, unknown> | undefined;
-
-  constructor(error: ApiError) {
-    super(error.message);
-    this.name = 'ApiClientError';
-    this.code = error.code;
-    this.statusCode = error.statusCode;
-    this.details = error.details;
-  }
-}
-
-
-/**
- * API Error Schema
- */
-export const apiErrorSchema = z.object({
-  message: z.string(),
-  code: z.string().optional(),
-  statusCode: z.number(),
-  details: z.record(z.unknown()).optional(),
-});
-
 /**
  * API Client Klasse
  * @description Wrapper um fetch mit TypeScript und Error Handling
@@ -332,6 +291,39 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 }
+/**
+ * Request Options Type
+ */
+export { ApiClient };
+
+/**
+ * Custom API Error Klasse
+ */
+export const apiClient = new ApiClient();
+
+export class ApiClientError extends Error implements ApiError {
+  code: string | undefined;
+  statusCode: number;
+  details: Record<string, unknown> | undefined;
+
+  constructor(error: ApiError) {
+    super(error.message);
+    this.name = 'ApiClientError';
+    this.code = error.code;
+    this.statusCode = error.statusCode;
+    this.details = error.details;
+  }
+}
+
+/**
+ * API Error Schema
+ */
+export const apiErrorSchema = z.object({
+  message: z.string(),
+  code: z.string().optional(),
+  statusCode: z.number(),
+  details: z.record(z.unknown()).optional(),
+});
 
 // Singleton Instance
 export type ApiError = z.infer<typeof apiErrorSchema>;

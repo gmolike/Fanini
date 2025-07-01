@@ -101,10 +101,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
     <FormFieldWrapper
       control={control}
       name={name}
-      label={label}
-      description={description}
-      required={required}
-      className={className}
+      label={label ?? ''}
+      description={description ?? ''}
+      required={!!required}
+      className={className ?? ''}
       showReset={showReset}
       render={field => {
         const Icon = selectedOption?.icon;
@@ -116,7 +116,6 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                 <Button
                   {...ariaProps}
                   variant="outline"
-                  role="combobox"
                   aria-expanded={open}
                   className={cn(
                     'flex-1 justify-between font-normal',
@@ -131,7 +130,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                     {Icon ? <Icon className={ICON_SIZES.default} /> : null}
                     <span>{selectedOption?.label ?? placeholder}</span>
                   </span>
-                  {loading ? (
+                  {loading === true ? (
                     <Loader2 className={cn(ICON_SIZES.default, 'animate-spin opacity-50')} />
                   ) : (
                     <ChevronsUpDown className={cn(ICON_SIZES.default, 'shrink-0 opacity-50')} />
@@ -145,17 +144,19 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                     placeholder={searchPlaceholder}
                     value={searchValue}
                     onValueChange={setSearchValue}
-                    disabled={loading}
+                    disabled={Boolean(loading)}
                   />
                   <CommandList>
-                    {loading ? (
+                    {loading === true && (
                       <CommandEmpty>
                         <Loader2 className={cn(ICON_SIZES.default, 'animate-spin')} />
                         <span className="ml-2">{loadingText}</span>
                       </CommandEmpty>
-                    ) : filteredOptions.length === 0 ? (
+                    )}
+                    {!loading && filteredOptions.length === 0 && (
                       <CommandEmpty>{emptyText}</CommandEmpty>
-                    ) : (
+                    )}
+                    {!loading && filteredOptions.length > 0 && (
                       <CommandGroup>
                         {filteredOptions.map(option => {
                           const value = String(option.value);
@@ -167,7 +168,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                               key={value}
                               value={value}
                               onSelect={() => { handleSelect(option, field.onChange); }}
-                              disabled={option.disabled}
+                              disabled={option.disabled ?? false}
                             >
                               <Check
                                 className={cn(

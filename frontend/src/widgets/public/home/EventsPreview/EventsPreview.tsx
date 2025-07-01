@@ -1,9 +1,9 @@
 import { Link } from '@tanstack/react-router';
-import { AlertCircle,ArrowRight, Calendar, Clock, MapPin } from 'lucide-react';
+import { AlertCircle, ArrowRight, Calendar, Clock, MapPin } from 'lucide-react';
 
-import { EVENT_TYPE_CONFIG,useUpcomingEvents } from '@/entities/public/event';
+import { EVENT_TYPE_CONFIG, useUpcomingEvents } from '@/entities/public/event';
 
-import { Badge,Button, Card, CardContent } from '@/shared/shadcn';
+import { Badge, Button, Card, CardContent } from '@/shared/shadcn';
 import { LoadingState } from '@/shared/ui';
 import { Container } from '@/shared/ui/layout';
 
@@ -12,7 +12,10 @@ import { Container } from '@/shared/ui/layout';
  * @description Zeigt die nächsten 3 Events auf der Startseite (von API)
  */
 export const EventsPreview = () => {
+  const { data } = useUpcomingEvents();
   const eventsQuery = useUpcomingEvents();
+
+  console.log('EventsPreview', data);
 
   return (
     <section className="py-20">

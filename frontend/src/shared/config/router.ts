@@ -1,8 +1,8 @@
-import { createRouter } from '@tanstack/react-router'
+import { createRouter } from '@tanstack/react-router';
 
-import { routeTree } from '@/app/routeTree.gen'
+import { routeTree } from '@/app/routeTree.gen';
 
-import { queryClient } from './queryClient'
+import { queryClient } from './queryClient';
 
 export const router = createRouter({
   routeTree,
@@ -11,11 +11,12 @@ export const router = createRouter({
   },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
-})
+});
 
 // Einzige Type-Deklaration hier
 declare module '@tanstack/react-router' {
-  type Register = {
-    router: typeof router
+  // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+  interface Register {
+    router: typeof router;
   }
 }

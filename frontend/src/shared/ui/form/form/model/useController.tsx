@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { type  FieldValues,useForm as useRHFForm  } from 'react-hook-form';
+import { type FieldValues, useForm as useRHFForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
 
@@ -33,8 +33,8 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     externalForm
       ? {} // Dummy config when using external form
       : {
-          resolver: schema ? zodResolver(schema) : undefined,
-          defaultValues,
+          ...(schema ? { resolver: zodResolver(schema) } : {}),
+          defaultValues: defaultValues as NonNullable<typeof defaultValues>,
           mode,
           reValidateMode,
           criteriaMode,

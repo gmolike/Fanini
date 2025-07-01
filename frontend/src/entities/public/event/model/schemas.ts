@@ -9,10 +9,10 @@ export const publicEventSchema = z.object({
   location: z.string(),
   type: z.enum(['party', 'away', 'meeting', 'match']),
   description: z.string(),
-  shortDescription: z.string().nullable().optional(),
-  image: z.string().nullable().optional(),
-  maxParticipants: z.number().nullable().optional(),
-  currentParticipants: z.number().nullable().optional(),
+  shortDescription: z.string().optional(), // Entferne .nullable()
+  image: z.string().optional(), // Entferne .nullable()
+  maxParticipants: z.number().optional(), // Entferne .nullable()
+  currentParticipants: z.number().optional(), // Entferne .nullable()
   isPublic: z.literal(true),
 });
 

@@ -1,19 +1,9 @@
 // frontend/src/testing/mocks/db/factories/event.factory.ts
 import { faker } from '@faker-js/faker/locale/de';
 
-import type { EventType,PublicEvent } from '@/entities/public/event';
+import type { EventType, PublicEvent } from '@/entities/public/event';
 
 import { db } from '../index';
-
-
-
-
-
-
-
-
-
-
 
 type DbEvent = ReturnType<typeof db.event.create>;
 

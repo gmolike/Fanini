@@ -6,21 +6,19 @@ import type {
   StrictEnumConfig,
 } from './types';
 
-
-
 /**
  * Helper für automatische Config-Generierung aus Enum-Values
  */
 export function createEnumConfigFromValues<T extends Record<string, string>>(
   enumObj: T,
-  variantMap?: Partial<Record<keyof T, EnumValueConfig['variant']>>,
+  variantMap?: Partial<Record<keyof T, EnumValueConfig['variant']>>
 ): StrictEnumConfig<T> {
   const config = {} as StrictEnumConfig<T>;
 
-  (Object.keys(enumObj) as (keyof T)[]).forEach((key) => {
+  (Object.keys(enumObj) as (keyof T)[]).forEach(key => {
     config[key] = {
       // Label explizit aus Enum-Value
-      label: enumObj[key],
+      label: enumObj[key] ?? '',
       variant: variantMap?.[key] ?? 'default',
     };
   });
@@ -28,20 +26,16 @@ export function createEnumConfigFromValues<T extends Record<string, string>>(
   return config;
 }
 
-
-
-
-
 /**
  * Erstellt Config nur mit Varianten - nutzt Enum-Values als Labels
  */
 export function createEnumVariantConfig<T extends Record<string, string>>(
   enumObj: T,
-  variantMap: FlexibleEnumConfig<T>,
+  variantMap: FlexibleEnumConfig<T>
 ): EnumConfigBundle<T> {
   const variants = {} as StrictEnumConfig<T>;
 
-  (Object.keys(enumObj) as (keyof T)[]).forEach((key) => {
+  (Object.keys(enumObj) as (keyof T)[]).forEach(key => {
     const mapValue = variantMap[key];
     if (typeof mapValue === 'string') {
       variants[key] = { variant: mapValue };
@@ -53,10 +47,6 @@ export function createEnumVariantConfig<T extends Record<string, string>>(
   return { variants, enumObj };
 }
 
-
-
-
-
 /**
  * Extrahiert die Config für einen Enum-Wert
  * Erstellt Default-Config mit Enum-Value als Label
@@ -64,7 +54,7 @@ export function createEnumVariantConfig<T extends Record<string, string>>(
 export function getEnumConfig<T extends Record<string, string | number>>(
   value: string | number | symbol | null | undefined,
   config: StrictEnumConfig<T>,
-  enumObj?: T,
+  enumObj?: T
 ): EnumValueConfig | undefined {
   if (value === null || value === undefined) return undefined;
 
@@ -82,8 +72,6 @@ export function getEnumConfig<T extends Record<string, string | number>>(
   return valueConfig;
 }
 
-
-
 /**
  * Extrahiert den Label für einen Enum-Wert aus der Config
  * Nutzt Enum-Value als Fallback wenn kein Label definiert
@@ -92,7 +80,7 @@ export function getEnumLabel<T extends Record<string, string | number>>(
   value: string | number | symbol | null | undefined,
   config: StrictEnumConfig<T>,
   enumObj?: T,
-  fallback = '',
+  fallback = ''
 ): string {
   if (value === null || value === undefined) return fallback;
 

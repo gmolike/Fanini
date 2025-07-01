@@ -1,5 +1,6 @@
 // frontend/src/testing/mocks/setup.ts
 import { worker } from './browser';
+import { seedDevelopmentData } from './db/seeds';
 
 /**
  * Startet den Mock Service Worker
@@ -42,6 +43,10 @@ export async function startMockServer(): Promise<void> {
         url: '/mockServiceWorker.js',
       },
     });
+
+    // Seed Daten nach erfolgreichem Start
+    console.info('[MSW] Mock Service Worker started');
+    seedDevelopmentData();
   } catch (error) {
     console.error('[MSW] Failed to start Mock Service Worker:', error);
     throw error;

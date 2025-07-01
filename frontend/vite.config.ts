@@ -1,14 +1,11 @@
 // frontend/vite.config.ts
 /* eslint-disable @typescript-eslint/naming-convention */
-import { resolve } from 'path';
-
 import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react-swc';
+import { resolve } from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig, loadEnv } from 'vite';
-
-import type { PluginOption } from 'vite';
+import { defineConfig, loadEnv, type PluginOption } from 'vite';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -73,6 +70,9 @@ export default defineConfig(({ mode }) => {
         protocol: 'ws',
         host: 'localhost',
       },
+      fs: {
+        allow: ['..'], // Erlaubt Zugriff auf Dateien außerhalb des Projektverzeichnisses
+      },
       // Proxy für EasyVerein API
       proxy: {
         '/api/easyverein': {
@@ -91,7 +91,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       cors: true,
     },
-
+    publicDir: 'public',
     // Build Optimizations
     build: {
       target: 'esnext',

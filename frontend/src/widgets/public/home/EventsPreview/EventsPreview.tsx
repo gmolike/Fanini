@@ -12,10 +12,7 @@ import { Container } from '@/shared/ui/layout';
  * @description Zeigt die nächsten 3 Events auf der Startseite (von API)
  */
 export const EventsPreview = () => {
-  const { data } = useUpcomingEvents();
   const eventsQuery = useUpcomingEvents();
-
-  console.log('EventsPreview', data);
 
   return (
     <section className="py-20">

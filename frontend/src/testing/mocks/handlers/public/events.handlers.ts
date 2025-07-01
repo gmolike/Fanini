@@ -1,18 +1,45 @@
-// frontend/src/testing/mocks/handlers/events.handlers.ts
-import { delay,http, HttpResponse } from 'msw';
+/* eslint-disable @typescript-eslint/naming-convention */
+// frontend/src/testing/mocks/handlers/public/events.handlers.ts
+import { delay, http, HttpResponse } from 'msw';
 
-import { db, toPublicEvent } from '../../db';
+import type { PublicEventDetail } from '@/entities/public/event';
+
+import { db, toPublicEventListItem } from '../../db';
+
+// Type-safe converter für Detail
+const toPublicEventDetail = (
+  dbEvent: NonNullable<ReturnType<typeof db.event.findFirst>>
+): PublicEventDetail => {
+  const listItem = toPublicEventListItem(dbEvent);
+
+  return {
+    ...listItem,
+    description: dbEvent.description,
+    bannerImage: dbEvent.image ?? undefined,
+    registrationRequired: false,
+    status: new Date(dbEvent.date) > new Date() ? 'upcoming' : 'completed',
+    comments: [],
+    history: [
+      {
+        date: dbEvent.createdAt,
+        action: 'created' as const,
+        description: 'Event wurde erstellt',
+      },
+    ],
+  };
+};
 
 export const eventsHandlers = [
-  // GET /api/events/public
-  http.get('/api/events/public', async () => {
+  // GET /api/public/event/list
+  http.get('/api/public/event/list', async () => {
     await delay(300);
 
     const dbEvents = db.event.findMany({
       where: { isPublic: { equals: true } },
+      orderBy: { date: 'asc' },
     });
 
-    const events = dbEvents.map(toPublicEvent);
+    const events = dbEvents.map(toPublicEventListItem);
 
     return HttpResponse.json({
       data: events,
@@ -20,35 +47,26 @@ export const eventsHandlers = [
         total: events.length,
         page: 1,
         limit: 10,
+        hasMore: false,
       },
     });
   }),
 
-  // GET /api/events/public/upcoming
-  http.get('/api/events/public/upcoming', async () => {
-    await delay(200);
-
-    const dbEvents = db.event.findMany({
-      where: { isPublic: { equals: true } },
-      take: 3,
-    });
-
-    const events = dbEvents.map(toPublicEvent);
-
-    return HttpResponse.json({
-      data: events,
-    });
-  }),
-
-  // GET /api/events/public/:id - Ohne explizite Typisierung
-  http.get('/api/events/public/:id', async ({ params }) => {
+  // GET /api/public/event/:id
+  http.get('/api/public/event/:id', async ({ params }) => {
     await delay(200);
 
     const { id } = params;
+    if (typeof id !== 'string') {
+      return new HttpResponse(JSON.stringify({ error: 'Invalid ID' }), {
+        status: 400,
+        headers: { 'content-type': 'application/json' },
+      });
+    }
 
     const event = db.event.findFirst({
       where: {
-        id: { equals: id as string },
+        id: { equals: id },
         isPublic: { equals: true },
       },
     });
@@ -56,12 +74,12 @@ export const eventsHandlers = [
     if (!event) {
       return new HttpResponse(JSON.stringify({ error: 'Event nicht gefunden' }), {
         status: 404,
-        headers: {
-          contentType: 'application/json',
-        },
+        headers: { 'content-type': 'application/json' },
       });
     }
 
-    return HttpResponse.json(toPublicEvent(event));
+    return HttpResponse.json({
+      data: toPublicEventDetail(event),
+    });
   }),
 ];

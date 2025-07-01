@@ -1,7 +1,11 @@
 // frontend/src/features/public/event-grid/ui/Card.tsx
 import { Calendar, MapPin, Users } from 'lucide-react';
 
-import { EVENT_CATEGORY_CONFIG,EVENT_ORGANIZER_CONFIG,type PublicEventListItem  } from '@/entities/public/event';
+import {
+  EVENT_CATEGORY_CONFIG,
+  EVENT_ORGANIZER_CONFIG,
+  type PublicEventListItem,
+} from '@/entities/public/event';
 
 import { Badge, Card as ShadcnCard, CardContent } from '@/shared/shadcn';
 import { Image } from '@/shared/ui';
@@ -74,25 +78,29 @@ export const Card = ({ event }: CardProps) => {
             <span className="truncate">{event.location}</span>
           </div>
 
-          {event.maxParticipants ? <div className="flex items-center gap-2">
+          {event.maxParticipants ? (
+            <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span>
-                {event.currentParticipants || 0} / {event.maxParticipants} Teilnehmer
+                {event.currentParticipants ?? 0} / {event.maxParticipants} Teilnehmer
               </span>
-            </div> : null}
+            </div>
+          ) : null}
         </div>
 
         {/* Progress Bar für Teilnehmer */}
-        {event.maxParticipants ? <div className="mt-4">
+        {event.maxParticipants ? (
+          <div className="mt-4">
             <div className="h-2 overflow-hidden rounded-full bg-gray-200">
               <div
                 className="h-full bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] transition-all duration-500"
                 style={{
-                  width: `${((event.currentParticipants || 0) / event.maxParticipants) * 100}%`,
+                  width: `${String(((event.currentParticipants ?? 0) / event.maxParticipants) * 100)}%`,
                 }}
               />
             </div>
-          </div> : null}
+          </div>
+        ) : null}
       </CardContent>
     </ShadcnCard>
   );

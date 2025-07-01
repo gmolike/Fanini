@@ -1,6 +1,8 @@
 // frontend/src/entities/public/event/model/schemas.ts
 import { z } from 'zod';
 
+// NEUE SCHEMAS (behalten)
+
 // Basis Event Schema für Listen-Ansicht
 export const publicEventListItemSchema = z.object({
   id: z.string(),
@@ -19,7 +21,7 @@ export const publicEventListItemSchema = z.object({
     .object({
       name: z.string(),
       logo: z.string().optional(),
-      color: z.string(), // Für visuelle Unterscheidung
+      color: z.string(),
     })
     .optional(),
 });
@@ -32,7 +34,7 @@ export const publicEventDetailSchema = publicEventListItemSchema.extend({
     .object({
       name: z.string(),
       role: z.string().optional(),
-      contact: z.string().optional(), // Email oder Telefon
+      contact: z.string().optional(),
     })
     .optional(),
   registrationRequired: z.boolean(),
@@ -41,7 +43,7 @@ export const publicEventDetailSchema = publicEventListItemSchema.extend({
   price: z
     .object({
       amount: z.number(),
-      currency: z.string().default('EUR'),
+      currency: z.string().optional(),
       description: z.string().optional(),
     })
     .optional(),
@@ -65,7 +67,7 @@ export const publicEventDetailSchema = publicEventListItemSchema.extend({
         }),
         content: z.string(),
         createdAt: z.string(),
-        isOfficial: z.boolean(), // Markiert offizielle Vereinskommentare
+        isOfficial: z.boolean(),
       })
     )
     .optional(),

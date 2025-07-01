@@ -7,12 +7,43 @@ import type {
 } from './schemas';
 import type { z } from 'zod';
 
+// NEUE TYPES (behalten)
 export type PublicEventListItem = z.infer<typeof publicEventListItemSchema>;
 export type PublicEventDetail = z.infer<typeof publicEventDetailSchema>;
 export type PublicEventListResponse = z.infer<typeof publicEventListResponseSchema>;
 export type PublicEventDetailResponse = z.infer<typeof publicEventDetailResponseSchema>;
 
-// Erweiterte Konfigurationen
+// Type für backward compatibility
+export type EventType = PublicEventListItem['type'];
+
+// Configs bleiben unverändert
+export const EVENT_TYPE_CONFIG = {
+  party: {
+    label: 'Party',
+    color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+  },
+  away: {
+    label: 'Auswärtsfahrt',
+    color: 'bg-[var(--color-fanini-red)]/10 text-[var(--color-fanini-red)]',
+  },
+  meeting: {
+    label: 'Versammlung',
+    color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+  },
+  match: {
+    label: 'Spieltag',
+    color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
+  },
+  concert: {
+    label: 'Konzert',
+    color: 'bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300',
+  },
+  training: {
+    label: 'Training',
+    color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
+  },
+} as const;
+
 export const EVENT_ORGANIZER_CONFIG = {
   faninitiative: {
     name: 'Faninitiative Spandau',

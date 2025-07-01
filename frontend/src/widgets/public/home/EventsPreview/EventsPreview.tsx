@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { AlertCircle, ArrowRight, Calendar, Clock, MapPin } from 'lucide-react';
 
-import { EVENT_TYPE_CONFIG, useUpcomingEvents } from '@/entities/public/event';
+import { EVENT_TYPE_CONFIG } from '@/entities/public/event';
 
 import { Badge, Button, Card, CardContent } from '@/shared/shadcn';
 import { LoadingState } from '@/shared/ui';
@@ -124,7 +124,7 @@ export const EventsPreview = () => {
               {/* CTA Button */}
               <div className="text-center">
                 <Button variant="outline" size="lg" asChild>
-                  <Link to="/events">
+                  <Link to="/event">
                     Alle Events anzeigen
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

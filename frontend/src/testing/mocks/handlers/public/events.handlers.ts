@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 // frontend/src/testing/mocks/handlers/public/events.handlers.ts
 import { delay, http, HttpResponse } from 'msw';
 
-import type { PublicEventDetail } from '@/entities/public/event';
+import type { PublicEventDetail, PublicEventListResponse } from '@/entities/public/event';
 
 import { db, toPublicEventListItem } from '../../db';
 
@@ -41,7 +40,7 @@ export const eventsHandlers = [
 
     const events = dbEvents.map(toPublicEventListItem);
 
-    return HttpResponse.json({
+    const response: PublicEventListResponse = {
       data: events,
       meta: {
         total: events.length,
@@ -49,37 +48,8 @@ export const eventsHandlers = [
         limit: 10,
         hasMore: false,
       },
-    });
-  }),
+    };
 
-  // GET /api/public/event/:id
-  http.get('/api/public/event/:id', async ({ params }) => {
-    await delay(200);
-
-    const { id } = params;
-    if (typeof id !== 'string') {
-      return new HttpResponse(JSON.stringify({ error: 'Invalid ID' }), {
-        status: 400,
-        headers: { 'content-type': 'application/json' },
-      });
-    }
-
-    const event = db.event.findFirst({
-      where: {
-        id: { equals: id },
-        isPublic: { equals: true },
-      },
-    });
-
-    if (!event) {
-      return new HttpResponse(JSON.stringify({ error: 'Event nicht gefunden' }), {
-        status: 404,
-        headers: { 'content-type': 'application/json' },
-      });
-    }
-
-    return HttpResponse.json({
-      data: toPublicEventDetail(event),
-    });
+    return HttpResponse.json(response);
   }),
 ];

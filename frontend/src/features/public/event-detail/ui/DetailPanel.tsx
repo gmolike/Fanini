@@ -1,5 +1,5 @@
 // frontend/src/features/public/event-detail/ui/DetailPanel.tsx
-import { usePublicEventDetail } from '@/entities/public/event';
+import { type PublicEventDetailResponse, usePublicEventDetail } from '@/entities/public/event';
 
 import { LoadingState } from '@/shared/ui';
 
@@ -17,7 +17,7 @@ export const DetailPanel = ({ eventId }: DetailPanelProps) => {
   const eventDetailQuery = usePublicEventDetail(eventId);
 
   return (
-    <LoadingState query={eventDetailQuery}>
+    <LoadingState<PublicEventDetailResponse> query={eventDetailQuery}>
       {response => <DetailContent event={response.data} />}
     </LoadingState>
   );

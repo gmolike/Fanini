@@ -1,7 +1,7 @@
 // frontend/src/shared/ui/layout/ui/ThemeToggle.tsx
 import { useEffect, useState } from 'react';
 
-import { Monitor,Moon, Sun } from 'lucide-react';
+import { Monitor, Moon, Sun } from 'lucide-react';
 
 import {
   Button,
@@ -67,9 +67,11 @@ export function ThemeToggle() {
         applyLightTheme();
       }
       localStorage.setItem('theme', theme);
+
+      // Expliziter return für alle Code-Pfade
+      return undefined;
     }
   }, [theme]);
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

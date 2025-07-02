@@ -1,14 +1,13 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 // frontend/src/testing/mocks/db/seeds/event.seed.ts
-
 import { createRandomEvent } from '../factories';
 
 export const seedEvents = (count = 10) => {
-  console.info(`[MSW] Seeding ${String(count)} events...`);
+  console.info(`[MSW] Seeding ${count} events...`);
 
   const events = [];
   for (let i = 0; i < count; i++) {
-    events.push(createRandomEvent());
+    const event = createRandomEvent();
+    events.push(event);
   }
 
   return events;
@@ -19,22 +18,28 @@ export const seedUpcomingEvents = () => {
   const events = [];
 
   // Nächste Woche
-  events.push(
-    createRandomEvent({
+  const nextWeekEvent = createRandomEvent();
+  db.event.update({
+    where: { id: { equals: nextWeekEvent.id } },
+    data: {
       title: 'Rückrundenstart-Party',
-      date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!,
+      date: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       type: 'party',
-    })
-  );
+    },
+  });
+  events.push(nextWeekEvent);
 
   // In 2 Wochen
-  events.push(
-    createRandomEvent({
+  const twoWeeksEvent = createRandomEvent();
+  db.event.update({
+    where: { id: { equals: twoWeeksEvent.id } },
+    data: {
       title: 'Auswärtsfahrt Berlin',
-      date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]!,
+      date: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       type: 'away',
-    })
-  );
+    },
+  });
+  events.push(twoWeeksEvent);
 
   return events;
 };

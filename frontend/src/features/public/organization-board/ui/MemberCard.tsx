@@ -1,25 +1,26 @@
-// widgets/public/organization/board/Card.tsx
-import { Calendar,Mail } from 'lucide-react';
+// frontend/src/features/public/organization-board/ui/MemberCard.tsx
+import { Calendar, Mail } from 'lucide-react';
 
 import type { BoardMember } from '@/entities/public/organization';
 
-import { Badge,Card as UICard, CardContent, CardHeader } from '@/shared/shadcn';
+import { Badge, Card, CardContent, CardHeader } from '@/shared/shadcn';
 
-type CardProps = {
+type MemberCardProps = {
   member: BoardMember;
-  onSelect?: (member: BoardMember) => void;
+  onSelect: (member: BoardMember) => void;
 };
 
 /**
- * Vorstandsmitglied-Karte
- * @param member - Mitgliedsdaten
- * @param onSelect - Auswahl-Callback
+ * MemberCard Component
+ * @description Zeigt ein Vorstandsmitglied als Karte
  */
-export const Card = ({ member, onSelect }: CardProps) => {
+export const MemberCard = ({ member, onSelect }: MemberCardProps) => {
   return (
-    <UICard
+    <Card
       className="cursor-pointer transition-all hover:-translate-y-1 hover:shadow-lg"
-      onClick={() => onSelect?.(member)}
+      onClick={() => {
+        onSelect(member);
+      }}
     >
       <CardHeader className="pb-4">
         <div className="flex items-start gap-4">
@@ -45,15 +46,19 @@ export const Card = ({ member, onSelect }: CardProps) => {
       </CardHeader>
 
       <CardContent className="space-y-3">
-        {member.description ? <p className="line-clamp-2 text-sm text-[var(--color-muted-foreground)]">
+        {member.description ? (
+          <p className="line-clamp-2 text-sm text-[var(--color-muted-foreground)]">
             {member.description}
-          </p> : null}
+          </p>
+        ) : null}
 
         <div className="space-y-2 text-sm">
-          {member.email ? <div className="flex items-center gap-2">
+          {member.email ? (
+            <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-[var(--color-muted-foreground)]" />
               <span className="truncate">{member.email}</span>
-            </div> : null}
+            </div>
+          ) : null}
 
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-[var(--color-muted-foreground)]" />
@@ -61,6 +66,6 @@ export const Card = ({ member, onSelect }: CardProps) => {
           </div>
         </div>
       </CardContent>
-    </UICard>
+    </Card>
   );
 };

@@ -1,45 +1,32 @@
-// widgets/public/organization/board/DetailModal.tsx
+// frontend/src/features/public/organization-board/ui/MemberDetailModal.tsx
 import { Calendar, Mail, Phone, User, X } from 'lucide-react';
 
 import type { BoardMember } from '@/entities/public/organization';
 
-import {
-  Badge,
-  Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogOverlay,
-  DialogTitle,
-} from '@/shared/shadcn';
+import { Badge, Button, Dialog, DialogContent, DialogHeader, DialogTitle } from '@/shared/shadcn';
 
-type DetailModalProps = {
+type MemberDetailModalProps = {
   member: BoardMember | null;
   open: boolean;
   onClose: () => void;
 };
 
 /**
- * Modal zur Detailansicht eines Vorstandsmitglieds
- * @param member - Vorstandsmitglied oder null
- * @param open - Modal-Status
- * @param onClose - Callback zum Schließen
+ * MemberDetailModal Component
+ * @description Modal zur Detailansicht eines Vorstandsmitglieds
  */
-export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
+export const MemberDetailModal = ({ member, open, onClose }: MemberDetailModalProps) => {
   if (!member) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogOverlay className="fixed inset-0 bg-white dark:bg-gray-900" />
       <DialogContent className="max-w-2xl">
-        <DialogHeader className="pb-0">
-          <div className="flex items-start justify-between">
-            <DialogTitle className="sr-only">{member.name}</DialogTitle>
-            <Button variant="ghost" size="icon" onClick={onClose} className="-mt-2 -mr-2 h-8 w-8">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Schließen</span>
-            </Button>
-          </div>
+        <DialogHeader>
+          <DialogTitle className="sr-only">{member.name}</DialogTitle>
+          <Button variant="ghost" size="icon" onClick={onClose} className="absolute top-4 right-4">
+            <X className="h-4 w-4" />
+            <span className="sr-only">Schließen</span>
+          </Button>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -119,8 +106,8 @@ export const DetailModal = ({ member, open, onClose }: DetailModalProps) => {
             <div className="space-y-3 border-t pt-6">
               <h3 className="mb-3 font-semibold">Verantwortlichkeiten</h3>
               <ul className="space-y-2">
-                {member.responsibilities.map((resp, idx) => (
-                  <li key={idx} className="flex items-start">
+                {member.responsibilities.map(resp => (
+                  <li key={resp} className="flex items-start">
                     <span className="mt-1.5 mr-3 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--color-fanini-blue)]" />
                     <span className="text-[var(--color-muted-foreground)]">{resp}</span>
                   </li>

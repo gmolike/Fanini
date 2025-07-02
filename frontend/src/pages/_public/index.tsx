@@ -1,19 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { Hero, Stats } from '@/widgets/public/home';
-
-import { EventsPreview } from '@/features/public/event-preview';
+import { HomeWidget } from '@/widgets/public/home';
 
 export const Route = createFileRoute('/_public/')({
   component: HomePage,
 });
 
 function HomePage() {
-  return (
-    <>
-      <Hero />
-      <Stats />
-      <EventsPreview />
-    </>
-  );
+  return <HomeWidget />;
 }

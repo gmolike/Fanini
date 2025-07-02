@@ -48,7 +48,7 @@ export const Hero = () => {
           {/* Subheading */}
           <p className="mx-auto mb-10 max-w-2xl text-lg text-white/90 sm:text-xl">
             Die Faninitiative Spandau e.V. ist der offizielle Fanverein der Eintracht Spandau. Seit
-            2022 vereinen wir Fans und schaffen unvergessliche Momente.
+            2025 vereinen wir Fans und schaffen unvergessliche Momente.
           </p>
 
           {/* CTA Buttons */}

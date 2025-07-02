@@ -1,4 +1,7 @@
-// frontend/src/widgets/public/organization/structure/Chart.tsx
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+// frontend/src/features/public/organization-structure/ui/OrgChart.tsx
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import {
@@ -25,12 +28,11 @@ import {
 
 import '@xyflow/react/dist/style.css';
 
-type ChartProps = {
+type OrgChartProps = {
   data: OrganizationNode;
   className?: string;
 };
 
-// Node Types für React Flow
 const nodeTypes = {
   org: OrgNode,
 };
@@ -46,56 +48,36 @@ const convertToFlowElements = (
   const nodes: OrgChartNode[] = [];
   const edges: Edge[] = [];
 
-  // Typsichere Konvertierung
-  const orgNode = node as {
-    name?: unknown;
-    description?: unknown;
-    type?: unknown;
-    members?: unknown;
-    children?: unknown;
-  };
+  const nodeId = `node-${String(node.name).replace(/\s+/g, '-').toLowerCase()}`;
 
-  // Node-ID generieren - sicherer Zugriff
-  const nodeName = typeof orgNode.name === 'string' ? orgNode.name : 'unnamed';
-  const nodeId = `node-${nodeName.replace(/\s+/g, '-').toLowerCase()}`;
-
-  // Type Mapping - prüfe welche Werte tatsächlich kommen
   const getNodeType = (): 'board' | 'advisory' | 'audit' | 'team' => {
-    const typeValue = String(orgNode.type).toLowerCase();
-
-    // Mapping verschiedener möglicher Werte
-    if (typeValue.includes('vorstand') || typeValue === 'board') return 'board';
-    if (typeValue.includes('beirat') || typeValue === 'advisory') return 'advisory';
-    if (typeValue.includes('kassenprüf') || typeValue.includes('prüf') || typeValue === 'audit')
-      return 'audit';
-
-    return 'team';
+    const typeMap: Record<string, 'board' | 'advisory' | 'audit' | 'team'> = {
+      board: 'board',
+      advisory: 'advisory',
+      audit: 'audit',
+      team: 'team',
+    };
+    return typeMap[node.type] ?? 'team';
   };
 
-  // Node erstellen
-  const baseData = {
+  const baseData: OrgNodeData = {
     id: nodeId,
-    label: nodeName,
-    department: typeof orgNode.description === 'string' ? orgNode.description : nodeName,
+    label: node.name,
+    department: node.description ?? node.name,
     level,
     type: getNodeType(),
+    memberCount: node.members?.length,
   };
-
-  const memberCount =
-    Array.isArray(orgNode.members) && orgNode.members.length > 0
-      ? orgNode.members.length
-      : undefined;
 
   const flowNode: OrgChartNode = {
     id: nodeId,
     type: 'org',
-    position: { x: 0, y: level * 200 }, // Mehr vertikaler Abstand
-    data: memberCount !== undefined ? { ...baseData, memberCount } : baseData,
+    position: { x: 0, y: level * 200 },
+    data: baseData,
   };
 
   nodes.push(flowNode);
 
-  // Edge zum Parent erstellen
   if (parentId) {
     edges.push({
       id: `edge-${parentId}-${nodeId}`,
@@ -105,9 +87,8 @@ const convertToFlowElements = (
     });
   }
 
-  // Rekursiv Children verarbeiten
-  if (Boolean(orgNode.children) && Array.isArray(orgNode.children)) {
-    orgNode.children.forEach((child: OrganizationNode) => {
+  if (Array.isArray(node.children)) {
+    node.children.forEach((child: OrganizationNode) => {
       const childElements = convertToFlowElements(child, nodeId, level + 1);
       nodes.push(...childElements.nodes);
       edges.push(...childElements.edges);
@@ -118,25 +99,22 @@ const convertToFlowElements = (
 };
 
 /**
- * Interaktives Organigramm zur Darstellung der Vereinsstruktur
+ * OrgChart Component
+ * @description Interaktives Organigramm zur Darstellung der Vereinsstruktur
  */
-export const Chart = ({ data, className }: ChartProps) => {
+export const Structure = ({ data, className }: OrgChartProps) => {
   const [selectedNode, setSelectedNode] = useState<OrgNodeData | null>(null);
   const reactFlowInstanceRef = useRef<ReactFlowInstance<Node<OrgNodeData>> | null>(null);
 
-  // Konvertiere Daten zu React Flow Format
   const flowElements = useMemo(() => {
     const { nodes, edges } = convertToFlowElements(data);
-    // Automatisches Layout anwenden
     return getLayoutedElements(nodes, edges, 'TB');
   }, [data]);
 
-  // Node Click Handler
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNode(node.data as OrgNodeData);
   }, []);
 
-  // Export Handler
   const handleExport = useCallback(async (format: 'png' | 'svg' | 'pdf') => {
     if (reactFlowInstanceRef.current) {
       await exportChart(
@@ -147,7 +125,6 @@ export const Chart = ({ data, className }: ChartProps) => {
     }
   }, []);
 
-  // React Flow Init Handler
   const onInit = useCallback((instance: ReactFlowInstance<Node<OrgNodeData>>) => {
     reactFlowInstanceRef.current = instance;
   }, []);

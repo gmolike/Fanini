@@ -15,7 +15,6 @@ export const Stats = () => {
 
   return (
     <section className="relative bg-[var(--color-muted)] py-16">
-      {/* Optional: Hintergrundbild */}
       <div
         className="absolute inset-0 opacity-5"
         style={{

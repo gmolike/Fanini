@@ -6,8 +6,7 @@ import { Link } from '@tanstack/react-router';
 import { Menu, Users } from 'lucide-react';
 
 import { Container } from '@/shared/ui/layout/Container';
-import { ThemeToggle } from '@/shared/ui/layout/ui/ThemeToggle';
-
+import { ThemeToggle } from '@/shared/ui/themetoggle/ThemeToggle';
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);

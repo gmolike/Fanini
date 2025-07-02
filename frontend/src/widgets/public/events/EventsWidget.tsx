@@ -37,12 +37,7 @@ export const EventsWidget = () => {
       />
 
       <PageSection>
-        <ModernTabs
-          items={tabs}
-          defaultValue="grid
-        "
-          variant="default"
-        />
+        <ModernTabs items={tabs} defaultValue="grid" variant="default" />
       </PageSection>
     </>
   );

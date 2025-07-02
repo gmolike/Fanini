@@ -9,22 +9,23 @@
   --color-secondary: var(--color-fanini-red);
   --color-secondary-foreground: #ffffff;
 
-  --color-popover: #ffffff;
-  --color-popover-foreground: #1a2e38;
-
-  --color-background: #ffffff;
+  --color-background: #eff1f3;
   --color-foreground: #1a2e38;
-  --color-card: #ffffff;
+  --color-card: #fafbfc;
   --color-card-foreground: #1a2e38;
-  --color-popover: #ffffff;
+  --color-popover: #fafbfc;
   --color-popover-foreground: #1a2e38;
-  --color-muted: #f3f6f8;
+  --color-muted: #e4e7eb;
   --color-muted-foreground: #5a7a8c;
-  --color-accent: #e8f0f4;
+  --color-accent: #d8dde2;
   --color-accent-foreground: #34687e;
-  --color-border: #d9e2e8;
-  --color-input: #e8f0f4;
+  --color-border: #c9d1d9;
+  --color-input: #e8ebef;
   --color-ring: var(--color-primary);
+
+  --color-card-light: #ffffff;
+  --color-card-medium: #fafbfc;
+  --color-card-dark: #f6f8fa;
 
   --color-destructive: #c73e35;
   --color-destructive-foreground: #ffffff;
@@ -34,17 +35,17 @@
   --color-warning-foreground: #ffffff;
 
   --radius: 0.5rem;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #1a2e38;
+
+  /* Button Overrides für Light Mode */
   button[data-variant="default"] {
     background-color: var(--color-fanini-blue);
     color: white;
   }
 
-  /* Outline button */
   button[data-variant="outline"] {
     border-color: var(--color-border);
     color: var(--color-foreground);
+    background-color: transparent;
   }
 
   button[data-variant="outline"]:hover {
@@ -72,9 +73,6 @@
   --color-destructive: #e85449;
   --color-success: #5d9b6f;
   --color-warning: #e8975a;
-
-  --color-popover: #1a2e38;
-  --color-popover-foreground: #e8f0f4;
 }
 
 * {
@@ -92,6 +90,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dialog Overlay mit besserem Blur */
 [data-slot="dialog-overlay"] {
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
@@ -111,6 +110,7 @@ body {
 [data-slot="button"][data-variant="outline"] {
   color: var(--color-fanini-blue);
   border-color: var(--color-fanini-blue);
+  background-color: transparent;
 }
 
 [data-slot="button"][data-variant="outline"]:hover {
@@ -118,13 +118,37 @@ body {
   color: white;
 }
 
-/* Füge diese Regel hinzu für bessere Sichtbarkeit */
+/* Dropdown und Select mit besserer Sichtbarkeit */
 [data-slot="dropdown-menu-content"] {
   background-color: var(--color-popover);
   border: 1px solid var(--color-border);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 [data-slot="select-content"] {
   background-color: var(--color-popover);
   border: 1px solid var(--color-border);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Zusätzliche Abstufungen für verschiedene Bereiche */
+[data-slot="tabs-list"] {
+  background-color: var(--color-muted);
+}
+
+[data-slot="card"] {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.05),
+    0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Hover-States mit subtilen Farbänderungen */
+[data-slot="card"]:hover {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+    0 2px 4px -1px rgba(0, 0, 0, 0.04);
 }

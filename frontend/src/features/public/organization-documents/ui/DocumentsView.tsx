@@ -59,7 +59,9 @@ export const DocumentsView = ({ filterType }: DocumentsViewProps) => {
             {/* Direkte PDF-Vorschau */}
             <div className="lg:col-span-2">
               {selectedDoc ? (
-                <Card className="h-[600px] overflow-hidden p-0">
+                <Card className="h-[1000px] overflow-hidden p-0">
+                  {' '}
+                  {/* Erhöht von 600px auf 800px */}
                   <div className="bg-muted border-b px-4 py-3">
                     <h4 className="font-medium">{selectedDoc.title}</h4>
                   </div>

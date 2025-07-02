@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 
 import { Loader2 } from 'lucide-react';
 
-import { Container } from '@/shared/ui/layout';
+import { Container } from '@/shared/ui';
 
 type LegalContentProps = {
   type: 'impressum' | 'datenschutz';

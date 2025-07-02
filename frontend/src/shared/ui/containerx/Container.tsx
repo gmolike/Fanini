@@ -18,15 +18,15 @@ export const Container: React.FC<ContainerProps> = ({
   as: Component = 'div',
 }) => {
   const sizeClasses = {
-    sm: 'max-w-4xl', // vorher: max-w-3xl
-    default: 'max-w-7xl', // vorher: max-w-6xl
-    lg: 'max-w-[90rem]', // vorher: max-w-7xl
-    xl: 'max-w-[110rem]', // neu
-    full: 'max-w-full',
+    sm: 'max-w-4xl',
+    default: 'max-w-none', // 100% Breite als Standard
+    lg: 'max-w-none',
+    xl: 'max-w-none',
+    full: 'max-w-none',
   };
 
   return (
-    <Component className={cn('mx-auto px-4 sm:px-6 lg:px-8', sizeClasses[size], className)}>
+    <Component className={cn('mx-auto w-full px-4 sm:px-6 lg:px-8', sizeClasses[size], className)}>
       {children}
     </Component>
   );

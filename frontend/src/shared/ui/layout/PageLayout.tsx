@@ -1,6 +1,6 @@
 // frontend/src/shared/ui/layout/PageLayout.tsx
 import { cn } from '@/shared/lib';
-import { Container } from '@/shared/ui/layout/Container';
+import { Container } from '@/shared/ui';
 
 type PageLayoutProps = {
   children: React.ReactNode;

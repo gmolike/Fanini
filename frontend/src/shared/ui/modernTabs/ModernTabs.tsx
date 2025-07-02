@@ -21,24 +21,33 @@ export const ModernTabs: React.FC<ModernTabsProps> = ({
 }) => {
   const variantStyles = {
     default: {
-      list: 'bg-transparent border-b h-auto p-0 rounded-none',
+      list: 'bg-transparent border-b h-auto p-0 rounded-none gap-0',
       trigger:
-        'rounded-none border-b-2 border-transparent pb-3 data-[state=active]:border-[var(--color-fanini-blue)] data-[state=active]:text-[var(--color-fanini-blue)] transition-all duration-200',
+        'rounded-none border-b-2 border-transparent pb-3 data-[state=active]:border-[var(--color-fanini-blue)] data-[state=active]:text-[var(--color-fanini-blue)] transition-all duration-200 hover:text-[var(--color-fanini-blue)]/80',
     },
     pills: {
-      list: 'bg-muted/50 h-auto p-1 rounded-lg',
+      list: 'bg-[var(--color-muted)] h-auto p-1 rounded-lg gap-1',
       trigger:
-        'rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all duration-200',
+        'rounded-md data-[state=active]:bg-white dark:data-[state=active]:bg-[var(--color-card)] data-[state=active]:shadow-sm transition-all duration-200',
     },
   };
 
   const styles = variantStyles[variant];
 
+  // Dynamische Grid-Columns
+  const gridCols =
+    {
+      1: 'grid-cols-1',
+      2: 'grid-cols-2',
+      3: 'grid-cols-3',
+      4: 'grid-cols-4',
+      5: 'grid-cols-5',
+      6: 'grid-cols-6',
+    }[items.length] ?? 'grid-cols-4';
+
   return (
     <Tabs defaultValue={defaultValue} className={cn('w-full', className)}>
-      <TabsList
-        className={cn('grid w-full gap-0', styles.list, `grid-cols-${String(items.length)}`)}
-      >
+      <TabsList className={cn('grid w-full', gridCols, styles.list)}>
         {items.map(item => (
           <TabsTrigger
             key={item.value}

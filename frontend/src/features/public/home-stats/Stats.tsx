@@ -1,10 +1,9 @@
 // frontend/src/widgets/public/home/Stats/Stats.tsx
-import { Calendar, Heart,Trophy, Users } from 'lucide-react';
+import { Calendar, Heart, Trophy, Users } from 'lucide-react';
 
 import { usePublicStats } from '@/entities/public/stats';
 
-import { LoadingState } from '@/shared/ui/feedback/ui/LoadingState';
-import { Container } from '@/shared/ui/layout/Container';
+import { Container, LoadingState } from '@/shared/ui';
 
 /**
  * Stats Widget

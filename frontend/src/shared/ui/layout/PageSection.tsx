@@ -1,7 +1,6 @@
 // frontend/src/shared/ui/layout/PageSection.tsx
 import { cn } from '@/shared/lib';
-
-import { Container } from './Container';
+import { Container } from '@/shared/ui';
 
 type PageSectionProps = {
   children: React.ReactNode;

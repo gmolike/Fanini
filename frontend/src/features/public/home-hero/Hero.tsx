@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 
 import { Button } from '@/shared/shadcn';
-import { Container } from '@/shared/ui/layout/Container';
+import { Container } from '@/shared/ui';
 
 /**
  * Hero Widget für die Startseite
@@ -36,7 +36,7 @@ export const Hero = () => {
 
           {/* Heading */}
           <h1 className="mb-6 font-[Bebas_Neue] text-5xl text-white sm:text-6xl lg:text-7xl">
-            Gemeinsam für
+            Gemeinsam für{' '}
             <span className="relative">
               <span className="relative z-10 text-[var(--color-fanini-red)]">
                 Eintracht Spandau

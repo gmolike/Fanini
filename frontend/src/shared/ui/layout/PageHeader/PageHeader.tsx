@@ -1,15 +1,8 @@
-import * as React from 'react';
-
 import { cn } from '@/shared/lib';
-
-import { Container } from '../Container';
+import { Container } from '@/shared/ui';
 
 import type { PageHeaderProps } from './model/types';
 
-/**
- * PageHeader Komponente
- * @description Einheitlicher Seitenkopf mit Titel, Beschreibung und Actions
- */
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
   description,
@@ -20,7 +13,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   const variantClasses = {
     default: 'bg-background border-b',
-    hero: 'bg-gradient-to-r from-fanini-blue-500 to-fanini-blue-600 text-white',
+    hero: 'bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-blue)]/90 text-white dark:text-white', // explizit für dark mode
     minimal: 'bg-transparent',
   };
 
@@ -34,7 +27,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             <h1
               className={cn(
                 'text-3xl font-bold tracking-tight',
-                variant === 'hero' ? 'text-white' : 'text-foreground'
+                variant === 'hero'
+                  ? 'text-white dark:text-white' // Weiß in beiden Modi
+                  : 'text-foreground' // Standard: schwarz/weiß je nach Mode
               )}
             >
               {title}
@@ -43,7 +38,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
               <p
                 className={cn(
                   'mt-2 text-lg',
-                  variant === 'hero' ? 'text-white/90' : 'text-muted-foreground'
+                  variant === 'hero' ? 'text-white/90 dark:text-white/90' : 'text-muted-foreground'
                 )}
               >
                 {description}

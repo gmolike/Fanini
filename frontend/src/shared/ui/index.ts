@@ -1,5 +1,6 @@
 export * from './breadcrumb';
 export * from './button';
+export * from './containerx';
 export * from './data-display';
 export * from './dataTable';
 export * from './display';
@@ -11,3 +12,4 @@ export * from './Image';
 export * from './layout';
 export * from './modernTabs';
 export * from './select';
+export * from './themetoggle';

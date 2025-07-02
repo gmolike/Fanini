@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-// frontend/src/features/public/organization-structure/ui/OrgChart.tsx
+// frontend/src/features/public/organization-structure/ui/Structure.tsx
 import { useCallback, useMemo, useRef, useState } from 'react';
 
 import {
@@ -12,6 +12,7 @@ import {
   ReactFlow,
   type ReactFlowInstance,
 } from '@xyflow/react';
+import { Info } from 'lucide-react';
 
 import type { OrganizationNode } from '@/entities/public/organization';
 
@@ -130,35 +131,47 @@ export const Structure = ({ data, className }: OrgChartProps) => {
   }, []);
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
-      <div className="space-y-4 p-6">
-        {/* Legend */}
-        <div className="flex items-center justify-between">
-          <h3 className="text-muted-foreground text-sm">
-            Klicke auf ein Element für mehr Details • Scrolle zum Zoomen
-          </h3>
-          <div className="flex gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded bg-gradient-to-b from-blue-500 to-blue-600" />
-              <span>Vorstand</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded bg-gradient-to-b from-red-500 to-red-600" />
-              <span>Beirat</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-4 w-4 rounded bg-gradient-to-b from-amber-500 to-amber-600" />
-              <span>Prüfung</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="bg-muted h-4 w-4 rounded" />
-              <span>Team</span>
+    <div className={cn('space-y-4', className)}>
+      {/* Info Card */}
+      <Card className="border-0 bg-[var(--color-muted)] p-4">
+        <div className="flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
+          <Info className="h-4 w-4" />
+          <p>
+            Klicke auf ein Element für mehr Details • Scrolle zum Zoomen • Nutze die Toolbar zum
+            Exportieren
+          </p>
+        </div>
+      </Card>
+
+      {/* Organigramm */}
+      <Card className="overflow-hidden p-0">
+        {/* Legend als Header */}
+        <div className="border-b bg-[var(--color-muted)] px-6 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h3 className="text-sm font-medium">Hierarchie-Übersicht</h3>
+            <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded bg-gradient-to-b from-blue-500 to-blue-600" />
+                <span>Vorstand</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded bg-gradient-to-b from-red-500 to-red-600" />
+                <span>Beirat</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded bg-gradient-to-b from-amber-500 to-amber-600" />
+                <span>Prüfung</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-3 w-3 rounded bg-[var(--color-muted)]" />
+                <span>Team</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* React Flow Container */}
-        <div className="bg-muted relative h-[500px] rounded-lg">
+        <div className="relative h-[600px] bg-[var(--color-background)]">
           <ReactFlow<Node<OrgNodeData>>
             nodes={flowElements.nodes}
             edges={flowElements.edges}
@@ -168,21 +181,24 @@ export const Structure = ({ data, className }: OrgChartProps) => {
             fitViewOptions={{ padding: 0.2 }}
             attributionPosition="bottom-left"
             onInit={onInit}
+            style={{
+              background: 'transparent',
+            }}
           >
             <Background
               variant={BackgroundVariant.Dots}
-              gap={16}
+              gap={20}
               size={1}
               color="var(--color-border)"
-              className="opacity-50"
+              className="opacity-20"
             />
             <CompactToolbar onExport={handleExport} />
           </ReactFlow>
         </div>
 
-        {/* Selected Node Details */}
+        {/* Selected Node Details - als Footer */}
         {selectedNode ? (
-          <div className="animate-in slide-in-from-bottom-2 bg-muted rounded-lg p-4">
+          <div className="animate-in slide-in-from-bottom-2 border-t bg-[var(--color-muted)] p-4">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <h4 className="flex items-center gap-2 text-lg font-semibold">
@@ -218,7 +234,7 @@ export const Structure = ({ data, className }: OrgChartProps) => {
             </div>
           </div>
         ) : null}
-      </div>
-    </Card>
+      </Card>
+    </div>
   );
 };

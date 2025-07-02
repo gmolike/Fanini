@@ -33,7 +33,8 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     externalForm
       ? {} // Dummy config when using external form
       : {
-          ...(schema ? { resolver: zodResolver(schema) } : {}),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ...(schema ? { resolver: zodResolver(schema as any) } : {}),
           defaultValues: defaultValues as NonNullable<typeof defaultValues>,
           mode,
           reValidateMode,
@@ -43,7 +44,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
           shouldUnregister,
           shouldUseNativeValidation,
           progressive,
-          delayError,
+          ...(delayError !== undefined ? { delayError } : {}),
         }
   );
 
@@ -69,5 +70,5 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     };
   }, [externalForm, internalForm, schema]);
 
-  return result;
+  return result as ControllerResult<TFieldValues>;
 };

@@ -125,13 +125,13 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                 if (inputType === 'number' && value !== '') {
                   const parsed = parseNumber(value);
                   if (parsed !== null) {
-                    // Convert the parsed number to string before passing to field.onChange
-                    field.onChange(String(parsed));
+                    // Type assertion für field.onChange
+                    field.onChange(String(parsed) as any);
                     return;
                   }
                 }
 
-                field.onChange(e);
+                field.onChange(e.target.value as any);
               }}
               onBlur={field.onBlur}
               name={field.name}

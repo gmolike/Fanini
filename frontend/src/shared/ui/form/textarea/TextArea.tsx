@@ -123,7 +123,8 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
             data-testid={testId}
             className={cn(showReset && 'pr-10', autoResize && 'resize-none overflow-hidden')}
             onChange={e => {
-              field.onChange(e);
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+              field.onChange(e.target.value as any);
 
               // Trigger resize on change
               if (autoResize && textareaRef.current) {

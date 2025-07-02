@@ -6,7 +6,7 @@ import { Form as ShadCnForm } from '@/shared/shadcn';
 import { useController } from './model/useController';
 
 import type { Props } from './model/types';
-import type { FieldValues } from 'react-hook-form';
+import type { FieldValues, UseFormReturn } from 'react-hook-form';
 
 /**
  * Form Component - Flexible form wrapper with Zod validation
@@ -84,7 +84,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   const formId = providedId ?? generatedId;
 
   const { form } = useController({
-    form: externalForm,
+    form: externalForm as UseFormReturn | undefined,
     schema,
     defaultValues,
     mode,
@@ -98,22 +98,24 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
     delayError,
   });
 
-  const handleSubmit = form.handleSubmit(onSubmit, onError);
+  const typedForm = form as UseFormReturn<TFieldValues>;
+
+  const handleSubmit = typedForm.handleSubmit(onSubmit, onError);
 
   const handleFormReset = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    form.reset();
+    typedForm.reset();
     onReset?.();
   };
 
-  const content = typeof children === 'function' ? children(form) : children;
+  const content = typeof children === 'function' ? children(typedForm) : children;
 
   // Extract schema description if available
   const ariaLabel =
     schema && '_def' in schema ? (schema._def as { description?: string }).description : undefined;
 
   return (
-    <ShadCnForm {...form}>
+    <ShadCnForm {...typedForm}>
       <form
         id={formId}
         onSubmit={handleSubmit}

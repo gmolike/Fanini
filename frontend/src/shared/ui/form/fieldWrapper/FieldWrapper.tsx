@@ -117,7 +117,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
 
           {/* Error Message */}
           {hasError ? (
-            <div {...errorProps}>
+            <div {...errorProps} aria-live="polite">
               <ShadCnFormMessage className="text-xs font-medium" />
             </div>
           ) : null}

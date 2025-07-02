@@ -130,7 +130,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                     {Icon ? <Icon className={ICON_SIZES.default} /> : null}
                     <span>{selectedOption?.label ?? placeholder}</span>
                   </span>
-                  {loading === true ? (
+                  {loading ? (
                     <Loader2 className={cn(ICON_SIZES.default, 'animate-spin opacity-50')} />
                   ) : (
                     <ChevronsUpDown className={cn(ICON_SIZES.default, 'shrink-0 opacity-50')} />
@@ -147,16 +147,16 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                     disabled={Boolean(loading)}
                   />
                   <CommandList>
-                    {loading === true && (
+                    {loading ? (
                       <CommandEmpty>
                         <Loader2 className={cn(ICON_SIZES.default, 'animate-spin')} />
                         <span className="ml-2">{loadingText}</span>
                       </CommandEmpty>
-                    )}
-                    {loading === false && filteredOptions.length === 0 && (
+                    ) : null}
+                    {!loading && filteredOptions.length === 0 && (
                       <CommandEmpty>{emptyText}</CommandEmpty>
                     )}
-                    {loading === false && filteredOptions.length > 0 && (
+                    {!loading && filteredOptions.length > 0 && (
                       <CommandGroup>
                         {filteredOptions.map(option => {
                           const value = String(option.value);

@@ -62,8 +62,7 @@ type HeadlineLabelProps = {
 };
 
 const HeadlineLabel = ({ headline, required }: HeadlineLabelProps) => {
-  const labelProps = required !== undefined ? { required } : {};
-  return <ShadCnFormLabel {...labelProps}>{headline}</ShadCnFormLabel>;
+  return <ShadCnFormLabel required={!!required}>{headline}</ShadCnFormLabel>;
 };
 
 const Component = <TFieldValues extends FieldValues = FieldValues>({
@@ -83,8 +82,8 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   const { isDisabled, groupClasses, ariaProps, labelProps } = useController({
     control,
     name,
-    disabled,
-    required,
+    disabled: disabled ?? false,
+    required: required ?? false,
     side,
     label,
   });
@@ -144,7 +143,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
             {label ? (
               <ShadCnFormLabel
                 {...labelProps}
-                required={required}
+                required={!!required}
                 className="cursor-pointer font-normal"
               >
                 {label}

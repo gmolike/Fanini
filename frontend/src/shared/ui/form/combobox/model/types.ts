@@ -2,6 +2,9 @@ import type { BaseFieldProps } from '../../input/model/types';
 import type { LoadingState, Option } from '../../types';
 import type { Control, FieldPath, FieldValues, PathValue } from 'react-hook-form';
 
+// Re-export Option from types
+export type { Option } from '../../types';
+
 /**
  * Props for the Combobox controller hook
  */
@@ -80,4 +83,10 @@ export type Props<
      * @default 300
      */
     debounceDelay?: number;
+
+    /**
+     * Loading state
+     * @default false
+     */
+    loading?: boolean;
   };

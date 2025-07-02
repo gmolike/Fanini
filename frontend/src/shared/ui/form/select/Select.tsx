@@ -132,7 +132,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                           onSelect={() => {
                             onValueChange(value, field.onChange);
                           }}
-                          disabled={option.disabled}
+                          disabled={!!option.disabled}
                         >
                           <Check
                             className={cn(

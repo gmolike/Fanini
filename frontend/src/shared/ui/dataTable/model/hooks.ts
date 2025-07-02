@@ -13,7 +13,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 
-import { convertTableDefinition, getColumnVisibility } from './converter';
+import { convertTableDefinition, getColumnVisibility, getSearchableColumns } from './converter';
 
 import type {
   DataTableController,
@@ -154,6 +154,7 @@ export const useDataTable = <TData extends TableDataConstraint>(
     isExpanded,
     selectedRows: {},
   };
+  const searchableColumns = getSearchableColumns(tableDefinition);
 
   const controller: DataTableController<TData> = {
     // Table instance
@@ -185,6 +186,7 @@ export const useDataTable = <TData extends TableDataConstraint>(
       addButtonText,
       addButtonTitle,
       disabledColumns,
+      searchableColumns,
       tableDefinition,
     },
 

@@ -21,5 +21,8 @@ import type { CellProps } from '../../model/types';
  * ```
  */
 export const Text = <TData,>({ value }: CellProps<TData>) => (
-  <TextDisplay text={value === undefined ? null : (value as string | number | null)} />
+  <TextDisplay
+    text={value === undefined ? null : (value as string | number | null)}
+    className={undefined}
+  />
 );

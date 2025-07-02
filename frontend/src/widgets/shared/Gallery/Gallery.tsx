@@ -1,4 +1,4 @@
-import { cn } from '@/shared';
+import { cn } from '@/shared/lib';
 
 type GalleryImage = {
   src: string;

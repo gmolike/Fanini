@@ -173,7 +173,7 @@ const otherContentSchema = z.object({
   name: z.string(),
   category: z.string(),
   description: z.string(),
-  customFields: z.record(z.any()),
+  customFields: z.record(z.union([z.string(), z.number(), z.boolean(), z.null()])),
 });
 
 // Content Union Schema

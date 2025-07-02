@@ -144,7 +144,7 @@ export type OtherContent = {
   name: string;
   category: string;
   description: string;
-  customFields: Record<string, any>;
+  customFields: Record<string, string | number | boolean | null>;
 };
 
 /**

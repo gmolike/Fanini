@@ -26,7 +26,7 @@ export const SpecialEventsCard = ({ events }: SpecialEventsCardProps) => {
       {events.map(event => {
         const Icon = CATEGORY_ICONS[event.category];
         return (
-          <Card key={event.id ?? `${event.title}-${event.date}`}>
+          <Card key={event.id}>
             <CardContent className="pt-6">
               <div className="flex items-start gap-4">
                 <div className="rounded-full bg-[var(--color-muted)] p-3">

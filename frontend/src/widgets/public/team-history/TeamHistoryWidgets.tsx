@@ -1,4 +1,4 @@
-// frontend/src/widgets/team-history/Timeline/Timeline.tsx
+// frontend/src/widgets/public/team-history/TeamHistoryWidgets.tsx
 import { useState } from 'react';
 
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
@@ -18,7 +18,9 @@ export const TeamHistoryWidgets = () => {
   const currentYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState(currentYear - 1);
 
-  const { data: yearData, isLoading: isLoadingData } = useTeamHistoryByYear(selectedYear);
+  // useTeamHistoryByYear gibt eine Funktion zurück, die wir aufrufen müssen
+  const teamHistoryQuery = useTeamHistoryByYear(selectedYear);
+  const { data: yearData, isLoading: isLoadingData } = teamHistoryQuery();
 
   if (isLoadingYears) {
     return (
@@ -89,20 +91,26 @@ export const TeamHistoryWidgets = () => {
         ))}
       </div>
 
-      {/* Content */}
-      {isLoadingData === true && (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--color-muted-foreground)]" />
-        </div>
-      )}
-      {isLoadingData === false && yearData !== undefined && yearData !== null && (
-        <TeamHistoryTabs yearData={yearData} />
-      )}
-      {isLoadingData === false && (yearData === undefined || yearData === null) && (
-        <div className="py-12 text-center text-[var(--color-muted-foreground)]">
-          Keine Daten für {selectedYear} verfügbar
-        </div>
-      )}
+      {/* Content - Entfernte die verschachtelte ternary expression */}
+      {(() => {
+        if (isLoadingData) {
+          return (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin text-[var(--color-muted-foreground)]" />
+            </div>
+          );
+        }
+
+        if (yearData) {
+          return <TeamHistoryTabs yearData={yearData} />;
+        }
+
+        return (
+          <div className="py-12 text-center text-[var(--color-muted-foreground)]">
+            Keine Daten für {selectedYear} verfügbar
+          </div>
+        );
+      })()}
     </div>
   );
 };

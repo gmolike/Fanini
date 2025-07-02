@@ -70,13 +70,13 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   } = useController({
     control,
     name,
-    disabled,
-    required,
+    disabled: disabled ?? false,
+    required: required ?? false,
     dateFormat,
-    min,
-    max,
-    locale,
-    label,
+    ...(min ? { min } : {}),
+    ...(max ? { max } : {}),
+    ...(locale ? { locale } : {}),
+    label: label ?? '',
   });
 
   const { handleClear } = useFieldReset(control, name);

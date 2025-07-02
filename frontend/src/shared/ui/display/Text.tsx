@@ -3,7 +3,7 @@ import { cn } from '@/shared/lib';
 type Props = {
   text?: string | number | null;
   placeholder?: string;
-  className?: string | undefined;
+  className: string | undefined;
   truncate?: boolean;
 };
 

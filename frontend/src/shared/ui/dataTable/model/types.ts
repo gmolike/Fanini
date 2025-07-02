@@ -93,7 +93,7 @@ export type DataTableController<TData> = {
   emptyProps: Record<string, never>;
   tableProps: {
     className: string;
-    style?: React.CSSProperties | undefined;
+    style: React.CSSProperties | undefined;
   };
   coreTableProps: {
     table: TanstackTable<TData>;
@@ -177,7 +177,7 @@ export type DataTableState = {
  */
 export type ErrorStateProps = {
   error: Error;
-  onRetry?: (() => void) | undefined;
+  onRetry: (() => void) | undefined;
 };
 
 /**
@@ -188,7 +188,7 @@ export type ExpandButtonProps = {
   onToggle: () => void;
   collapsedCount: number;
   totalCount: number;
-  customText?:
+  customText:
     | {
         expand?: string;
         collapse?: string;
@@ -312,16 +312,16 @@ export type TablePreset = keyof typeof TABLE_PRESETS;
  */
 export type ToolbarProps<TData> = {
   table: TanstackTable<TData>;
-  globalFilter?: string | undefined;
-  onGlobalFilterChange?: ((value: string) => void) | undefined;
-  searchPlaceholder?: string | undefined;
-  columnLabels?: Record<string, string> | undefined;
-  showColumnToggle?: boolean | undefined;
-  showColumnToggleText?: boolean | undefined;
-  onAddClick?: (() => void) | undefined;
-  addButtonText?: string | undefined;
-  addButtonTitle?: string | undefined;
-  searchableColumns?: string[] | undefined;
-  disabledColumns?: string[] | undefined;
-  tableDefinition?: TableDefinition<TData> | undefined;
+  globalFilter: string | undefined;
+  onGlobalFilterChange: ((value: string) => void) | undefined;
+  searchPlaceholder: string | undefined;
+  columnLabels: Record<string, string> | undefined;
+  showColumnToggle: boolean | undefined;
+  showColumnToggleText: boolean | undefined;
+  onAddClick: (() => void) | undefined;
+  addButtonText: string | undefined;
+  addButtonTitle: string | undefined;
+  searchableColumns: string[] | undefined;
+  disabledColumns: string[] | undefined;
+  tableDefinition: TableDefinition<TData> | undefined;
 };

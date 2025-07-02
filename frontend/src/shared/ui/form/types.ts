@@ -82,3 +82,31 @@ export type PlaceholderProps = {
    */
   emptyText?: string;
 };
+
+// frontend/src/shared/ui/form/types.ts
+/**
+ * Helper type to handle optional props with exactOptionalPropertyTypes
+ * Converts T | undefined to T for required controller props
+ */
+export type WithDefaults<T> = {
+  [K in keyof T]-?: T[K];
+};
+
+/**
+ * Extract required props from optional ones
+ */
+export type ExtractRequired<T> = {
+  [K in keyof T as undefined extends T[K] ? never : K]: T[K];
+};
+
+/**
+ * Extract optional props and make them truly optional
+ */
+export type ExtractOptional<T> = {
+  [K in keyof T as undefined extends T[K] ? K : never]?: Exclude<T[K], undefined>;
+};
+
+/**
+ * Combine required and optional props correctly
+ */
+export type StrictProps<T> = ExtractRequired<T> & ExtractOptional<T>;

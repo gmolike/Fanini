@@ -11,19 +11,20 @@ import type { FieldValues } from 'react-hook-form';
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
-  disabled = false,
-  required = false,
+  disabled,
+  required,
   side = 'right',
   label,
 }: ControllerProps<TFieldValues>): ControllerResult => {
-  const { isDisabled } = useFormFieldState(control, disabled);
+  const { isDisabled } = useFormFieldState(control, disabled ?? false);
   const { ariaProps, labelProps } = useFieldAccessibility(
     control,
     name,
-    required,
+    required ?? false,
     isDisabled,
-    label
+    label ?? ''
   );
+  // Rest des Codes bleibt gleich
 
   // Determine layout classes based on side
   const groupClasses = useMemo(() => {

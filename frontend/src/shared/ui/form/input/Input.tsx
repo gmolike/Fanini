@@ -13,7 +13,7 @@ import { formatPhoneNumber, parseNumber } from '../utils';
 import { useController } from './model/useController';
 
 import type { Props } from './model/types';
-import type { FieldValues } from 'react-hook-form';
+import type { FieldValues, PathValue } from 'react-hook-form';
 
 /**
  * Input Component - Form input field with comprehensive features
@@ -125,13 +125,12 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
                 if (inputType === 'number' && value !== '') {
                   const parsed = parseNumber(value);
                   if (parsed !== null) {
-                    // Type assertion für field.onChange
-                    field.onChange(String(parsed) as any);
+                    field.onChange(String(parsed) as PathValue<TFieldValues, typeof name>);
                     return;
                   }
                 }
 
-                field.onChange(e.target.value as any);
+                field.onChange(e.target.value as PathValue<TFieldValues, typeof name>);
               }}
               onBlur={field.onBlur}
               name={field.name}

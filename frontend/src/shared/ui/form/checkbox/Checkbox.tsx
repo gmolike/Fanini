@@ -12,6 +12,7 @@ import {
   FormLabel as ShadCnFormLabel,
   FormMessage as ShadCnFormMessage,
 } from '@/shared/shadcn';
+import { ensureDefined } from '@/shared/ui/form/utils/propUtils';
 
 import { useFieldReset } from '../hooks';
 
@@ -58,7 +59,7 @@ import type { FieldValues } from 'react-hook-form';
 // Headline label component moved outside of main component
 type HeadlineLabelProps = {
   headline: React.ReactNode;
-  required?: boolean | undefined;
+  required: boolean | undefined;
 };
 
 const HeadlineLabel = ({ headline, required }: HeadlineLabelProps) => {
@@ -82,10 +83,10 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
   const { isDisabled, groupClasses, ariaProps, labelProps } = useController({
     control,
     name,
-    disabled: disabled ?? false,
+    disabled: ensureDefined(disabled, false),
     required: required ?? false,
     side,
-    label,
+    label: label ?? '',
   });
 
   const { isDifferentFromDefault, handleReset, handleClear } = useFieldReset(control, name);

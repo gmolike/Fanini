@@ -16,7 +16,7 @@ import {
   PopoverTrigger,
 } from '@/shared/shadcn';
 
-import { ICON_SIZES, TRANSITIONS } from '../constants';
+import { DEFAULT_DEBOUNCE_DELAY, ICON_SIZES, TRANSITIONS } from '../constants';
 import { FormFieldWrapper } from '../fieldWrapper';
 import { useFieldReset } from '../hooks';
 
@@ -84,13 +84,13 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
   } = useController({
     control,
     name,
-    disabled,
-    required,
+    disabled: disabled ?? false,
+    required: required ?? false,
     options,
-    onSearchChange,
+    ...(onSearchChange ? { onSearchChange } : {}),
     loading,
-    debounceDelay,
-    label,
+    debounceDelay: debounceDelay ?? DEFAULT_DEBOUNCE_DELAY,
+    label: label ?? '',
   });
 
   const { handleClear } = useFieldReset(control, name);

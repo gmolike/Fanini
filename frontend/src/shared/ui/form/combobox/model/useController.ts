@@ -10,17 +10,21 @@ import type { ControllerProps, ControllerResult } from './types';
 /**
  * Hook for Combobox controller logic
  */
-export const useController = <TFieldValues extends FieldValues = FieldValues, TValue = string>({
-  control,
-  name,
-  disabled = false,
-  required = false,
-  options,
-  onSearchChange,
-  loading,
-  debounceDelay = DEFAULT_DEBOUNCE_DELAY,
-  label,
-}: ControllerProps<TFieldValues, TValue>): ControllerResult<TFieldValues, TValue> => {
+export const useController = <TFieldValues extends FieldValues = FieldValues, TValue = string>(
+  props: ControllerProps<TFieldValues, TValue>
+): ControllerResult<TFieldValues, TValue> => {
+  const {
+    control,
+    name,
+    disabled = false,
+    required = false,
+    options,
+    onSearchChange,
+    loading = false,
+    debounceDelay = DEFAULT_DEBOUNCE_DELAY,
+    label = '',
+  } = props;
+
   const { isDisabled } = useFormFieldState(control, disabled);
   const { ariaProps, labelProps } = useFieldAccessibility(
     control,
@@ -85,7 +89,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues, TV
   );
 
   return {
-    isDisabled: (isDisabled || loading) ?? false,
+    isDisabled: isDisabled || loading,
     open,
     setOpen,
     searchValue,

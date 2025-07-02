@@ -11,8 +11,8 @@ import type { FieldValues } from 'react-hook-form';
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   side = 'right',
   label,
 }: ControllerProps<TFieldValues>): ControllerResult => {

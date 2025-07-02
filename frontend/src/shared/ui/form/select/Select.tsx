@@ -1,6 +1,6 @@
 import { memo } from 'react';
 
-import { Check, ChevronsUpDown, type  LucideIcon,X  } from 'lucide-react';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
 
 import { cn } from '@/shared/lib';
 import {
@@ -80,6 +80,8 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
     });
 
   const { handleClear } = useFieldReset(control, name);
+  const selectedOption = options.find(opt => String(opt.value) === normalizedValue);
+  const SelectedIcon = selectedOption?.icon;
 
   return (
     <FormFieldWrapper
@@ -107,13 +109,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                 data-testid={testId}
               >
                 <span className="flex items-center gap-2">
-                  {(() => {
-                    const selectedOption = options.find(
-                      opt => String(opt.value) === normalizedValue
-                    );
-                    const Icon = selectedOption?.icon;
-                    return Icon ? <Icon className={ICON_SIZES.default} /> : null;
-                  })()}
+                  {SelectedIcon ? <SelectedIcon className={ICON_SIZES.default} /> : null}
                   <span className="truncate">{displayValue}</span>
                 </span>
                 <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
@@ -133,7 +129,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                         <CommandItem
                           key={value}
                           value={value}
-                          onSelect={() => { onValueChange(value, field.onChange); }}
+                          onSelect={() => {
+                            onValueChange(value, field.onChange);
+                          }}
                           disabled={option.disabled}
                         >
                           <Check
@@ -163,7 +161,9 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => { handleClear(); }}
+              onClick={() => {
+                handleClear();
+              }}
               aria-label="Auswahl löschen"
               className="shrink-0"
             >

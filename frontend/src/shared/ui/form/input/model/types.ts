@@ -147,6 +147,7 @@ export type ControllerResult = {
   errorProps: {
     id: string;
     role: string;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     'aria-live': 'polite';
   };
 

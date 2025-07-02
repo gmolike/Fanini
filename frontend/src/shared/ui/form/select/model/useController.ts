@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { type  FieldPath,type  FieldValues,type  PathValue,useWatch  } from 'react-hook-form';
+import { type FieldPath, type FieldValues, type PathValue, useWatch } from 'react-hook-form';
 
 import { useFieldAccessibility, useFormFieldState } from '../../hooks';
 
@@ -11,8 +11,8 @@ import type { ControllerProps, ControllerResult } from './types';
 export const useController = <TFieldValues extends FieldValues = FieldValues, TValue = string>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   options,
   placeholder,
   label,

@@ -24,7 +24,8 @@ const formatFileSize = (bytes: number): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   const size = parseFloat((bytes / Math.pow(k, i)).toFixed(2));
 
-  return `${size} ${sizes[i] ?? 'Bytes'}`;
+  // String() explizit verwenden
+  return `${String(size)} ${sizes[i] ?? 'Bytes'}`;
 };
 
 /**
@@ -110,11 +111,19 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
         <div className="space-y-4">
           {/* Dropzone */}
           <div
+            role="button"
+            tabIndex={isDisabled ? -1 : 0}
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onClick={() => {
               if (!isDisabled && canAddMore) {
+                inputRef.current?.click();
+              }
+            }}
+            onKeyDown={e => {
+              if (!isDisabled && canAddMore && (e.key === 'Enter' || e.key === ' ')) {
+                e.preventDefault();
                 inputRef.current?.click();
               }
             }}
@@ -146,7 +155,7 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
             <div className="space-y-2">
               {files.map((file, index) => (
                 <div
-                  key={`${file.name}-${file.lastModified}-${index}`}
+                  key={`${file.name}-${String(file.lastModified)}-${String(index)}`}
                   className="flex items-center gap-3 rounded-lg border p-3"
                 >
                   {/* Preview or icon */}

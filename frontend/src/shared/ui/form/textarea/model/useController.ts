@@ -1,4 +1,4 @@
-import { type  FieldValues,useWatch  } from 'react-hook-form';
+import { type FieldValues, useWatch } from 'react-hook-form';
 
 import { useFieldAccessibility, useFormFieldState } from '../../hooks';
 
@@ -10,8 +10,8 @@ import type { ControllerProps, ControllerResult } from './types';
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   rows = 3,
   maxLength,
   label,
@@ -27,6 +27,6 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
     rows,
     ariaProps,
     currentLength,
-    maxLength,
+    maxLength: maxLength ?? 0,
   };
 };

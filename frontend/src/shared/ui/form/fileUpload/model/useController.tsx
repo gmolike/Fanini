@@ -34,8 +34,8 @@ const fileToInfo = async (file: File): Promise<FileInfo> => {
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   accept,
   maxSize = 10 * 1024 * 1024, // 10MB
   maxFiles = 1,
@@ -136,7 +136,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
 
   const inputProps = {
     type: 'file' as const,
-    accept,
+    ...(accept !== undefined ? { accept } : {}),
     multiple: multiple && maxFiles > 1,
     disabled: isDisabled || !canAddMore,
   };

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { useFieldAccessibility, useFormFieldState } from '../../hooks';
 
 import type { ControllerProps, ControllerResult, InputHTMLType } from './types';
-import type { Control,FieldValues } from 'react-hook-form';
+import type { Control, FieldValues } from 'react-hook-form';
 
 /**
  * Type for resolver with Zod schema
@@ -109,8 +109,8 @@ const inferInputType = (schema: z.ZodTypeAny): InputHTMLType => {
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   type: explicitType,
   label,
 }: ControllerProps<TFieldValues>): ControllerResult => {

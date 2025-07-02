@@ -110,15 +110,16 @@ const Component = <TFieldValues extends FieldValues = FieldValues>({
 
                 {EndIcon ? <EndIcon className={cn('ml-2', iconSizeClass, 'opacity-50')} /> : null}
               </Button>
-
-              {additionalContentNode ? <div className="px-1">{additionalContentNode}</div> : null}
+              {additionalContentNode !== null && additionalContentNode !== undefined ? (
+                <div className="px-1">{additionalContentNode}</div>
+              ) : null}
             </div>
 
             {dialog({
               open: dialogOpen,
               onOpenChange: setDialogOpen,
               value: field.value,
-              onChange: field.onChange,
+              onChange: field.onChange as (value: unknown) => void,
               name: name as string,
             })}
           </>

@@ -14,8 +14,8 @@ import type { ControllerProps, ControllerResult } from './types';
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   dateFormat = 'dd.MM.yyyy',
   min,
   max,

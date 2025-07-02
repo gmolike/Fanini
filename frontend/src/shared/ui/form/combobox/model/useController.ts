@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { type  FieldPath,type  FieldValues,type  PathValue,useWatch  } from 'react-hook-form';
+import { type FieldPath, type FieldValues, type PathValue, useWatch } from 'react-hook-form';
 
 import { DEFAULT_DEBOUNCE_DELAY } from '../../constants';
 import { useDebounce, useFieldAccessibility, useFormFieldState } from '../../hooks';
@@ -13,8 +13,8 @@ import type { ControllerProps, ControllerResult } from './types';
 export const useController = <TFieldValues extends FieldValues = FieldValues, TValue = string>({
   control,
   name,
-  disabled,
-  required,
+  disabled = false,
+  required = false,
   options,
   onSearchChange,
   loading,
@@ -53,7 +53,8 @@ export const useController = <TFieldValues extends FieldValues = FieldValues, TV
   }, [options, searchValue]);
 
   // Debounced search callback
-  const debouncedSearchChange = useDebounce((value: string) => {
+  const debouncedSearchChange = useDebounce((...args: unknown[]) => {
+    const value = args[0] as string;
     onSearchChange?.(value);
   }, debounceDelay);
 
@@ -84,7 +85,7 @@ export const useController = <TFieldValues extends FieldValues = FieldValues, TV
   );
 
   return {
-    isDisabled: isDisabled || loading,
+    isDisabled: (isDisabled || loading) ?? false,
     open,
     setOpen,
     searchValue,

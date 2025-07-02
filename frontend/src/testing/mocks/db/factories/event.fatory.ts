@@ -1,7 +1,7 @@
 // frontend/src/testing/mocks/db/factories/event.factory.ts
 import { faker } from '@faker-js/faker/locale/de';
 
-import { db } from '../index';
+import { type db } from '../index';
 
 type DbEvent = ReturnType<typeof db.event.create>;
 

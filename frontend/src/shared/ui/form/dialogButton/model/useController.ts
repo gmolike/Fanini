@@ -10,7 +10,7 @@ import type { FieldValues } from 'react-hook-form';
  */
 export const useController = <TFieldValues extends FieldValues = FieldValues>({
   control,
-  disabled,
+  disabled = false,
   placeholder = 'Auswählen...',
   children,
 }: ControllerProps<TFieldValues>): ControllerResult => {
@@ -23,16 +23,17 @@ export const useController = <TFieldValues extends FieldValues = FieldValues>({
   );
 
   const getDisplayContent = useCallback(
+    // eslint-disable-next-line sonarjs/function-return-type
     (value: unknown): ReactNode => {
       if (typeof children === 'function') {
         const result = children(value);
-        // If the function returns empty/null/undefined and no value, show placeholder
-        if ((result === null || result === undefined || result === '') && !hasValue(value)) {
-          return placeholder;
+        // Immer einen konsistenten Typ zurückgeben
+        if (result === null || result === undefined || result === '') {
+          return hasValue(value) ? '' : placeholder;
         }
-        return result ?? placeholder;
+        return result;
       }
-
+      // Konsistenter Return
       return hasValue(value) ? children : placeholder;
     },
     [children, placeholder, hasValue]

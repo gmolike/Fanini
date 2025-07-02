@@ -35,8 +35,8 @@ export const YearCommentCard = ({ comment }: YearCommentCardProps) => {
               Highlights des Jahres
             </h4>
             <ul className="space-y-1">
-              {comment.highlights.map((highlight, index) => (
-                <li key={index} className="flex items-start gap-2">
+              {comment.highlights.map(highlight => (
+                <li key={highlight} className="flex items-start gap-2">
                   <span className="text-[var(--color-fanini-blue)]">•</span>
                   <span className="text-sm">{highlight}</span>
                 </li>
@@ -52,8 +52,8 @@ export const YearCommentCard = ({ comment }: YearCommentCardProps) => {
               Tiefpunkte
             </h4>
             <ul className="space-y-1">
-              {comment.lowlights.map((lowlight, index) => (
-                <li key={index} className="flex items-start gap-2">
+              {comment.lowlights.map(lowlight => (
+                <li key={lowlight} className="flex items-start gap-2">
                   <span className="text-red-500">•</span>
                   <span className="text-sm">{lowlight}</span>
                 </li>

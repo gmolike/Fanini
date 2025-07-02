@@ -62,8 +62,8 @@ export const LolTeamCard = ({ content, year }: LolTeamCardProps) => {
           <div>
             <h4 className="mb-3 font-semibold">Coaching Staff</h4>
             <div className="space-y-2">
-              {content.coaches.map((coach, index) => (
-                <div key={index} className="flex justify-between text-sm">
+              {content.coaches.map(coach => (
+                <div key={coach.name} className="flex justify-between text-sm">
                   <span>{coach.name}</span>
                   <span className="text-[var(--color-muted-foreground)]">{coach.role}</span>
                 </div>
@@ -108,8 +108,8 @@ export const LolTeamCard = ({ content, year }: LolTeamCardProps) => {
               Erfolge
             </h4>
             <div className="space-y-2">
-              {content.achievements.map((achievement, index) => (
-                <div key={index} className="flex items-start gap-2">
+              {content.achievements.map(achievement => (
+                <div key={achievement.title} className="flex items-start gap-2">
                   <Trophy className="mt-0.5 h-4 w-4 text-yellow-500" />
                   <div>
                     <div className="text-sm font-medium">{achievement.title}</div>

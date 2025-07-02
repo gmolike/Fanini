@@ -8,4 +8,6 @@ export * from './enum';
 export * from './feedback';
 export * from './icons/SocialIcon';
 export * from './Image';
+export * from './layout';
+export * from './modernTabs';
 export * from './select';

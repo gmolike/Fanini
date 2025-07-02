@@ -1,10 +1,10 @@
-import type { ElementType,ReactNode } from 'react'
+import type { ElementType, ReactNode } from 'react';
 
 export type ContainerProps = {
-  children: ReactNode
-  size?: ContainerSize
-  className?: string
-  as?: ElementType
-}
+  children: ReactNode;
+  size?: ContainerSize;
+  className?: string;
+  as?: ElementType;
+};
 
-export type ContainerSize = 'sm' | 'default' | 'lg' | 'full'
+export type ContainerSize = 'sm' | 'default' | 'lg' | 'xl' | 'full';

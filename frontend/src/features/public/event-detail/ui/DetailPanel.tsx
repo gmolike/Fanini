@@ -17,7 +17,7 @@ export const DetailPanel = ({ eventId }: DetailPanelProps) => {
   const eventDetailQuery = usePublicEventDetail(eventId);
 
   return (
-    <LoadingState<PublicEventDetailResponse> query={eventDetailQuery}>
+    <LoadingState<PublicEventDetailResponse> query={eventDetailQuery()}>
       {response => <DetailContent event={response.data} />}
     </LoadingState>
   );

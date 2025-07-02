@@ -9,4 +9,4 @@ export * from './seeds';
 export const db = factory(schemas);
 
 // Re-export nur die neuen converter
-export { toPublicEventListItem } from './factories/event.fatory';
+export { toPublicEventListItem } from './factories/event.factory';

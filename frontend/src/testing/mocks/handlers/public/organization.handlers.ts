@@ -109,6 +109,7 @@ export const organizationHandlers = [
       ],
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     return HttpResponse.json({ data: structure });
   }),
 

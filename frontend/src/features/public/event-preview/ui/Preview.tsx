@@ -105,7 +105,7 @@ export const Preview = () => {
 
             <div className="text-center">
               <Button variant="outline" size="lg" asChild>
-                <Link to="/event">
+                <Link to="/events">
                   Alle Events anzeigen
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>

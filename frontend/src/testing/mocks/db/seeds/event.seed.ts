@@ -1,8 +1,9 @@
 // frontend/src/testing/mocks/db/seeds/event.seed.ts
 import { createRandomEvent } from '../factories';
+import { db } from '../index';
 
 export const seedEvents = (count = 10) => {
-  console.info(`[MSW] Seeding ${count} events...`);
+  console.info(`[MSW] Seeding ${count.toString()} events...`);
 
   const events = [];
   for (let i = 0; i < count; i++) {

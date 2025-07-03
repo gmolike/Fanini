@@ -43,7 +43,7 @@ export const ListView = () => {
   }, [newslettersQuery.data, searchTerm, selectedTag]);
 
   const handleSelect = (id: string) => {
-    void navigate({ to: `/newsletter/$newsletterId`, params: { newsletterId: id } });
+    void navigate({ to: '/newsletter/$newsletterId', params: { newsletterId: id } });
   };
 
   return (

@@ -56,6 +56,29 @@ export type NewsletterListItem = Pick<
   'id' | 'edition' | 'title' | 'subtitle' | 'publishedAt' | 'tags' | 'headerImage'
 >;
 
+// Response Types
+export type NewsletterListResponse = {
+  data: NewsletterListItem[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    hasMore: boolean;
+  };
+};
+
+export type NewsletterDetailResponse = {
+  data: Newsletter;
+};
+
+// Subscription Types
+export type NewsletterSubscription = {
+  email: string;
+  firstName: string;
+  lastName?: string;
+  acceptsMarketing: boolean;
+};
+
 export const ARTICLE_CATEGORY_CONFIG = {
   'team-update': {
     label: 'Team Update',

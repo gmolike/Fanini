@@ -1,5 +1,5 @@
 // frontend/src/features/public/newsletter-list/ui/ListView.tsx
-import { useMemo,useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
@@ -24,8 +24,10 @@ export const ListView = () => {
 
     // Alle Tags sammeln
     const tagsSet = new Set<string>();
-    newsletters.forEach(nl => nl.tags.forEach(tag => tagsSet.add(tag)));
-    const tags = Array.from(tagsSet).sort();
+    newsletters.forEach(nl => {
+      nl.tags.forEach(tag => tagsSet.add(tag));
+    });
+    const tags = Array.from(tagsSet).sort((a, b) => a.localeCompare(b));
 
     // Filtern
     const filtered = newsletters.filter(newsletter => {
@@ -41,7 +43,7 @@ export const ListView = () => {
   }, [newslettersQuery.data, searchTerm, selectedTag]);
 
   const handleSelect = (id: string) => {
-    navigate({ to: `/newsletter/$newsletterId`, params: { newsletterId: id } });
+    void navigate({ to: `/newsletter/$newsletterId`, params: { newsletterId: id } });
   };
 
   return (

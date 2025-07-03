@@ -5,8 +5,7 @@ import { NewsletterDetailView } from '@/features/public/newsletter-detail';
 
 import { useNewsletterDetail } from '@/entities/public/newsletter';
 
-import { LoadingState } from '@/shared/ui';
-import { PageSection } from '@/shared/ui/layout';
+import { LoadingState, PageSection } from '@/shared/ui';
 
 export const NewsletterDetailWidget = () => {
   const { newsletterId } = useParams({ from: '/_public/newsletter/$newsletterId' });
@@ -14,7 +13,7 @@ export const NewsletterDetailWidget = () => {
 
   return (
     <PageSection className="py-8">
-      <LoadingState query={newsletterQuery()}>
+      <LoadingState query={newsletterQuery}>
         {response => <NewsletterDetailView newsletter={response.data} />}
       </LoadingState>
     </PageSection>

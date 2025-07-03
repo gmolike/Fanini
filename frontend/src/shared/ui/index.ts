@@ -11,7 +11,7 @@ export * from './feedback';
 export * from './glass';
 export * from './hover';
 export * from './icons/SocialIcon';
-export * from './Image';
+export * from './imagex';
 export * from './layout';
 export * from './modernTabs';
 export * from './parallax';

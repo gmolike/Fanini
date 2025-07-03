@@ -1,9 +1,8 @@
 // frontend/src/features/public/newsletter-list/ui/List.tsx
 import { CalendarDays, Hash, Newspaper } from 'lucide-react';
 
-import { ARTICLE_CATEGORY_CONFIG, type NewsletterListItem } from '@/entities/public/newsletter';
+import { type NewsletterListItem } from '@/entities/public/newsletter';
 
-import { cn } from '@/shared/lib';
 import { Badge, Card, CardContent } from '@/shared/shadcn';
 import { Image } from '@/shared/ui';
 

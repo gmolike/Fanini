@@ -33,7 +33,9 @@ export const Filters = ({
           <Input
             placeholder="Newsletter durchsuchen..."
             value={searchTerm}
-            onChange={e => { onSearchChange(e.target.value); }}
+            onChange={e => {
+              onSearchChange(e.target.value);
+            }}
             className="pl-9"
           />
         </div>

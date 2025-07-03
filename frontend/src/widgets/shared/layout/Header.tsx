@@ -16,6 +16,7 @@ export const Header = () => {
     { name: 'Über uns', href: '/about' },
     { name: 'Historie', href: '/historie' },
     { name: 'HistorieModern', href: '/historie-modern' },
+    { name: 'News', href: '/newsletter' },
     { name: 'Kontakt', href: '/kontakt' },
   ];
 

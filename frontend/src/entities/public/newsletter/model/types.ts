@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 // frontend/src/entities/public/newsletter/model/types.ts
+/* eslint-disable @typescript-eslint/naming-convention */
 export type NewsletterStatus = 'draft' | 'published' | 'archived';
 
 export type ArticleCategory =
@@ -18,21 +18,25 @@ export type NewsletterAuthor = {
   avatar?: string;
 };
 
+export type NewsletterImage = {
+  url: string;
+  caption?: string;
+  position?: 'inline' | 'header' | 'gallery';
+};
+
 export type NewsletterArticle = {
   id: string;
   title: string;
   content: string;
+  excerpt: string;
   author: NewsletterAuthor;
   teamId?: string;
   teamName?: string;
   category: ArticleCategory;
-  images?: {
-    url: string;
-    caption?: string;
-    position?: 'inline' | 'header' | 'gallery';
-  }[];
+  images?: NewsletterImage[];
   order: number;
   tags?: string[];
+  readingTime?: number;
 };
 
 export type Newsletter = {
@@ -49,14 +53,21 @@ export type Newsletter = {
   articles: NewsletterArticle[];
   closingMessage?: string;
   nextEditionHint?: string;
+  stats?: {
+    totalArticles: number;
+    estimatedReadTime: number;
+    teams: string[];
+  };
 };
 
 export type NewsletterListItem = Pick<
   Newsletter,
   'id' | 'edition' | 'title' | 'subtitle' | 'publishedAt' | 'tags' | 'headerImage'
->;
+> & {
+  preview: string;
+  articleCount: number;
+};
 
-// Response Types
 export type NewsletterListResponse = {
   data: NewsletterListItem[];
   meta: {
@@ -71,7 +82,6 @@ export type NewsletterDetailResponse = {
   data: Newsletter;
 };
 
-// Subscription Types
 export type NewsletterSubscription = {
   email: string;
   firstName: string;
@@ -83,43 +93,36 @@ export const ARTICLE_CATEGORY_CONFIG = {
   'team-update': {
     label: 'Team Update',
     icon: '👥',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
+    gradient: 'from-blue-500 to-purple-500',
   },
   'event-recap': {
     label: 'Event Rückblick',
     icon: '📸',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
+    gradient: 'from-purple-500 to-pink-500',
   },
   announcement: {
     label: 'Ankündigung',
     icon: '📢',
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
+    gradient: 'from-red-500 to-orange-500',
   },
   community: {
     label: 'Community',
     icon: '🤝',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
+    gradient: 'from-green-500 to-teal-500',
   },
   esports: {
     label: 'E-Sports',
     icon: '🎮',
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-100',
+    gradient: 'from-indigo-500 to-purple-500',
   },
   'baller-league': {
     label: 'Baller League',
     icon: '⚽',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100',
+    gradient: 'from-orange-500 to-red-500',
   },
   feature: {
     label: 'Feature',
     icon: '✨',
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-100',
+    gradient: 'from-pink-500 to-purple-500',
   },
 } as const;

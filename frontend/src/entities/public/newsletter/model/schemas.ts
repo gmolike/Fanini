@@ -18,6 +18,7 @@ const newsletterArticleSchema = z.object({
   id: z.string(),
   title: z.string(),
   content: z.string(),
+  excerpt: z.string(),
   author: newsletterAuthorSchema,
   teamId: z.string().optional(),
   teamName: z.string().optional(),
@@ -33,6 +34,7 @@ const newsletterArticleSchema = z.object({
   images: z.array(newsletterImageSchema).optional(),
   order: z.number(),
   tags: z.array(z.string()).optional(),
+  readingTime: z.number().optional(),
 });
 
 export const newsletterSchema = z.object({
@@ -49,17 +51,29 @@ export const newsletterSchema = z.object({
   articles: z.array(newsletterArticleSchema),
   closingMessage: z.string().optional(),
   nextEditionHint: z.string().optional(),
+  stats: z
+    .object({
+      totalArticles: z.number(),
+      estimatedReadTime: z.number(),
+      teams: z.array(z.string()),
+    })
+    .optional(),
 });
 
-export const newsletterListItemSchema = newsletterSchema.pick({
-  id: true,
-  edition: true,
-  title: true,
-  subtitle: true,
-  publishedAt: true,
-  tags: true,
-  headerImage: true,
-});
+export const newsletterListItemSchema = newsletterSchema
+  .pick({
+    id: true,
+    edition: true,
+    title: true,
+    subtitle: true,
+    publishedAt: true,
+    tags: true,
+    headerImage: true,
+  })
+  .extend({
+    preview: z.string(),
+    articleCount: z.number(),
+  });
 
 export const newsletterListResponseSchema = z.object({
   data: z.array(newsletterListItemSchema),

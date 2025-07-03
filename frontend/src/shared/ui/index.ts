@@ -8,6 +8,7 @@ export * from './display';
 export * from './document';
 export * from './enum';
 export * from './feedback';
+export * from './float';
 export * from './glass';
 export * from './hover';
 export * from './icons/SocialIcon';

@@ -23,6 +23,41 @@ export const TeamHistoryHero = ({
   isLoading,
   onYearChange,
 }: TeamHistoryHeroProps) => {
+  const renderContent = () => {
+    if (isLoading) {
+      return (
+        <motion.div
+          key="loading"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="flex justify-center py-20"
+        >
+          <div className="relative">
+            <div className="h-16 w-16 animate-spin rounded-full border-4 border-[var(--color-fanini-blue)]/20 border-t-[var(--color-fanini-blue)]" />
+            <Calendar className="absolute inset-0 m-auto h-8 w-8 text-[var(--color-fanini-blue)]" />
+          </div>
+        </motion.div>
+      );
+    }
+
+    if (yearData) {
+      return (
+        <motion.div
+          key={selectedYear}
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.3 }}
+        >
+          <TeamHistoryContent data={yearData} />
+        </motion.div>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-[var(--color-fanini-blue)]/10 via-transparent to-[var(--color-fanini-red)]/10">
       {/* Background Animation */}
@@ -55,32 +90,7 @@ export const TeamHistoryHero = ({
         />
 
         {/* Content Area */}
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex justify-center py-20"
-            >
-              <div className="relative">
-                <div className="h-16 w-16 animate-spin rounded-full border-4 border-[var(--color-fanini-blue)]/20 border-t-[var(--color-fanini-blue)]" />
-                <Calendar className="absolute inset-0 m-auto h-8 w-8 text-[var(--color-fanini-blue)]" />
-              </div>
-            </motion.div>
-          ) : yearData ? (
-            <motion.div
-              key={selectedYear}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-            >
-              <TeamHistoryContent data={yearData} />
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        <AnimatePresence mode="wait">{renderContent()}</AnimatePresence>
 
         {/* Scroll Indicator */}
         {yearData ? (

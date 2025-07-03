@@ -1,23 +1,37 @@
 // frontend/src/entities/public/newsletter/api/queries.ts
-import { createSimpleRemoteQuery } from '@/shared/api';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+
+import { apiClient } from '@/shared/api';
 
 import { newsletterDetailResponseSchema, newsletterListResponseSchema } from '../model/schemas';
 
 import type { NewsletterDetailResponse, NewsletterListResponse } from '../model/types';
 
-export const useNewsletterList = createSimpleRemoteQuery<NewsletterListResponse>({
-  queryKey: ['newsletter', 'list'],
-  endpoint: '/api/public/newsletter/list',
-  schema: newsletterListResponseSchema,
-  staleTime: 1000 * 60 * 10, // 10 Minuten
-});
-
-export const useNewsletterDetail = (newsletterId: string | null, options?: { enabled?: boolean }) =>
-  createSimpleRemoteQuery<NewsletterDetailResponse>({
-    queryKey: ['newsletter', 'detail', newsletterId ?? ''],
-    endpoint: newsletterId ? `/api/public/newsletter/${newsletterId}` : '/api/public/newsletter/',
-    schema: newsletterDetailResponseSchema,
-    staleTime: 1000 * 60 * 30, // 30 Minuten
-    enabled: !!newsletterId && options?.enabled !== false,
-    ...options,
+export const useNewsletterList = (): UseQueryResult<NewsletterListResponse> => {
+  return useQuery({
+    queryKey: ['newsletter', 'list'],
+    queryFn: async () => {
+      const response = await apiClient.get<NewsletterListResponse>('/api/public/newsletter/list');
+      return newsletterListResponseSchema.parse(response);
+    },
+    staleTime: 1000 * 60 * 10, // 10 minutes
   });
+};
+
+export const useNewsletterDetail = (
+  newsletterId: string | undefined,
+  options?: { enabled?: boolean }
+): UseQueryResult<NewsletterDetailResponse> => {
+  return useQuery({
+    queryKey: ['newsletter', 'detail', newsletterId ?? ''],
+    queryFn: async () => {
+      if (!newsletterId) throw new Error('Newsletter ID is required');
+      const response = await apiClient.get<NewsletterDetailResponse>(
+        `/api/public/newsletter/${newsletterId}`
+      );
+      return newsletterDetailResponseSchema.parse(response);
+    },
+    enabled: !!newsletterId && options?.enabled !== false,
+    staleTime: 1000 * 60 * 30, // 30 minutes
+  });
+};

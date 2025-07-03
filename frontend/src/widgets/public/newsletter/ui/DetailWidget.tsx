@@ -1,26 +1,31 @@
 // frontend/src/widgets/public/newsletter/ui/DetailWidget.tsx
-import { useParams } from '@tanstack/react-router';
+import { Loader2 } from 'lucide-react';
 
 import { NewsletterDetailView } from '@/features/public/newsletter-detail';
 
 import { useNewsletterDetail } from '@/entities/public/newsletter';
 
-import { LoadingState, PageSection } from '@/shared/ui';
+import { GlassCard, LoadingState } from '@/shared/ui';
 
-// frontend/src/widgets/public/newsletter/ui/DetailWidget.tsx// frontend/src/widgets/public/newsletter/ui/DetailWidget.tsx
-export const NewsletterDetailWidget = () => {
-  const { newsletterId } = useParams({ from: '/_public/newsletter/$newsletterId' });
+type NewsletterDetailWidgetProps = {
+  newsletterId: string;
+};
 
-  console.log('Newsletter ID from params:', newsletterId);
-
-  // Hook muss AUFGERUFEN werden mit ()
-  const newsletterQuery = useNewsletterDetail(newsletterId)(); // <- Beachte die ()
+export const NewsletterDetailWidget = ({ newsletterId }: NewsletterDetailWidgetProps) => {
+  const newsletterQuery = useNewsletterDetail(newsletterId);
 
   return (
-    <PageSection className="py-8">
-      <LoadingState query={newsletterQuery}>
-        {response => <NewsletterDetailView newsletter={response.data} />}
-      </LoadingState>
-    </PageSection>
+    <LoadingState
+      query={newsletterQuery}
+      loadingFallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <GlassCard className="p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-fanini-blue)]" />
+          </GlassCard>
+        </div>
+      }
+    >
+      {response => <NewsletterDetailView newsletter={response.data} />}
+    </LoadingState>
   );
 };

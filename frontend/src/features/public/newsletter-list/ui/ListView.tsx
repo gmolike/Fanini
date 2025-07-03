@@ -1,72 +1,80 @@
 // frontend/src/features/public/newsletter-list/ui/ListView.tsx
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
+import { motion } from 'framer-motion';
 
 import { useNewsletterList } from '@/entities/public/newsletter';
 
-import { LoadingState } from '@/shared/ui';
+import { GlassCard, LoadingState } from '@/shared/ui';
 
-import { Filters } from './Filters';
-import { List } from './List';
+import { FilterBar } from './FilterBar';
+import { NewsletterCard } from './NewsletterCard';
 
 export const ListView = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTag, setSelectedTag] = useState('all');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
   const newslettersQuery = useNewsletterList();
 
-  const { filteredNewsletters, availableTags } = useMemo(() => {
-    if (!newslettersQuery.data?.data) return { filteredNewsletters: [], availableTags: [] };
-
-    const newsletters = newslettersQuery.data.data;
-
-    // Alle Tags sammeln
-    const tagsSet = new Set<string>();
-    newsletters.forEach(nl => {
-      nl.tags.forEach(tag => tagsSet.add(tag));
-    });
-    const tags = Array.from(tagsSet).sort((a, b) => a.localeCompare(b));
-
-    // Filtern
-    const filtered = newsletters.filter(newsletter => {
-      const matchesSearch =
-        newsletter.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        newsletter.subtitle?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTag = selectedTag === 'all' || newsletter.tags.includes(selectedTag);
-
-      return matchesSearch && matchesTag;
-    });
-
-    return { filteredNewsletters: filtered, availableTags: tags };
-  }, [newslettersQuery.data, searchTerm, selectedTag]);
-
   const handleSelect = (id: string) => {
-    void navigate({ to: '/newsletter/$newsletterId', params: { newsletterId: id } });
+    void navigate({ to: `/newsletter/$newsletterId`, params: { newsletterId: id } });
   };
 
   return (
     <LoadingState query={newslettersQuery}>
-      {() => (
-        <>
-          <Filters
-            searchTerm={searchTerm}
-            selectedTag={selectedTag}
-            availableTags={availableTags}
-            onSearchChange={setSearchTerm}
-            onTagChange={setSelectedTag}
-          />
+      {response => {
+        const newsletters = response.data;
+        const tags = [...new Set(newsletters.flatMap(n => n.tags))];
 
-          {filteredNewsletters.length === 0 ? (
-            <div className="text-muted-foreground py-12 text-center">
-              Keine Newsletter gefunden.
-            </div>
-          ) : (
-            <List newsletters={filteredNewsletters} onSelect={handleSelect} />
-          )}
-        </>
-      )}
+        const filtered = newsletters.filter(newsletter => {
+          const matchesSearch =
+            newsletter.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            newsletter.subtitle?.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchesTag = !selectedTag || newsletter.tags.includes(selectedTag);
+          return matchesSearch && matchesTag;
+        });
+
+        return (
+          <>
+            <FilterBar
+              searchTerm={searchTerm}
+              selectedTag={selectedTag}
+              availableTags={tags}
+              onSearchChange={setSearchTerm}
+              onTagChange={setSelectedTag}
+            />
+
+            {filtered.length === 0 ? (
+              <GlassCard className="p-12 text-center">
+                <p className="text-[var(--color-muted-foreground)]">Keine Newsletter gefunden.</p>
+              </GlassCard>
+            ) : (
+              <motion.div
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.1 },
+                  },
+                }}
+                className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+              >
+                {filtered.map(newsletter => (
+                  <NewsletterCard
+                    key={newsletter.id}
+                    newsletter={newsletter}
+                    onSelect={handleSelect}
+                  />
+                ))}
+              </motion.div>
+            )}
+          </>
+        );
+      }}
     </LoadingState>
   );
 };

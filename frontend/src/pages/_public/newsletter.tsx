@@ -1,5 +1,5 @@
 // frontend/src/pages/_public/newsletter.tsx
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useParams } from '@tanstack/react-router';
 
 import { NewsletterWidget } from '@/widgets/public/newsletter';
 
@@ -9,9 +9,10 @@ export const Route = createFileRoute('/_public/newsletter')({
 
 function NewsletterLayout() {
   // Prüfe ob es einen newsletterId Parameter gibt
-  const params = Route.useParams();
+  const params = useParams({ strict: false });
 
   // Wenn kein newsletterId, zeige die Liste
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!params.newsletterId) {
     return <NewsletterWidget />;
   }

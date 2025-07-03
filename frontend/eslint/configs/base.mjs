@@ -2,8 +2,8 @@ import js from '@eslint/js';
 import prettierConfig from 'eslint-config-prettier';
 import sonarjs from 'eslint-plugin-sonarjs';
 import tseslint from 'typescript-eslint';
-import path from 'node:path'; // ← Fehlender Import
-import { fileURLToPath } from 'node:url'; // ← Fehlender Import
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

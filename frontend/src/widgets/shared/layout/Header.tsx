@@ -15,6 +15,7 @@ export const Header = () => {
     { name: 'Events', href: '/events' },
     { name: 'Über uns', href: '/about' },
     { name: 'Historie', href: '/historie' },
+    { name: 'HistorieModern', href: '/historie-modern' },
     { name: 'Kontakt', href: '/kontakt' },
   ];
 

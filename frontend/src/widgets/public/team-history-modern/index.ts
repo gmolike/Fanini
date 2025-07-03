@@ -1,0 +1,1 @@
+export { TeamHistoryModernWidget } from './TeamHistoryModernWidget';

@@ -1,6 +1,11 @@
 // shared/lib/dto-schema-builder.ts
 import { z } from 'zod';
 
+/**
+ * Builder-Klasse für die Erstellung von Zod-Schemas mit DTO-basierten Validierungen
+ * @template TDTOShape - Die Form des DTO-Objekts
+ * @template TLabels - Die Labels für die Fehlermeldungen
+ */
 export class DTOSchemaBuilder<
   TDTOShape extends z.ZodRawShape,
   TLabels extends Record<string, string>,
@@ -10,55 +15,96 @@ export class DTOSchemaBuilder<
     private readonly labels: TLabels
   ) {}
 
-  // Methoden mit DTO-Key Constraint
+  /**
+   * Erstellt ein erforderliches String-Schema mit Mindestlänge
+   * @param key - Der Schlüssel des DTO-Feldes
+   * @param minLength - Die Mindestlänge des Strings (Standard: 1)
+   * @returns Zod String-Schema
+   */
   requiredString(key: keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels, minLength = 1) {
-    return z
-      .string({ required_error: `${this.labels[key]} ist erforderlich` })
-      .min(minLength, `${this.labels[key]} muss mindestens ${minLength} Zeichen haben`);
+    const label = this.labels[key];
+    return (
+      z
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        .string({ required_error: `${label} ist erforderlich` })
+        .min(minLength, `${label} muss mindestens ${String(minLength)} Zeichen haben`)
+    );
   }
 
-  requiredEmail<TKey extends keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels>(key: TKey) {
-    return z
-      .string({ required_error: `${this.labels[key]} ist erforderlich` })
-      .min(1, `${this.labels[key]} ist erforderlich`)
-      .email(`${this.labels[key]} muss eine gültige E-Mail-Adresse sein`);
+  /**
+   * Erstellt ein erforderliches E-Mail-Schema
+   * @param key - Der Schlüssel des DTO-Feldes
+   * @returns Zod E-Mail-Schema
+   */
+  requiredEmail(key: keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels) {
+    const label = this.labels[key];
+    return (
+      z
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        .string({ required_error: `${label} ist erforderlich` })
+        .min(1, `${label} ist erforderlich`)
+        .email(`${label} muss eine gültige E-Mail-Adresse sein`)
+    );
   }
 
-  requiredNumber<TKey extends keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels>(key: TKey) {
+  /**
+   * Erstellt ein erforderliches Nummer-Schema
+   * @param key - Der Schlüssel des DTO-Feldes
+   * @returns Zod Number-Schema
+   */
+  requiredNumber(key: keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels) {
+    const label = this.labels[key];
     return z.number({
-      required_error: `${this.labels[key]} ist erforderlich`,
-      invalid_type_error: `${this.labels[key]} muss eine Zahl sein`,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      required_error: `${label} ist erforderlich`,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      invalid_type_error: `${label} muss eine Zahl sein`,
     });
   }
 
-  optionalString<TKey extends keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels>(key: TKey) {
-    return z.string({ required_error: `${this.labels[key]} ist erforderlich` }).optional();
+  /**
+   * Erstellt ein optionales String-Schema
+   * @param key - Der Schlüssel des DTO-Feldes
+   * @returns Zod Optional String-Schema
+   */
+  optionalString(key: keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels) {
+    const label = this.labels[key];
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    return z.string({ required_error: `${label} ist erforderlich` }).optional();
   }
 
+  /**
+   * Erstellt ein Boolean-Schema mit Preprocessing
+   * @returns Zod Boolean-Schema
+   */
   boolean() {
     return z.preprocess(val => val ?? false, z.boolean());
   }
 
-  // NEU: Enum mit Error Map
-  enum<
-    TKey extends keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels,
-    TEnum extends [string, ...Array<string>],
-  >(
-    key: TKey,
+  /**
+   * Erstellt ein Enum-Schema mit Custom Error Messages
+   * @param key - Der Schlüssel des DTO-Feldes
+   * @param values - Die erlaubten Enum-Werte
+   * @param options - Optionale Konfiguration für Error Handling
+   * @returns Zod Enum-Schema
+   */
+  enum<TEnum extends [string, ...string[]]>(
+    key: keyof z.infer<z.ZodObject<TDTOShape>> & keyof TLabels,
     values: TEnum,
     options?: {
       errorMap?: (issue: z.ZodIssueOptionalMessage, ctx: z.ErrorMapCtx) => { message: string };
       defaultError?: string;
     }
   ) {
+    const label = this.labels[key];
     const errorMap =
-      options?.errorMap ||
+      options?.errorMap ??
       ((issue, ctx) => {
         if (issue.code === z.ZodIssueCode.invalid_enum_value) {
           return {
             message:
               options?.defaultError ??
-              `${this.labels[key]} muss einer der folgenden Werte sein: ${values.join(', ')}`,
+              `${label} muss einer der folgenden Werte sein: ${values.join(', ')}`,
           };
         }
         return { message: ctx.defaultError };
@@ -67,12 +113,17 @@ export class DTOSchemaBuilder<
     return z.enum(values, { errorMap });
   }
 
-  // NEU: Refine Support
+  /**
+   * Helper für Refinement-Definitionen
+   * @param check - Die Validierungsfunktion
+   * @param options - Optionen für die Fehlermeldung
+   * @returns Refinement-Objekt
+   */
   refine<TInput = z.infer<z.ZodObject<TDTOShape>>>(
     check: (data: TInput) => boolean | Promise<boolean>,
     options: {
       message: string;
-      path?: Array<keyof TInput>;
+      path?: (keyof TInput)[];
     }
   ) {
     return {
@@ -81,30 +132,28 @@ export class DTOSchemaBuilder<
     };
   }
 
-  // Die Extend-Methode mit perfekter Type-Inference und optionalem strict()
-  extend<TOverrides extends Record<string, z.ZodTypeAny>>(
-    overrides: (builder: this) => TOverrides,
+  /**
+   * Erweitert das Basis-Schema mit zusätzlichen Feldern
+   * @param overrides - Funktion die die zusätzlichen Felder definiert
+   * @param options - Optionale Konfiguration (strict mode, refinements)
+   * @returns Erweitertes Zod-Schema
+   */
+  extend(
+    overrides: (builder: this) => z.ZodRawShape,
     options?: {
       strict?: boolean;
-      refine?: Array<{
+      refine?: {
         check: (data: z.infer<z.ZodObject<TDTOShape>>) => boolean | Promise<boolean>;
-        params: { message: string; path?: Array<string> };
-      }>;
+        params: { message: string; path?: string[] };
+      }[];
     }
   ): z.ZodTypeAny {
-    let schema: z.ZodTypeAny = this.dto.extend(overrides(this)) as z.ZodObject<
-      TDTOShape & { [K in keyof TOverrides]: TOverrides[K] },
-      z.UnknownKeysParam,
-      z.ZodTypeAny,
-      z.infer<z.ZodObject<TDTOShape & { [K in keyof TOverrides]: TOverrides[K] }>>,
-      z.output<z.ZodObject<TDTOShape & { [K in keyof TOverrides]: TOverrides[K] }>>
-    >;
+    const extended = overrides(this);
+    let schema: z.ZodTypeAny = this.dto.extend(extended);
 
-    // Apply strict mode if requested
-    if (options?.strict) {
-      if (schema instanceof z.ZodObject) {
-        schema = schema.strict();
-      }
+    // Apply strict mode if requested and apply refinements
+    if (options?.strict && schema instanceof z.ZodObject) {
+      schema = schema.strict();
     }
 
     // Apply refinements
@@ -118,10 +167,18 @@ export class DTOSchemaBuilder<
   }
 }
 
-// Helper Factory Function
-export function createDTOSchemaBuilder<
+/**
+ * Factory-Funktion zum Erstellen eines DTOSchemaBuilders
+ * @param dto - Das Basis-DTO-Schema
+ * @param labels - Die Labels für Fehlermeldungen
+ * @returns Eine neue DTOSchemaBuilder-Instanz
+ */
+export const createDTOSchemaBuilder = <
   TDTOShape extends z.ZodRawShape,
   TLabels extends Record<string, string>,
->(dto: z.ZodObject<TDTOShape>, labels: TLabels): DTOSchemaBuilder<TDTOShape, TLabels> {
+>(
+  dto: z.ZodObject<TDTOShape>,
+  labels: TLabels
+): DTOSchemaBuilder<TDTOShape, TLabels> => {
   return new DTOSchemaBuilder(dto, labels);
-}
+};

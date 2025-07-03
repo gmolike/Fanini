@@ -232,7 +232,7 @@ export const teamHistoryYearResponseSchema = z.object({
 export const availableYearsResponseSchema = z.object({
   id: z.string(),
   years: z.array(z.number()),
-  teamTypes: z.record(z.number(), z.array(teamTypeSchema)),
+  teamTypes: z.record(z.string(), z.array(teamTypeSchema)),
 });
 
 // Export individual schemas for reuse

@@ -10,3 +10,4 @@ export const db = factory(schemas);
 
 // Re-export nur die neuen converter
 export { toPublicEventListItem } from './factories/event.factory';
+export { toNewsletterDetail, toNewsletterListItem } from './factories/newsletter.factory';

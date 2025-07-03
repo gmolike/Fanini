@@ -17,6 +17,7 @@ export const newsletterImage = {
 
 export const newsletterArticle = {
   id: primaryKey(String),
+  newsletterId: String,
   title: String,
   content: String,
   authorId: String,
@@ -41,6 +42,7 @@ export const newsletter = {
   closingMessage: nullable(String),
   nextEditionHint: nullable(String),
 };
+
 export const newsletterSubscription = {
   id: primaryKey(String),
   email: String,
@@ -50,13 +52,4 @@ export const newsletterSubscription = {
   subscribedAt: String,
   confirmed: Boolean,
   confirmationToken: nullable(String),
-};
-
-// Re-export für DB-Schema
-export const newsletterSchema = {
-  newsletter,
-  newsletterAuthor,
-  newsletterArticle,
-  newsletterImage,
-  newsletterSubscription,
 };

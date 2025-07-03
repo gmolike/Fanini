@@ -50,13 +50,13 @@ export const Article = ({ article }: ArticleProps) => {
       {article.images?.find(img => img.position === 'header') ? (
         <div className="overflow-hidden rounded-lg">
           <Image
-            src={article.images.find(img => img.position === 'header')!.url}
+            src={article.images.find(img => img.position === 'header')?.url ?? ''}
             alt={article.title}
             className="h-full w-full object-cover"
           />
           {article.images.find(img => img.position === 'header')?.caption ? (
             <p className="text-muted-foreground mt-2 text-center text-sm">
-              {article.images.find(img => img.position === 'header')!.caption}
+              {article.images.find(img => img.position === 'header')?.caption}
             </p>
           ) : null}
         </div>

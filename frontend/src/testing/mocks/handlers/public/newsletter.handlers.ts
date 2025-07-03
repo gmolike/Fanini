@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // frontend/src/testing/mocks/handlers/public/newsletter.handlers.ts
 import { delay, http, HttpResponse } from 'msw';
 
@@ -84,20 +85,7 @@ export const newsletterHandlers = [
     // Artikel holen
     const articles = db.newsletterArticle.findMany({
       where: {
-        id: {
-          in: [
-            'article-esports-recap',
-            'article-baller-league',
-            'article-vorstand',
-            'article-mitglieder',
-            'article-technik',
-            'article-medien',
-            'article-events',
-            'article-fan-week',
-            'article-community',
-            'article-upcoming',
-          ],
-        },
+        newsletterId: { equals: newsletter.id },
       },
       orderBy: { order: 'asc' },
     });
@@ -142,13 +130,14 @@ export const newsletterHandlers = [
 
     // Neue Subscription erstellen
     const subscription = db.newsletterSubscription.create({
-      id: `sub-${Date.now()}`,
+      id: `sub-${Date.now().toString()}`,
       email: body.email,
       firstName: body.firstName,
       lastName: body.lastName,
       acceptsMarketing: body.acceptsMarketing,
       subscribedAt: new Date().toISOString(),
       confirmed: false,
+      // eslint-disable-next-line sonarjs/pseudo-random
       confirmationToken: Math.random().toString(36).substring(2, 15),
     });
 

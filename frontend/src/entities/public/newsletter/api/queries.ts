@@ -2,6 +2,7 @@
 import { createSimpleRemoteQuery } from '@/shared/api';
 
 import { newsletterDetailResponseSchema, newsletterListResponseSchema } from '../model/schemas';
+
 import type { NewsletterDetailResponse, NewsletterListResponse } from '../model/types';
 
 export const useNewsletterList = createSimpleRemoteQuery<NewsletterListResponse>({

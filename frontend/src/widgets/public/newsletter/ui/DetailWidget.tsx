@@ -8,7 +8,7 @@ import { useNewsletterDetail } from '@/entities/public/newsletter';
 import { LoadingState, PageSection } from '@/shared/ui';
 
 export const NewsletterDetailWidget = () => {
-  const { newsletterId } = useParams({ from: '/_public/newsletter/$newsletterId' });
+  const { newsletterId } = useParams({ from: '/newsletter/$newsletterId' });
   const newsletterQuery = useNewsletterDetail(newsletterId);
 
   return (

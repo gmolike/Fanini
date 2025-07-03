@@ -79,7 +79,7 @@ export const newsletterSubscriptionSchema = z.object({
   email: z.string().email('Bitte gib eine gültige E-Mail-Adresse ein'),
   firstName: z.string().min(2, 'Der Vorname muss mindestens 2 Zeichen lang sein'),
   lastName: z.string().optional(),
-  acceptsMarketing: z.boolean().refine(val => val === true, {
+  acceptsMarketing: z.boolean().refine(val => val, {
     message: 'Du musst dem Newsletter-Empfang zustimmen',
   }),
 });

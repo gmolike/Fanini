@@ -69,6 +69,7 @@ Eure Fanini-Crew`,
     // E-Sports Recap
     db.newsletterArticle.create({
       id: 'article-esports-recap',
+      newsletterId: newsletter1.id,
       title: 'E-Sports-Recap',
       content: `Auch wenn aktuell Off-Season ist: sobald es wieder losgeht, bekommt ihr hier die wichtigsten Infos zu Matches, MVPs und Highlights!
 
@@ -97,6 +98,7 @@ PRM-Pokal:
     // Baller League Update
     db.newsletterArticle.create({
       id: 'article-baller-league',
+      newsletterId: newsletter1.id,
       title: 'BallerLeague Updates',
       content: `Sobald der Ball wieder rollt, liefern wir Spielberichte, Tabellen und spannende Stats.
 Die 3. Season der Baller League haben wir leider nur als 7. Platz beenden können. Dafür konnten wir den polnischen Bulldozer Norbert Jasczak, der zur Hälfte der Season unser Team ordentlich verstärkt hat, für Season 4 dauerhaft unter Vertrag nehmen.`,
@@ -109,6 +111,7 @@ Die 3. Season der Baller League haben wir leider nur als 7. Platz beenden könne
     // Fanini-Spotlight: Vorstand
     db.newsletterArticle.create({
       id: 'article-vorstand',
+      newsletterId: newsletter1.id,
       title: 'Fanini-Spotlight: Die Vereinsgründung ist durch!',
       content: `Hallo zusammen! Wir, der Vorstand, freuen uns riesig, euch heute die vollständige Geschichte und die aktuellen Neuigkeiten zur Vereinsgründung der Faninitiative Spandau mitzuteilen. Viele von euch waren bei den Versammlungen persönlich dabei, aber hier ist der komplette Überblick für alle:
 
@@ -130,6 +133,7 @@ Wir freuen uns darauf, euch bald weitere Updates zu geben und gemeinsam mit euch
     // Team Mitgliederverwaltung
     db.newsletterArticle.create({
       id: 'article-mitglieder',
+      newsletterId: newsletter1.id,
       title: 'Team Update: Mitgliederverwaltung',
       content: `Die Baller League Season 3, die erstmalig in Berlin Tempelhof stattfand, ist zu Ende gegangen und dazu hatten wir wieder unser Kicktippspiel veranstaltet. Rund 20 aktive Fans aus der Community haben dort um die ersten drei Plätze getippt, um tolle Preise wie ein Eintracht Trikot und Knabe Malz abzustauben. Zur kommenden Season 4 planen wir, es wieder stattfinden zu lassen. Außerdem ist die Fanini seit der Gründungsveranstaltung im Februar auf 70 Mitglieder gewachsen.`,
       authorId: authors.franzee.id,
@@ -143,6 +147,7 @@ Wir freuen uns darauf, euch bald weitere Updates zu geben und gemeinsam mit euch
     // Team Technik
     db.newsletterArticle.create({
       id: 'article-technik',
+      newsletterId: newsletter1.id,
       title: 'Team Update: Technik stellt sich vor',
       content: `Ich stelle euch heute das Team Technik vor!
 
@@ -168,6 +173,7 @@ Das wars auch schon wieder von uns, wenn ihr euch denkt, dass sowas für euch w�
     // Team Mediengestaltung
     db.newsletterArticle.create({
       id: 'article-medien',
+      newsletterId: newsletter1.id,
       title: 'Team Update: Neue Leitung bei Mediengestaltung',
       content: `Servus aus der Kreativ-Ecke! Wir vom Team Mediengestaltung sind diejenigen, die für die Memes, Grafiken und den ganzen visuellen Kram verantwortlich sind, den ihr von der Fanini seht.
 
@@ -185,6 +191,7 @@ Dafür suchen wir aber auch aktiv nach Verstärkung! Wenn du ein kreatives Auge 
     // Team Events
     db.newsletterArticle.create({
       id: 'article-events',
+      newsletterId: newsletter1.id,
       title: 'Team Update: Events - Wir planen eure Highlights!',
       content: `Hey!
 Wir sind Team Events, bestehend aus kreativen Köpfen, die sich um die Planung, Ideenfindung und Umsetzung von Aktionen kümmern.
@@ -209,6 +216,7 @@ Wir freuen uns euch vor Ort zu treffen :)`,
     // Fan der Woche Rubrik
     db.newsletterArticle.create({
       id: 'article-fan-week',
+      newsletterId: newsletter1.id,
       title: 'Fan der Woche',
       content: `Ihr macht geilen Kram? Wir zeigen ihn! Egal ob Memes, Fan-Art oder besondere Aktionen, wir teilen eure kreativen Ideen!
 
@@ -222,6 +230,7 @@ Diese Rubrik startet ab dem nächsten Newsletter - schickt uns eure Kreationen!`
     // Community-Aktionen
     db.newsletterArticle.create({
       id: 'article-community',
+      newsletterId: newsletter1.id,
       title: 'Community-Aktionen',
       content: `Challenges, Votings & mehr – alles, wo eure Stimme zählt.
 
@@ -235,6 +244,7 @@ In Zukunft werden wir hier regelmäßig Aktionen vorstellen, bei denen ihr mitma
     // Was steht an?
     db.newsletterArticle.create({
       id: 'article-upcoming',
+      newsletterId: newsletter1.id,
       title: 'Was steht an?',
       content: `Vom 20.8. bis 24.8. schlägt in Köln wieder das Herz des Gamings: die Gamescom. Dazu wird es zu gegebener Zeit noch weitere Informationen geben, aber ihr könnt euch schonmal den Samstag freihalten, denn man munkelt von einer Aktion, die dort stattfinden wird....
 

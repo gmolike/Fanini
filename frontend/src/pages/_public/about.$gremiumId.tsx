@@ -13,8 +13,14 @@ export const Route = createFileRoute('/_public/about/$gremiumId')({
 });
 
 function GremiumDetail() {
-  const { gremiumId } = useParams({ strict: false });
+  const params = useParams({ strict: false });
+  const { gremiumId } = params;
+  if (!gremiumId) {
+    throw new Error('Gremium ID is required');
+  }
   const gremiumQuery = useGremiumDetail(gremiumId);
+
+  console.log('[GremiumDetail] Rendering with gremiumId:', gremiumId);
 
   return (
     <LoadingState
@@ -27,7 +33,11 @@ function GremiumDetail() {
         </div>
       }
     >
-      {response => <OrganizationDetailView gremium={response.data} />}
+      {response => {
+        console.log('[GremiumDetailObjekt] Rendering with gremiumId:', response.data);
+
+        return <OrganizationDetailView gremium={response.data} />;
+      }}
     </LoadingState>
   );
 }

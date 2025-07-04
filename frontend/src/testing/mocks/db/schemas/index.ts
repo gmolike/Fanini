@@ -7,4 +7,3 @@ export {
   newsletterImage,
   newsletterSubscription,
 } from './newsletter.schema';
-export { boardMember, document } from './organization.schema';

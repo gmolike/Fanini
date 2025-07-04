@@ -18,6 +18,7 @@ type DetailViewProps = {
 };
 
 export const DetailView = ({ gremium }: DetailViewProps) => {
+  console.debug('DetailView', { gremium });
   return (
     <>
       {/* Hero Section */}

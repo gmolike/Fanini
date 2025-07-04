@@ -1,1 +1,1 @@
-export { TeamHistoryWidgets } from './TeamHistoryWidgets';
+export { TeamHistoryWidget } from './TeamHistoryWidgets';

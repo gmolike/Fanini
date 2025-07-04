@@ -1,8 +1,9 @@
-// frontend/src/features/public/team-history-modern/ui/Content.tsx
+// frontend/src/features/public/team-history/ui/Content.tsx
+import { Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Gamepad2, Globe, Heart, Trophy, Users } from 'lucide-react';
+import { ArrowRight, Gamepad2, Globe, Heart, Trophy, Users } from 'lucide-react';
 
-import { TeamContentPreview } from '@/features/public/team-history-modern';
+import { TeamContentPreview } from '@/features/public/team-history';
 
 import type { TeamHistoryYearResponse } from '@/entities/public/team-history';
 
@@ -84,22 +85,32 @@ export const TeamHistoryContent = ({ data }: TeamHistoryContentProps) => {
 
           return (
             <motion.div key={team.id} variants={item}>
-              <HoverCard>
-                <GlassCard className="h-full overflow-hidden">
-                  <div className={`h-2 bg-gradient-to-r ${config.gradient}`} />
-                  <div className="p-6">
-                    <div className="mb-4 flex items-center gap-3">
-                      <div
-                        className={`rounded-xl bg-gradient-to-r p-3 ${config.gradient} text-white`}
-                      >
-                        <Icon className="h-6 w-6" />
+              <Link
+                to="/historie/$year/$teamType"
+                params={{ year: String(data.year), teamType: team.teamType }}
+                className="block transition-transform hover:scale-[1.02]"
+              >
+                <HoverCard>
+                  <GlassCard className="h-full cursor-pointer overflow-hidden">
+                    <div className={`h-2 bg-gradient-to-r ${config.gradient}`} />
+                    <div className="p-6">
+                      <div className="mb-4 flex items-center gap-3">
+                        <div
+                          className={`rounded-xl bg-gradient-to-r p-3 ${config.gradient} text-white`}
+                        >
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <h3 className="text-xl font-bold">{config.title}</h3>
                       </div>
-                      <h3 className="text-xl font-bold">{config.title}</h3>
+                      <TeamContentPreview content={team.content} type={team.teamType} />
+                      <div className="mt-4 flex items-center gap-2 text-sm text-[var(--color-muted-foreground)]">
+                        <span>Details ansehen</span>
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </div>
                     </div>
-                    <TeamContentPreview content={team.content} type={team.teamType} />
-                  </div>
-                </GlassCard>
-              </HoverCard>
+                  </GlassCard>
+                </HoverCard>
+              </Link>
             </motion.div>
           );
         })}

@@ -1,26 +1,22 @@
 // frontend/src/pages/_public/historie.tsx
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Outlet, useParams } from '@tanstack/react-router';
 
-import { TeamHistoryWidgets } from '@/widgets/public/team-history';
-
-import { PageHeader, PageSection } from '@/shared/ui/layout';
+import { TeamHistoryWidget } from '@/widgets/public/team-history';
 
 export const Route = createFileRoute('/_public/historie')({
   component: HistoriePage,
 });
 
 function HistoriePage() {
-  return (
-    <>
-      <PageHeader
-        title="Vereinshistorie"
-        description="Die Geschichte der Teams und besonderen Momente"
-        variant="hero"
-      />
+  // Prüfe ob es einen newsletterId Parameter gibt
+  const params = useParams({ strict: false });
 
-      <PageSection>
-        <TeamHistoryWidgets />
-      </PageSection>
-    </>
-  );
+  // Wenn kein newsletterId, zeige die Liste
+   
+  if (!params.year) {
+    return <TeamHistoryWidget />;
+  }
+
+  // Sonst zeige das Outlet (Detail-View)
+  return <Outlet />;
 }

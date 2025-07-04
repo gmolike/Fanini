@@ -12,7 +12,7 @@ function NewsletterLayout() {
   const params = useParams({ strict: false });
 
   // Wenn kein newsletterId, zeige die Liste
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+   
   if (!params.newsletterId) {
     return <NewsletterWidget />;
   }

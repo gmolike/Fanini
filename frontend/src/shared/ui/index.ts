@@ -12,7 +12,7 @@ export * from './float';
 export * from './glass';
 export * from './hover';
 export * from './icons/SocialIcon';
-export * from './imagex';
+export * from './image';
 export * from './layout';
 export * from './modernTabs';
 export * from './parallax';

@@ -1,8 +1,8 @@
-// frontend/src/features/public/team-history-modern/ui/Hero.tsx
+// frontend/src/features/public/team-history/ui/Hero.tsx
 import { AnimatePresence, motion } from 'framer-motion';
 import { Calendar, ChevronDown } from 'lucide-react';
 
-import { TeamHistoryContent } from '@/features/public/team-history-modern';
+import { TeamHistoryContent } from '@/features/public/team-history';
 
 import type { TeamHistoryYearResponse } from '@/entities/public/team-history';
 

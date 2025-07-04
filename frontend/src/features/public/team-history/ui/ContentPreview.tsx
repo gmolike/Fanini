@@ -1,4 +1,4 @@
-// frontend/src/features/public/team-history-modern/ui/ContentPreview.tsx
+// frontend/src/features/public/team-history/ui/ContentPreview.tsx
 import { Award, Calendar, Trophy, Users } from 'lucide-react';
 
 import type { TeamContent, TeamType } from '@/entities/public/team-history';

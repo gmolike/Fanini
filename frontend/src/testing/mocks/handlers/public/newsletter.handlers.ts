@@ -6,21 +6,15 @@ import type {
   NewsletterListResponse,
 } from '@/entities/public/newsletter';
 
-import {
-  createNewsletter,
-  toNewsletterListItem,
-} from '@/testing/mocks/db/factories/newsletter.factory';
+import { NEWSLETTER_DATA_MAP, NEWSLETTER_LIST_DATA } from '../../db/seeds/newsletter.seed';
 
 export const newsletterHandlers = [
   // Newsletter List
   http.get('/api/public/newsletter/list', () => {
-    const newsletters = Array.from({ length: 10 }, () => createNewsletter());
-    const items = newsletters.map(toNewsletterListItem);
-
     const response: NewsletterListResponse = {
-      data: items,
+      data: NEWSLETTER_LIST_DATA,
       meta: {
-        total: items.length,
+        total: NEWSLETTER_LIST_DATA.length,
         page: 1,
         limit: 10,
         hasMore: false,
@@ -32,7 +26,16 @@ export const newsletterHandlers = [
 
   // Newsletter Detail
   http.get('/api/public/newsletter/:id', ({ params }) => {
-    const newsletter = createNewsletter({ id: params['id'] as string });
+    const newsletterId = params['id'] as string;
+    const newsletter = NEWSLETTER_DATA_MAP[newsletterId];
+
+    if (!newsletter) {
+      return new HttpResponse(JSON.stringify({ error: 'Newsletter nicht gefunden' }), {
+        status: 404,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        headers: { 'content-type': 'application/json' },
+      });
+    }
 
     const response: NewsletterDetailResponse = {
       data: newsletter,
@@ -41,7 +44,7 @@ export const newsletterHandlers = [
     return HttpResponse.json(response);
   }),
 
-  // Newsletter Subscribe - Fix: request Variable entfernt, da nicht benutzt
+  // Newsletter Subscribe
   http.post('/api/public/newsletter/subscribe', () => {
     return HttpResponse.json({
       success: true,

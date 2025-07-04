@@ -1,16 +1,9 @@
+// frontend/src/testing/mocks/db/seeds/newsletter.seed.ts
 /* eslint-disable sonarjs/no-duplicate-string */
-// frontend/src/testing/mocks/handlers/public/newsletter.handlers.ts
-import { http, HttpResponse } from 'msw';
-
-import type {
-  Newsletter,
-  NewsletterDetailResponse,
-  NewsletterListItem,
-  NewsletterListResponse,
-} from '@/entities/public/newsletter';
+import type { Newsletter, NewsletterListItem } from '@/entities/public/newsletter';
 
 // Echter Fanini Newsletter #1
-const NEWSLETTER_DATA: Newsletter = {
+export const NEWSLETTER_DATA: Newsletter = {
   id: 'newsletter-2025-01',
   edition: 1,
   title: 'Fanini-Newsletter #1',
@@ -24,7 +17,7 @@ const NEWSLETTER_DATA: Newsletter = {
   },
   status: 'published',
   tags: ['Newsletter', 'Community', 'Vereinsgründung', 'Teams'],
-  headerImage: '/public/images/Gruendungsschild.png',
+  headerImage: '/images/Gruendungsschild.png',
   introduction: `Hallo liebe Fanini-Mitglieder!
 
 Wir freuen uns, euch den allerersten Fanini-Newsletter zu präsentieren!
@@ -256,7 +249,7 @@ Danke, dass ihr Teil davon seid. Auf viele weitere Aktionen – wir lesen uns ba
 };
 
 // Newsletter List Item
-const NEWSLETTER_LIST_ITEM: NewsletterListItem = {
+export const NEWSLETTER_LIST_ITEM: NewsletterListItem = {
   id: NEWSLETTER_DATA.id,
   edition: NEWSLETTER_DATA.edition,
   title: NEWSLETTER_DATA.title,
@@ -269,38 +262,19 @@ const NEWSLETTER_LIST_ITEM: NewsletterListItem = {
   articleCount: NEWSLETTER_DATA.articles.length,
 };
 
-export const newsletterHandlers = [
-  // Newsletter List
-  http.get('/api/public/newsletter/list', () => {
-    const response: NewsletterListResponse = {
-      data: [NEWSLETTER_LIST_ITEM],
-      meta: {
-        total: 1,
-        page: 1,
-        limit: 10,
-        hasMore: false,
-      },
-    };
+// Map für alle Newsletter (wie bei Team History)
+export const NEWSLETTER_DATA_MAP: Record<string, Newsletter> = {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  'newsletter-2025-01': NEWSLETTER_DATA,
+} as const;
 
-    return HttpResponse.json(response);
-  }),
+export const NEWSLETTER_LIST_DATA: NewsletterListItem[] = [NEWSLETTER_LIST_ITEM] as const;
 
-  // Newsletter Detail
-  http.get('/api/public/newsletter/:id', () => {
-    const response: NewsletterDetailResponse = {
-      data: NEWSLETTER_DATA,
-    };
-
-    return HttpResponse.json(response);
-  }),
-
-  // Newsletter Subscribe
-  http.post('/api/public/newsletter/subscribe', () => {
-    return HttpResponse.json({
-      success: true,
-      message: 'Erfolgreich angemeldet',
-      confirmationRequired: true,
-      subscriberId: `sub_${Date.now()}`,
-    });
-  }),
-];
+// Seed function
+export const seedNewsletters = () => {
+  console.info('[MSW] Newsletter data ready');
+  return {
+    newsletters: NEWSLETTER_DATA_MAP,
+    list: NEWSLETTER_LIST_DATA,
+  };
+};

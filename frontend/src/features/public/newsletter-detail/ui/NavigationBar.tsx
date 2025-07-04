@@ -51,7 +51,7 @@ export const NavigationBar = ({ newsletter }: NavigationBarProps) => {
     <motion.div
       initial={{ y: -100 }}
       animate={{ y: isSticky ? 0 : -100 }}
-      className="fixed top-0 right-0 left-0 z-50 border-b bg-white/80 backdrop-blur-lg dark:bg-black/80"
+      className="border-border bg-background/95 fixed top-0 right-0 left-0 z-50 border-b backdrop-blur-sm"
     >
       <div className="container mx-auto px-4">
         <div className="flex items-center gap-2 overflow-x-auto py-4">

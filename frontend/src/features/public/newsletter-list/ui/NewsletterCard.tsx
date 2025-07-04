@@ -5,7 +5,7 @@ import { ArrowRight, Calendar, FileText, Hash } from 'lucide-react';
 import type { NewsletterListItem } from '@/entities/public/newsletter';
 
 import { Badge, Button } from '@/shared/shadcn';
-import { FloatingCard, GlassCard, Image } from '@/shared/ui';
+import { FloatingCard, Image } from '@/shared/ui';
 
 type NewsletterCardProps = {
   newsletter: NewsletterListItem;
@@ -21,9 +21,11 @@ export const NewsletterCard = ({ newsletter, onSelect }: NewsletterCardProps) =>
       }}
     >
       <FloatingCard>
-        <GlassCard className="group h-full overflow-hidden transition-all hover:shadow-2xl">
+        {/* Entfernt GlassCard, nutzt stattdessen normale Card-Styles */}
+        <div className="group bg-card h-full overflow-hidden rounded-xl border transition-all hover:shadow-2xl">
           {/* Header Image */}
-          {newsletter.headerImage ? <div className="relative aspect-video overflow-hidden">
+          {newsletter.headerImage ? (
+            <div className="relative aspect-video overflow-hidden">
               <Image
                 src={newsletter.headerImage}
                 alt={newsletter.title}
@@ -35,7 +37,8 @@ export const NewsletterCard = ({ newsletter, onSelect }: NewsletterCardProps) =>
               <Badge className="absolute top-4 left-4 bg-[var(--color-fanini-blue)] text-white">
                 Edition #{newsletter.edition}
               </Badge>
-            </div> : null}
+            </div>
+          ) : null}
 
           {/* Content */}
           <div className="space-y-4 p-6">
@@ -56,7 +59,9 @@ export const NewsletterCard = ({ newsletter, onSelect }: NewsletterCardProps) =>
               <h3 className="mb-2 bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] bg-clip-text text-xl font-bold text-transparent">
                 {newsletter.title}
               </h3>
-              {newsletter.subtitle ? <p className="text-[var(--color-muted-foreground)]">{newsletter.subtitle}</p> : null}
+              {newsletter.subtitle ? (
+                <p className="text-[var(--color-muted-foreground)]">{newsletter.subtitle}</p>
+              ) : null}
             </div>
 
             {/* Preview */}
@@ -78,7 +83,9 @@ export const NewsletterCard = ({ newsletter, onSelect }: NewsletterCardProps) =>
 
             {/* Action */}
             <Button
-              onClick={() => { onSelect(newsletter.id); }}
+              onClick={() => {
+                onSelect(newsletter.id);
+              }}
               className="group/btn w-full"
               variant="outline"
             >
@@ -86,7 +93,7 @@ export const NewsletterCard = ({ newsletter, onSelect }: NewsletterCardProps) =>
               <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
             </Button>
           </div>
-        </GlassCard>
+        </div>
       </FloatingCard>
     </motion.div>
   );

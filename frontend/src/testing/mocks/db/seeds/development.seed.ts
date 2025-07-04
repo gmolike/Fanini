@@ -1,5 +1,6 @@
 // frontend/src/testing/mocks/db/seeds/development.seed.ts
 import { seedEvents } from './event.seed';
+import { seedNewsletters } from './newsletter.seed';
 import { seedBoardMembers, seedDocuments } from './organization.seed';
 import { seedTeamHistory } from './teamHistory.seed';
 

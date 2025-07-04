@@ -12,15 +12,16 @@ type FloatingCardProps = {
 };
 
 /**
- * Schwebende Karte mit 3D-Tilt Effekt bei Hover
+ * Floating card with 3D tilt effect on hover
+ * @description Schwebende Karte mit 3D-Tilt Effekt bei Hover
  * @param intensity - Intensität des Tilt-Effekts (Standard: 10)
  */
 export const FloatingCard = ({ children, className, intensity = 10 }: FloatingCardProps) => {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const mouseXSpring = useSpring(x);
-  const mouseYSpring = useSpring(y);
+  const mouseXSpring = useSpring(x, { stiffness: 500, damping: 40 });
+  const mouseYSpring = useSpring(y, { stiffness: 500, damping: 40 });
 
   const rotateX = useTransform(
     mouseYSpring,
@@ -49,11 +50,12 @@ export const FloatingCard = ({ children, className, intensity = 10 }: FloatingCa
 
   return (
     <motion.div
-      className={cn('relative', className)}
+      className={cn('relative will-change-transform', className)}
       style={{
         rotateX,
         rotateY,
         transformStyle: 'preserve-3d',
+        transformOrigin: 'center center',
       }}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}

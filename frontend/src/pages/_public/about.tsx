@@ -1,11 +1,20 @@
-import { createFileRoute } from '@tanstack/react-router';
+// pages/_public/about.tsx
+import { createFileRoute, Outlet, useParams } from '@tanstack/react-router';
 
-import { AboutWidget } from '@/widgets/public/about';
+import { OrganizationWidget } from '@/widgets/public/organization';
 
 export const Route = createFileRoute('/_public/about')({
-  component: AboutPage,
+  component: AboutLayout,
 });
 
-function AboutPage() {
-  return <AboutWidget />;
+function AboutLayout() {
+  const params = useParams({ strict: false });
+
+  // Wenn kein gremiumId, zeige die Liste
+  if (!params.gremiumId) {
+    return <OrganizationWidget />;
+  }
+
+  // Sonst zeige das Outlet (Detail-View)
+  return <Outlet />;
 }

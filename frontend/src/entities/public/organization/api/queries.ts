@@ -2,30 +2,28 @@
 import { createSimpleRemoteQuery } from '@/shared/api';
 
 import {
-  boardMembersResponseSchema,
   documentsResponseSchema,
-  organizationStructureResponseSchema,
+  gremienListResponseSchema,
+  gremiumDetailResponseSchema,
 } from '../model/schemas';
 
-import type {
-  BoardMembersResponse,
-  DocumentsResponse,
-  OrganizationStructureResponse,
-} from '../model/types';
+import type { DocumentsResponse, GremienListResponse, GremiumDetailResponse } from '../model/types';
 
-export const useBoardMembers = createSimpleRemoteQuery<BoardMembersResponse>({
-  queryKey: ['organization', 'board', 'public'],
-  endpoint: '/api/organization/public/board',
-  schema: boardMembersResponseSchema,
+export const useGremienList = createSimpleRemoteQuery<GremienListResponse>({
+  queryKey: ['organization', 'gremien', 'list'],
+  endpoint: '/api/organization/public/gremien',
+  schema: gremienListResponseSchema,
   staleTime: 1000 * 60 * 10,
 });
 
-export const useOrganizationStructure = createSimpleRemoteQuery<OrganizationStructureResponse>({
-  queryKey: ['organization', 'structure', 'public'],
-  endpoint: '/api/organization/public/structure',
-  schema: organizationStructureResponseSchema,
-  staleTime: 1000 * 60 * 10,
-});
+export const useGremiumDetail = (gremiumId: string) =>
+  createSimpleRemoteQuery<GremiumDetailResponse>({
+    queryKey: ['organization', 'gremium', gremiumId],
+    endpoint: `/api/organization/public/gremien/${gremiumId}`,
+    schema: gremiumDetailResponseSchema,
+    staleTime: 1000 * 60 * 10,
+    enabled: !!gremiumId,
+  });
 
 export const useOrganizationDocuments = createSimpleRemoteQuery<DocumentsResponse>({
   queryKey: ['organization', 'documents', 'public'],

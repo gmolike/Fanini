@@ -1,98 +1,122 @@
 // frontend/src/features/public/event-grid/ui/GridView.tsx
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 
-import { Filter, Search } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Calendar, Search } from 'lucide-react';
 
 import { usePublicEventList } from '@/entities/public/event';
 
-import { Button, Input } from '@/shared/shadcn';
-import { LoadingState } from '@/shared/ui';
+import { Input } from '@/shared/shadcn';
+import { AnimatedText, GlassCard, LoadingState } from '@/shared/ui';
 
-import { Card } from './Card';
-import { Filters } from './Filters';
+import { EventCard } from './Card';
+import { EventDetailModal } from './DetailModel';
+import { FilterPanel } from './Filters';
 
-/**
- * GridView Feature
- * @description Grid-Ansicht mit Filterung für Events
- */
 export const GridView = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [organizerFilter, setOrganizerFilter] = useState<string>('all');
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [filters, setFilters] = useState({
+    category: 'all',
+    organizer: 'all',
+    timeRange: 'all',
+  });
 
   const eventsQuery = usePublicEventList();
 
-  const filteredEvents = useMemo(() => {
-    if (!eventsQuery.data?.data) return [];
-
-    return eventsQuery.data.data.filter(event => {
+  const filteredEvents =
+    eventsQuery.data?.data.filter(event => {
       const matchesSearch =
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         event.location.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = categoryFilter === 'all' || event.category === categoryFilter;
-      const matchesOrganizer = organizerFilter === 'all' || event.organizer === organizerFilter;
-
+      const matchesCategory = filters.category === 'all' || event.category === filters.category;
+      const matchesOrganizer = filters.organizer === 'all' || event.organizer === filters.organizer;
       return matchesSearch && matchesCategory && matchesOrganizer;
-    });
-  }, [eventsQuery.data, searchTerm, categoryFilter, organizerFilter]);
-
-  const handleResetFilters = () => {
-    setSearchTerm('');
-    setCategoryFilter('all');
-    setOrganizerFilter('all');
-  };
+    }) ?? [];
 
   return (
-    <div className="space-y-6">
-      {/* Filter Bar */}
-      <div className="bg-card rounded-lg p-4 shadow-sm">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <div className="relative">
-            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-            <Input
-              placeholder="Events durchsuchen..."
-              value={searchTerm}
-              onChange={e => {
-                setSearchTerm(e.target.value);
-              }}
-              className="pl-9"
-            />
+    <>
+      <div className="space-y-8">
+        {/* Search & Filter Header */}
+        <GlassCard className="p-6">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="relative">
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Input
+                placeholder="Events durchsuchen..."
+                value={searchTerm}
+                onChange={e => {
+                  setSearchTerm(e.target.value);
+                }}
+                className="bg-background/50 pl-10"
+              />
+            </div>
+            <FilterPanel filters={filters} onFiltersChange={setFilters} />
           </div>
+        </GlassCard>
 
-          <Filters
-            categoryFilter={categoryFilter}
-            organizerFilter={organizerFilter}
-            onCategoryChange={setCategoryFilter}
-            onOrganizerChange={setOrganizerFilter}
-          />
-
-          <Button variant="outline" onClick={handleResetFilters}>
-            <Filter className="mr-2 h-4 w-4" />
-            Filter zurücksetzen
-          </Button>
-        </div>
+        {/* Events Grid */}
+        <LoadingState query={eventsQuery}>
+          {() => (
+            <AnimatePresence mode="wait">
+              {filteredEvents.length === 0 ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                >
+                  <GlassCard className="p-12 text-center">
+                    <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                    <AnimatedText className="mb-2 text-xl font-semibold">
+                      Keine Events gefunden
+                    </AnimatedText>
+                    <p className="text-muted-foreground">
+                      Versuche andere Filtereinstellungen oder schaue später nochmal vorbei.
+                    </p>
+                  </GlassCard>
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  variants={{
+                    hidden: { opacity: 0 },
+                    show: {
+                      opacity: 1,
+                      transition: { staggerChildren: 0.1 },
+                    },
+                    exit: { opacity: 0 },
+                  }}
+                  className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+                >
+                  {filteredEvents.map(event => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onSelect={() => {
+                        setSelectedEventId(event.id);
+                      }}
+                    />
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+        </LoadingState>
       </div>
 
-      {/* Events Grid */}
-      <LoadingState query={eventsQuery}>
-        {() => (
-          <>
-            {filteredEvents.length === 0 ? (
-              <div className="py-12 text-center">
-                <p className="text-muted-foreground">
-                  Keine Events gefunden. Versuche andere Filtereinstellungen.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {filteredEvents.map(event => (
-                  <Card key={event.id} event={event} />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-      </LoadingState>
-    </div>
+      {/* Detail Modal */}
+      <AnimatePresence>
+        {selectedEventId ? (
+          <EventDetailModal
+            eventId={selectedEventId}
+            onClose={() => {
+              setSelectedEventId(null);
+            }}
+          />
+        ) : null}
+      </AnimatePresence>
+    </>
   );
 };

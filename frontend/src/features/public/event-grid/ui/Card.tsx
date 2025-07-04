@@ -1,5 +1,6 @@
-// frontend/src/features/public/event-grid/ui/Card.tsx
-import { Calendar, MapPin, Users } from 'lucide-react';
+// frontend/src/features/public/event-grid/ui/EventCard.tsx
+import { motion } from 'framer-motion';
+import { Calendar, Clock, MapPin, Sparkles, Users } from 'lucide-react';
 
 import {
   EVENT_CATEGORY_CONFIG,
@@ -7,101 +8,137 @@ import {
   type PublicEventListItem,
 } from '@/entities/public/event';
 
-import { Badge, Card as ShadcnCard, CardContent } from '@/shared/shadcn';
-import { Image } from '@/shared/ui';
+import { Badge } from '@/shared/shadcn';
+import { AnimatedNumber, FloatingCard, HoverCard, Image } from '@/shared/ui';
 
-type CardProps = {
+type EventCardProps = {
   event: PublicEventListItem;
+  onSelect: () => void;
 };
 
-/**
- * Card Component
- * @description Einzelne Event-Karte für Grid-Ansicht
- */
-export const Card = ({ event }: CardProps) => {
+export const EventCard = ({ event, onSelect }: EventCardProps) => {
   const organizerConfig = EVENT_ORGANIZER_CONFIG[event.organizer];
   const categoryConfig = EVENT_CATEGORY_CONFIG[event.category];
+  const participantPercentage = event.maxParticipants
+    ? ((event.currentParticipants ?? 0) / event.maxParticipants) * 100
+    : 0;
 
   return (
-    <ShadcnCard className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
-      {/* Organizer Color Bar */}
-      <div className="h-1" style={{ backgroundColor: organizerConfig.color }} />
-
-      {/* Event Image */}
-      <div className="relative aspect-video overflow-hidden bg-gray-100">
-        {event.thumbnailImage ? (
-          <Image
-            src={event.thumbnailImage}
-            alt={event.title}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.95 },
+      }}
+      whileHover={{ y: -5 }}
+      onClick={onSelect}
+    >
+      <HoverCard>
+        <FloatingCard className="group cursor-pointer overflow-hidden">
+          {/* Gradient Border */}
+          <div
+            className="h-1.5 bg-gradient-to-r"
+            style={{
+              background: `linear-gradient(to right, ${organizerConfig.color}, ${organizerConfig.color}dd)`,
+            }}
           />
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <Calendar className="h-16 w-16 text-gray-300" />
-          </div>
-        )}
 
-        {/* Organizer Badge */}
-        <Badge className={`absolute top-2 right-2 ${organizerConfig.badge}`}>
-          {organizerConfig.name}
-        </Badge>
-      </div>
+          {/* Image Section */}
+          <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+            {event.thumbnailImage ? (
+              <>
+                <Image
+                  src={event.thumbnailImage}
+                  alt={event.title}
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <motion.div
+                  animate={{
+                    rotate: [0, 10, -10, 0],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    repeatType: 'reverse',
+                  }}
+                >
+                  <Sparkles className="h-16 w-16 text-gray-300 dark:text-gray-600" />
+                </motion.div>
+              </div>
+            )}
 
-      <CardContent className="p-6">
-        {/* Category & Type */}
-        <div className="mb-3 flex items-center gap-2">
-          <span className={`text-lg ${categoryConfig.color}`}>{categoryConfig.icon}</span>
-          <Badge variant="outline">{categoryConfig.label}</Badge>
-        </div>
-
-        {/* Title */}
-        <h3 className="mb-3 line-clamp-2 text-xl font-semibold transition-colors group-hover:text-[var(--color-fanini-blue)]">
-          {event.title}
-        </h3>
-
-        {/* Meta Info */}
-        <div className="text-muted-foreground space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
-            <span>
-              {new Date(event.date).toLocaleDateString('de-DE', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            <span className="truncate">{event.location}</span>
-          </div>
-
-          {event.maxParticipants ? (
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              <span>
-                {event.currentParticipants ?? 0} / {event.maxParticipants} Teilnehmer
-              </span>
-            </div>
-          ) : null}
-        </div>
-
-        {/* Progress Bar für Teilnehmer */}
-        {event.maxParticipants ? (
-          <div className="mt-4">
-            <div className="h-2 overflow-hidden rounded-full bg-gray-200">
-              <div
-                className="h-full bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] transition-all duration-500"
-                style={{
-                  width: `${String(((event.currentParticipants ?? 0) / event.maxParticipants) * 100)}%`,
-                }}
-              />
+            {/* Badges */}
+            <div className="absolute top-4 left-4 flex flex-col gap-2">
+              <Badge className={`${organizerConfig.badge} backdrop-blur-sm`}>
+                {organizerConfig.name}
+              </Badge>
+              <Badge variant="secondary" className="bg-white/90 backdrop-blur-sm dark:bg-black/90">
+                <span className={categoryConfig.color}>{categoryConfig.icon}</span>
+                <span className="ml-1">{categoryConfig.label}</span>
+              </Badge>
             </div>
           </div>
-        ) : null}
-      </CardContent>
-    </ShadcnCard>
+
+          {/* Content */}
+          <div className="space-y-4 p-6">
+            <div>
+              <h3 className="from-foreground to-foreground/70 mb-2 line-clamp-2 bg-gradient-to-r bg-clip-text text-xl font-bold text-transparent">
+                {event.title}
+              </h3>
+            </div>
+
+            {/* Meta Info */}
+            <div className="text-muted-foreground space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-[var(--color-fanini-blue)]" />
+                <span>
+                  {new Date(event.date).toLocaleDateString('de-DE', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'long',
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-[var(--color-fanini-blue)]" />
+                <span>{event.time} Uhr</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-[var(--color-fanini-blue)]" />
+                <span className="truncate">{event.location}</span>
+              </div>
+            </div>
+
+            {/* Participants */}
+            {event.maxParticipants ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1">
+                    <Users className="h-4 w-4" />
+                    <span>Teilnehmer</span>
+                  </span>
+                  <span className="font-semibold">
+                    <AnimatedNumber value={event.currentParticipants ?? 0} /> /{' '}
+                    {event.maxParticipants}
+                  </span>
+                </div>
+                <div className="relative h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)]"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${String(participantPercentage)}%` }}
+                    transition={{ duration: 1, ease: 'easeOut' }}
+                  />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </FloatingCard>
+      </HoverCard>
+    </motion.div>
   );
 };

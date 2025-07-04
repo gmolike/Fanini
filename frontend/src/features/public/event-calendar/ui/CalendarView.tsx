@@ -1,22 +1,17 @@
 // frontend/src/features/public/event-calendar/ui/CalendarView.tsx
 import { useState } from 'react';
 
-import { Calendar } from 'lucide-react';
-
-import { EventDetailPanel } from '@/features/public/event-detail';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { usePublicEventList } from '@/entities/public/event';
 
-import { Card, ScrollArea } from '@/shared/shadcn';
-import { LoadingState } from '@/shared/ui';
+import { Button } from '@/shared/shadcn';
+import { AnimatedText, GlassCard, LoadingState } from '@/shared/ui';
 
+import { EventDetailPanel } from './DetailPanel';
 import { CalendarGrid } from './Grid';
-import { CalendarHeader } from './Header';
 
-/**
- * CalendarView Feature
- * @description Kalender-Ansicht mit Split-View für Event-Details
- */
 export const CalendarView = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
@@ -34,52 +29,95 @@ export const CalendarView = () => {
     });
   };
 
-  const goToToday = () => {
-    setSelectedDate(new Date());
-  };
-
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      {/* Calendar Section */}
+    <div className="grid gap-6 lg:grid-cols-3">
+      {/* Calendar */}
       <div className="lg:col-span-2">
-        <Card>
-          <div className="p-6">
-            <CalendarHeader
-              selectedDate={selectedDate}
-              onNavigateMonth={navigateMonth}
-              onGoToToday={goToToday}
-            />
+        <GlassCard className="p-6">
+          {/* Header */}
+          <div className="mb-6 flex items-center justify-between">
+            <AnimatedText className="text-2xl font-bold">
+              {selectedDate.toLocaleDateString('de-DE', {
+                month: 'long',
+                year: 'numeric',
+              })}
+            </AnimatedText>
 
-            {/* Calendar Grid */}
-            <LoadingState query={eventsQuery}>
-              {response => (
-                <CalendarGrid
-                  events={response.data}
-                  currentMonth={currentMonth}
-                  currentYear={currentYear}
-                  selectedEventId={selectedEventId}
-                  onEventSelect={setSelectedEventId}
-                />
-              )}
-            </LoadingState>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigateMonth('prev');
+                }}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSelectedDate(new Date());
+                }}
+              >
+                Heute
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  navigateMonth('next');
+                }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-        </Card>
+
+          {/* Calendar Grid */}
+          <LoadingState query={eventsQuery}>
+            {response => (
+              <CalendarGrid
+                events={response.data}
+                currentMonth={currentMonth}
+                currentYear={currentYear}
+                selectedEventId={selectedEventId}
+                onEventSelect={setSelectedEventId}
+              />
+            )}
+          </LoadingState>
+        </GlassCard>
       </div>
 
       {/* Detail Panel */}
       <div className="lg:col-span-1">
-        <Card className="sticky top-4">
-          <ScrollArea className="h-[calc(100vh-8rem)]">
-            {selectedEventId ? (
-              <EventDetailPanel eventId={selectedEventId} />
-            ) : (
-              <div className="text-muted-foreground p-6 text-center">
-                <Calendar className="mx-auto mb-4 h-12 w-12 text-gray-300" />
-                <p>Wähle ein Event aus dem Kalender aus, um Details zu sehen.</p>
-              </div>
-            )}
-          </ScrollArea>
-        </Card>
+        <AnimatePresence mode="wait">
+          {selectedEventId ? (
+            <EventDetailPanel
+              key={selectedEventId}
+              eventId={selectedEventId}
+              onClose={() => {
+                setSelectedEventId(null);
+              }}
+            />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+            >
+              <GlassCard className="p-8 text-center">
+                <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                <AnimatedText className="mb-2 text-lg font-semibold">
+                  Wähle ein Event aus
+                </AnimatedText>
+                <p className="text-muted-foreground">
+                  Klicke auf ein Event im Kalender, um Details zu sehen.
+                </p>
+              </GlassCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

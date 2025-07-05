@@ -4,7 +4,7 @@ import { Award, Target, TrendingUp, Trophy, Users } from 'lucide-react';
 import type { BallerContent, TeamHistoryEntry } from '@/entities/public/team-history';
 
 import { Badge } from '@/shared/shadcn';
-import { AnimatedNumber, GlassCard, HoverCard, ParallaxCard } from '@/shared/ui';
+import { AnimatedValue, GlassCard, HoverCard, ParallaxCard } from '@/shared/ui';
 
 type BallerDetailSectionProps = {
   team: TeamHistoryEntry;
@@ -48,7 +48,7 @@ export const BallerDetailSection = ({ team, year }: BallerDetailSectionProps) =>
               className="rounded-xl bg-gradient-to-br from-green-500/20 to-blue-500/20 p-6 text-center"
             >
               <div className="text-3xl font-bold">
-                <AnimatedNumber value={content.seasonStats.position} />
+                <AnimatedValue value={content.seasonStats.position} />
                 <span className="text-lg">.</span>
               </div>
               <p className="text-sm text-[var(--color-muted-foreground)]">Tabellenplatz</p>
@@ -60,7 +60,7 @@ export const BallerDetailSection = ({ team, year }: BallerDetailSectionProps) =>
               className="rounded-xl bg-gradient-to-br from-green-500/20 to-blue-500/20 p-6 text-center"
             >
               <div className="text-3xl font-bold">
-                <AnimatedNumber value={content.seasonStats.points} />
+                <AnimatedValue value={content.seasonStats.points} />
               </div>
               <p className="text-sm text-[var(--color-muted-foreground)]">Punkte</p>
             </motion.div>

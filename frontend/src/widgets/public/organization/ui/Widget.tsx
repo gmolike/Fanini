@@ -5,7 +5,7 @@ import { Building } from 'lucide-react';
 import { OrganizationInfoCard } from '@/features/public/organization-info';
 import { OrganizationListView } from '@/features/public/organization-list';
 
-import { AnimatedText } from '@/shared/ui';
+import { AnimatedValue } from '@/shared/ui';
 
 export const OrganizationWidget = () => {
   return (
@@ -29,18 +29,18 @@ export const OrganizationWidget = () => {
             <Building className="h-12 w-12 text-white" />
           </motion.div>
 
-          <AnimatedText delay={0.2}>
+          <AnimatedValue delay={0.2}>
             <h1 className="mb-4 bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
               Über uns
             </h1>
-          </AnimatedText>
+          </AnimatedValue>
 
-          <AnimatedText delay={0.3}>
+          <AnimatedValue delay={0.3}>
             <p className="mx-auto max-w-2xl text-xl text-[var(--color-muted-foreground)]">
               Die Faninitiative Spandau e.V. - Struktur, Menschen und Leidenschaft. Entdecke wer wir
               sind und wie wir gemeinsam für unseren Verein arbeiten.
             </p>
-          </AnimatedText>
+          </AnimatedValue>
         </div>
       </div>
 

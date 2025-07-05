@@ -5,7 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { cn } from '@/shared/lib';
 import { Button as ShadcnButton } from '@/shared/shadcn/button';
 
-import type { ButtonProps } from '../model/types';
+import type { ButtonProps } from './model/types';
 
 /**
  * Button Komponente mit Loading State

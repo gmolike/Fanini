@@ -28,6 +28,12 @@ routeTree.gen.ts
 
 # Generated files
 src/tailwind.output.css
+# Storybook
+.storybook-static/
+storybook-static/
+public/storybook/
+node_modules/.cache/storybook/
 
-*storybook.log
-storybook-static
+# Build outputs
+dist/
+build/

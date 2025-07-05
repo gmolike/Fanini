@@ -5,7 +5,7 @@ import { Calendar, Heart, Image as ImageIcon, Users } from 'lucide-react';
 import type { FaniniContent, TeamHistoryEntry } from '@/entities/public/team-history';
 
 import { Badge } from '@/shared/shadcn';
-import { AnimatedNumber, GlassCard, HoverCard, Image, ParallaxCard } from '@/shared/ui';
+import { AnimatedValue, GlassCard, HoverCard, Image, ParallaxCard } from '@/shared/ui';
 
 type FaniniDetailSectionProps = {
   team: TeamHistoryEntry;
@@ -51,7 +51,7 @@ export const FaniniDetailSection = ({ team, year }: FaniniDetailSectionProps) =>
               >
                 <Users className="h-5 w-5" />
                 <span className="text-xl font-bold">
-                  <AnimatedNumber value={content.members} /> aktive Mitglieder
+                  <AnimatedValue value={content.members} /> aktive Mitglieder
                 </span>
               </motion.div>
             )}
@@ -99,7 +99,7 @@ export const FaniniDetailSection = ({ team, year }: FaniniDetailSectionProps) =>
                           {activity.participants ? (
                             <span className="flex items-center gap-2">
                               <Users className="h-4 w-4" />
-                              <AnimatedNumber value={activity.participants} /> Teilnehmer
+                              <AnimatedValue value={activity.participants} /> Teilnehmer
                             </span>
                           ) : null}
                           {activity.images && activity.images.length > 0 ? (

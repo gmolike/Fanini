@@ -9,7 +9,7 @@ import {
 } from '@/entities/public/event';
 
 import { Badge } from '@/shared/shadcn';
-import { AnimatedNumber, FloatingCard, HoverCard, Image } from '@/shared/ui';
+import { AnimatedValue, FloatingCard, HoverCard, Image } from '@/shared/ui';
 
 type EventCardProps = {
   event: PublicEventListItem;
@@ -122,7 +122,7 @@ export const EventCard = ({ event, onSelect }: EventCardProps) => {
                     <span>Teilnehmer</span>
                   </span>
                   <span className="font-semibold">
-                    <AnimatedNumber value={event.currentParticipants ?? 0} /> /{' '}
+                    <AnimatedValue value={event.currentParticipants ?? 0} /> /{' '}
                     {event.maxParticipants}
                   </span>
                 </div>

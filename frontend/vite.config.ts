@@ -7,19 +7,21 @@ import { resolve } from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { type ConfigEnv, defineConfig, loadEnv, type PluginOption } from 'vite';
 
-export default defineConfig(({ mode }: ConfigEnv) => {
+export default defineConfig(({ mode, command }: ConfigEnv) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
   const isProd = mode === 'production';
   const isTest = mode === 'test';
+  const isBuildingStorybook = command === 'build' && process.env['STORYBOOK'] === 'true';
 
   return {
     plugins: [
       // Tailwind CSS v4
       tailwindcss(),
 
-      // TanStack Router mit FSD-konformen Routes (nicht im Test-Modus)
+      // TanStack Router mit FSD-konformen Routes (nicht im Test-Modus oder Storybook)
       !isTest &&
+        !isBuildingStorybook &&
         tanstackRouter({
           routesDirectory: './src/pages',
           generatedRouteTree: './src/app/routeTree.gen.ts',
@@ -30,10 +32,11 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       react({
         jsxImportSource: 'react',
         tsDecorators: true,
-        plugins: [
-          ['@swc/plugin-styled-jsx', {}],
-          isProd && ['@swc/plugin-remove-console', {}],
-        ].filter(Boolean) as [string, Record<string, unknown>][],
+        plugins: !isBuildingStorybook
+          ? ([['@swc/plugin-styled-jsx', {}], isProd && ['@swc/plugin-remove-console', {}]].filter(
+              Boolean
+            ) as [string, Record<string, unknown>][])
+          : [],
       }),
 
       // Bundle Analyzer nur bei Bedarf
@@ -91,7 +94,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       port: 5173,
       strictPort: true,
       host: true,
-      open: !isTest, // Nicht im Test-Modus öffnen
+      open: !isTest && !isBuildingStorybook, // Nicht im Test-Modus oder Storybook öffnen
       cors: true,
       hmr: {
         overlay: true,
@@ -119,28 +122,13 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       host: true,
       cors: true,
     },
+
     publicDir: 'public',
+
     // Build Optimizations
     build: {
       target: 'esnext',
-      minify: isProd ? 'terser' : false,
-      ...(isProd && {
-        terserOptions: {
-          compress: {
-            drop_console: true,
-            drop_debugger: true,
-            pure_funcs: ['console.log', 'console.debug'],
-            passes: 2,
-          },
-          mangle: {
-            safari10: true,
-          },
-          format: {
-            comments: false,
-            ecma: 2020,
-          },
-        },
-      }),
+      minify: isProd && !isBuildingStorybook ? 'terser' : false,
     },
 
     // Dependency Optimization
@@ -158,7 +146,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         'clsx',
         'tailwind-merge',
         // Storybook dependencies
-        ...(isTest ? ['@storybook/react', '@storybook/addon-docs', '@storybook/addon-vitest'] : []),
+        ...(isTest || isBuildingStorybook ? ['@storybook/react', '@storybook/react-vite'] : []),
       ],
       exclude: ['@vite/client', '@vite/env'],
       esbuildOptions: {
@@ -181,9 +169,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       target: 'es2020',
       legalComments: 'none',
       treeShaking: true,
-      minifyIdentifiers: isProd,
-      minifySyntax: isProd,
-      minifyWhitespace: isProd,
+      minifyIdentifiers: isProd && !isBuildingStorybook,
+      minifySyntax: isProd && !isBuildingStorybook,
+      minifyWhitespace: isProd && !isBuildingStorybook,
     },
 
     // SSR/SSG (für zukünftige Erweiterungen)
@@ -197,6 +185,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       __DEV__: JSON.stringify(isDev),
       __PROD__: JSON.stringify(isProd),
       __TEST__: JSON.stringify(isTest),
+      __STORYBOOK__: JSON.stringify(isBuildingStorybook),
     },
   };
 });

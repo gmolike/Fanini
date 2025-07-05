@@ -6,7 +6,8 @@ import { ArrowLeft } from 'lucide-react';
 import type { Gremium } from '@/entities/public/organization';
 
 import { Button } from '@/shared/shadcn';
-import { , AnimatedValue, GlassCard, ParallaxCard } from '@/shared/ui';
+import { AnimatedValue, GlassCard } from '@/shared/ui';
+import { ParallaxCard } from '@/shared/ui/parallax';
 
 import { DetailHero } from './Hero';
 import { HighlightSection } from './HighlightSection';
@@ -18,7 +19,6 @@ type DetailViewProps = {
 };
 
 export const DetailView = ({ gremium }: DetailViewProps) => {
-  console.debug('DetailView', { gremium });
   return (
     <>
       {/* Hero Section */}

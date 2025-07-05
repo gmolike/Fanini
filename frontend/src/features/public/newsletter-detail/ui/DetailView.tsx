@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { Newsletter } from '@/entities/public/newsletter';
 
 import { Button } from '@/shared/shadcn';
-import { AnimatedText, GlassCard, ParallaxCard } from '@/shared/ui';
+import { AnimatedValue, GlassCard, ParallaxCard } from '@/shared/ui';
 
 import { ArticleSection } from './ArticleSection';
 import { DetailHero } from './DetailHero';
@@ -45,9 +45,9 @@ export const DetailView = ({ newsletter }: DetailViewProps) => {
           {/* Introduction */}
           <ParallaxCard>
             <GlassCard className="mb-12 p-8">
-              <AnimatedText gradient className="mb-4 text-2xl font-bold">
+              <AnimatedValue gradient className="mb-4 text-2xl font-bold">
                 {newsletter.title}
-              </AnimatedText>
+              </AnimatedValue>
               <p className="text-lg leading-relaxed text-[var(--color-muted-foreground)]">
                 {newsletter.introduction}
               </p>

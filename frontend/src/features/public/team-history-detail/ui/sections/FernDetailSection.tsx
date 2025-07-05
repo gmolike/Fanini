@@ -5,7 +5,7 @@ import { Globe, Mail, MapPin, Users } from 'lucide-react';
 import type { FernContent, TeamHistoryEntry } from '@/entities/public/team-history';
 
 import { Badge } from '@/shared/shadcn';
-import { AnimatedNumber, GlassCard, HoverCard, ParallaxCard } from '@/shared/ui';
+import { AnimatedValue, GlassCard, HoverCard, ParallaxCard } from '@/shared/ui';
 
 type FernDetailSectionProps = {
   team: TeamHistoryEntry;
@@ -50,7 +50,7 @@ export const FernDetailSection = ({ team, year }: FernDetailSectionProps) => {
                 className="text-center"
               >
                 <div className="text-3xl font-bold">
-                  <AnimatedNumber value={totalMembers} />
+                  <AnimatedValue value={totalMembers} />
                 </div>
                 <p className="text-sm text-[var(--color-muted-foreground)]">Mitglieder weltweit</p>
               </motion.div>
@@ -61,7 +61,7 @@ export const FernDetailSection = ({ team, year }: FernDetailSectionProps) => {
                 className="text-center"
               >
                 <div className="text-3xl font-bold">
-                  <AnimatedNumber value={content.chapters.length} />
+                  <AnimatedValue value={content.chapters.length} />
                 </div>
                 <p className="text-sm text-[var(--color-muted-foreground)]">Chapter</p>
               </motion.div>
@@ -109,7 +109,7 @@ export const FernDetailSection = ({ team, year }: FernDetailSectionProps) => {
                       ) : null}
                     </div>
                     <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
-                      <AnimatedNumber value={chapter.memberCount} />
+                      <AnimatedValue value={chapter.memberCount} />
                     </Badge>
                   </div>
 

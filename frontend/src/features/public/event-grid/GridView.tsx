@@ -7,7 +7,7 @@ import { Calendar, Search } from 'lucide-react';
 import { usePublicEventList } from '@/entities/public/event';
 
 import { Input } from '@/shared/shadcn';
-import { AnimatedText, GlassCard, LoadingState } from '@/shared/ui';
+import { AnimatedValue, GlassCard, LoadingState } from '@/shared/ui';
 
 import { EventCard } from './ui/Card';
 import { EventDetailModal } from './ui/DetailModel';
@@ -67,9 +67,9 @@ export const GridView = () => {
                 >
                   <GlassCard className="p-12 text-center">
                     <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-                    <AnimatedText className="mb-2 text-xl font-semibold">
+                    <AnimatedValue className="mb-2 text-xl font-semibold">
                       Keine Events gefunden
-                    </AnimatedText>
+                    </AnimatedValue>
                     <p className="text-muted-foreground">
                       Versuche andere Filtereinstellungen oder schaue später nochmal vorbei.
                     </p>

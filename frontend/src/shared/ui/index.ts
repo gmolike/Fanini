@@ -1,6 +1,5 @@
 // frontend/src/shared/ui/index.ts
 export * from './animated';
-export * from './breadcrumb';
 export * from './button';
 export * from './charts';
 export * from './container';
@@ -13,9 +12,11 @@ export * from './float';
 export * from './glass';
 export * from './hover';
 export * from './icons/SocialIcon';
+export * from './image';
 export * from './layout';
 export * from './loadingState';
 export * from './modernTabs';
+export * from './parallax';
 export * from './select';
 export * from './themetoggle';
 export * from './timeline';

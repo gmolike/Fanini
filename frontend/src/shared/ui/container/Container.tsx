@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { cn } from '@/shared/lib';
 
-import type { ContainerProps } from './types';
+import type { ContainerProps } from './model/types';
 
 /**
  * Container Komponente

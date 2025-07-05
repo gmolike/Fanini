@@ -16,7 +16,7 @@ import type { TeamHistoryEntry, TeamHistoryYearResponse } from '@/entities/publi
 
 import { cn } from '@/shared/lib';
 import { Badge, Button } from '@/shared/shadcn';
-import { AnimatedNumber } from '@/shared/ui';
+import { AnimatedValue } from '@/shared/ui';
 
 const TEAM_CONFIGS = {
   lol: {
@@ -124,7 +124,7 @@ export const DetailHero = ({ team, year, yearData }: DetailHeroProps) => {
             >
               <Badge className="px-6 py-3 text-lg">
                 <Calendar className="mr-2 h-5 w-5" />
-                <AnimatedNumber value={year} />
+                <AnimatedValue value={year} />
               </Badge>
             </motion.div>
 

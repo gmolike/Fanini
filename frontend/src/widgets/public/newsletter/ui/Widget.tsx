@@ -5,7 +5,7 @@ import { Newspaper } from 'lucide-react';
 import { NewsletterListView } from '@/features/public/newsletter-list';
 import { NewsletterSubscriptionCard } from '@/features/public/newsletter-subscription';
 
-import { AnimatedText } from '@/shared/ui';
+import { AnimatedValue } from '@/shared/ui';
 
 export const NewsletterWidget = () => {
   return (
@@ -29,18 +29,18 @@ export const NewsletterWidget = () => {
             <Newspaper className="h-12 w-12 text-white" />
           </motion.div>
 
-          <AnimatedText delay={0.2}>
+          <AnimatedValue delay={0.2}>
             <h1 className="mb-4 bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] bg-clip-text text-5xl font-bold text-transparent md:text-7xl">
               Fanini-Newsletter
             </h1>
-          </AnimatedText>
+          </AnimatedValue>
 
-          <AnimatedText delay={0.3}>
+          <AnimatedValue delay={0.3}>
             <p className="mx-auto max-w-2xl text-xl text-[var(--color-muted-foreground)]">
               Alle Updates, Team-News und Community-Highlights in einem Format. Jeden Monat neu,
               immer spannend.
             </p>
-          </AnimatedText>
+          </AnimatedValue>
         </div>
       </div>
 

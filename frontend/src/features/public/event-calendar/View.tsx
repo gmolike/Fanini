@@ -7,7 +7,7 @@ import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { usePublicEventList } from '@/entities/public/event';
 
 import { Button } from '@/shared/shadcn';
-import { AnimatedText, GlassCard, LoadingState } from '@/shared/ui';
+import { AnimatedValue, GlassCard, LoadingState } from '@/shared/ui';
 
 import { EventDetailPanel } from './ui/DetailPanel';
 import { CalendarGrid } from './ui/Grid';
@@ -36,12 +36,12 @@ export const View = () => {
         <GlassCard className="p-6">
           {/* Header */}
           <div className="mb-6 flex items-center justify-between">
-            <AnimatedText className="text-2xl font-bold">
+            <AnimatedValue className="text-2xl font-bold">
               {selectedDate.toLocaleDateString('de-DE', {
                 month: 'long',
                 year: 'numeric',
               })}
-            </AnimatedText>
+            </AnimatedValue>
 
             <div className="flex items-center gap-2">
               <Button
@@ -108,9 +108,9 @@ export const View = () => {
             >
               <GlassCard className="p-8 text-center">
                 <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-                <AnimatedText className="mb-2 text-lg font-semibold">
+                <AnimatedValue className="mb-2 text-lg font-semibold">
                   Wähle ein Event aus
-                </AnimatedText>
+                </AnimatedValue>
                 <p className="text-muted-foreground">
                   Klicke auf ein Event im Kalender, um Details zu sehen.
                 </p>

@@ -5,7 +5,7 @@ import { Calendar, Mail, Sparkles, Users } from 'lucide-react';
 import { type Gremium, GREMIUM_CONFIG } from '@/entities/public/organization';
 
 import { Badge } from '@/shared/shadcn';
-import { AnimatedNumber, Image } from '@/shared/ui';
+import { AnimatedValue, Image } from '@/shared/ui';
 
 type DetailHeroProps = {
   gremium: Gremium;
@@ -72,7 +72,7 @@ export const DetailHero = ({ gremium }: DetailHeroProps) => {
               <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
                 <Users className="h-5 w-5 text-white" />
                 <span className="text-lg font-medium text-white">
-                  <AnimatedNumber value={gremium.stats.memberCount} /> Mitglieder
+                  <AnimatedValue value={gremium.stats.memberCount} /> Mitglieder
                 </span>
               </div>
               <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
@@ -85,7 +85,7 @@ export const DetailHero = ({ gremium }: DetailHeroProps) => {
                 <div className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 backdrop-blur-sm">
                   <Sparkles className="h-5 w-5 text-white" />
                   <span className="text-lg font-medium text-white">
-                    <AnimatedNumber value={gremium.stats.projectsCompleted} /> Projekte
+                    <AnimatedValue value={gremium.stats.projectsCompleted} /> Projekte
                   </span>
                 </div>
               ) : null}

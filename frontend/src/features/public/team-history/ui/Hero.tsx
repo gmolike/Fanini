@@ -6,7 +6,7 @@ import { TeamHistoryContent } from '@/features/public/team-history';
 
 import type { TeamHistoryYearResponse } from '@/entities/public/team-history';
 
-import { AnimatedNumber, ModernTimeline } from '@/shared/ui';
+import { AnimatedValue, ModernTimeline } from '@/shared/ui';
 
 type TeamHistoryHeroProps = {
   selectedYear: number;
@@ -75,7 +75,7 @@ export const TeamHistoryHero = ({
           className="mb-12 text-center"
         >
           <h1 className="bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] bg-clip-text font-[Bebas_Neue] text-8xl font-bold text-transparent md:text-9xl">
-            <AnimatedNumber value={selectedYear} />
+            <AnimatedValue value={selectedYear} />
           </h1>
           <p className="mt-2 text-xl text-[var(--color-muted-foreground)]">
             Ein Jahr voller Momente

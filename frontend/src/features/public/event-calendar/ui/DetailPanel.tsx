@@ -9,7 +9,7 @@ import {
 } from '@/entities/public/event';
 
 import { Badge, Button, Separator } from '@/shared/shadcn';
-import { AnimatedText, GlassCard, Image, LoadingState } from '@/shared/ui';
+import { AnimatedValue, GlassCard, Image, LoadingState } from '@/shared/ui';
 
 type EventDetailPanelProps = {
   eventId: string;
@@ -78,7 +78,7 @@ export const EventDetailPanel = ({ eventId, onClose }: EventDetailPanelProps) =>
                 <div className="space-y-6 p-6">
                   {/* Title */}
                   <div>
-                    <AnimatedText className="mb-2 text-2xl font-bold">{event.title}</AnimatedText>
+                    <AnimatedValue className="mb-2 text-2xl font-bold">{event.title}</AnimatedValue>
                     {event.tags ? (
                       <div className="flex flex-wrap gap-1">
                         {event.tags.map(tag => (

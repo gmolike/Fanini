@@ -5,7 +5,7 @@ import { Calendar, Clock, Newspaper } from 'lucide-react';
 import { ARTICLE_CATEGORY_CONFIG, type Newsletter } from '@/entities/public/newsletter';
 
 import { Badge } from '@/shared/shadcn';
-import { AnimatedNumber, Image } from '@/shared/ui';
+import { AnimatedValue, Image } from '@/shared/ui';
 
 type DetailHeroProps = {
   newsletter: Newsletter;
@@ -43,7 +43,7 @@ export const DetailHero = ({ newsletter }: DetailHeroProps) => {
             >
               <Badge className="bg-[var(--color-fanini-blue)] px-4 py-2 text-lg text-white">
                 <Newspaper className="mr-2 h-5 w-5" />
-                Edition #<AnimatedNumber value={newsletter.edition} />
+                Edition #<AnimatedValue value={newsletter.edition} />
               </Badge>
             </motion.div>
 

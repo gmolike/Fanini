@@ -1,76 +1,76 @@
 // frontend/src/shared/ui/animated/AnimatedValue.tsx
-import { useEffect } from 'react';
+import { type ReactNode, useEffect } from 'react';
 
-import { motion, useSpring, useTransform } from 'framer-motion';
+import { motion, useSpring, useTransform, type Variants } from 'framer-motion';
 
 import { cn } from '@/shared/lib';
 
 type AnimatedValueProps = {
-  value: string | number;
   className?: string;
   delay?: number;
   gradient?: boolean;
-  format?: (value: number) => string;
+} & (
+  | { value: number; format?: (value: number) => string; children?: never }
+  | { value?: never; format?: never; children: ReactNode }
+);
+
+const textVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
 };
 
 /**
- * AnimatedValue Komponente
- * @description Animiert Text und Zahlenänderungen
- * @param {string | number} value - Der zu animierende Wert
- * @param {string} className - Zusätzliche CSS-Klassen
- * @param {number} delay - Verzögerung der Animation in Sekunden
- * @param {boolean} gradient - Aktiviert Gradient Text Effekt
- * @param {Function} format - Custom Formatierung für Zahlen
+ * AnimatedValue
+ * @description Animiert Zahlen oder Text-Content
  * @example
  * ```tsx
  * // Für Zahlen
- * <AnimatedValue value={1234} format={(n) => `€${n}`} />
+ * <AnimatedValue value={1234} format={(n) => `${n}€`} />
  *
- * // Für Text
- * <AnimatedValue value="Willkommen" gradient />
+ * // Für Content
+ * <AnimatedValue delay={0.2}>
+ *   <h1>Willkommen</h1>
+ * </AnimatedValue>
  * ```
  */
-export const AnimatedValue = ({
-  value,
-  className,
-  delay = 0,
-  gradient = false,
-  format,
-}: AnimatedValueProps) => {
-  // Always call hooks in the same order
-  const isNumber = typeof value === 'number';
-  // Provide a default number for useSpring if not a number
-  const spring = useSpring(isNumber ? value : 0, { stiffness: 100, damping: 30 });
+export const AnimatedValue = (props: AnimatedValueProps) => {
+  const { className, delay = 0, gradient = false } = props;
+
+  // Always call hooks at the top level
+  const spring = useSpring('value' in props && props.value !== undefined ? props.value : 0, {
+    stiffness: 100,
+    damping: 30,
+  });
   const display = useTransform(spring, current => {
     const rounded = Math.round(current);
-    return format ? format(rounded) : rounded.toString();
+    if ('value' in props && props.value !== undefined) {
+      if (props.format) {
+        return props.format(rounded);
+      } else {
+        return rounded.toString();
+      }
+    } else {
+      return '';
+    }
   });
 
   useEffect(() => {
-    if (isNumber) {
-      spring.set(value);
+    if ('value' in props && props.value !== undefined) {
+      spring.set(props.value);
     }
-  }, [spring, value, isNumber]);
+  }, [spring, props]);
 
-  if (isNumber) {
-    return (
-      <motion.span
-        className={cn(
-          gradient &&
-            'bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] bg-clip-text text-transparent',
-          className
-        )}
-      >
-        {display}
-      </motion.span>
-    );
+  // Zahlen-Animation
+  if ('value' in props && props.value !== undefined) {
+    return <motion.span className={className}>{display}</motion.span>;
   }
 
-  // Für Text
+  // Text/Content-Animation
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      variants={textVariants}
+      initial="hidden"
+      animate="visible"
       transition={{ duration: 0.5, delay }}
       className={cn(
         gradient &&
@@ -78,7 +78,7 @@ export const AnimatedValue = ({
         className
       )}
     >
-      {value}
+      {props.children}
     </motion.div>
   );
 };

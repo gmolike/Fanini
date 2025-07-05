@@ -15,12 +15,13 @@ export const Route = createFileRoute('/_public/about/$gremiumId')({
 function GremiumDetail() {
   const params = useParams({ strict: false });
   const { gremiumId } = params;
+
   if (!gremiumId) {
     throw new Error('Gremium ID is required');
   }
-  const gremiumQuery = useGremiumDetail(gremiumId);
 
-  console.log('[GremiumDetail] Rendering with gremiumId:', gremiumId);
+  // Verwende den Hook mit einem Parameter-Objekt
+  const gremiumQuery = useGremiumDetail({ gremiumId });
 
   return (
     <LoadingState
@@ -34,8 +35,6 @@ function GremiumDetail() {
       }
     >
       {response => {
-        console.log('[GremiumDetailObjekt] Rendering with gremiumId:', response.data);
-
         return <OrganizationDetailView gremium={response.data} />;
       }}
     </LoadingState>

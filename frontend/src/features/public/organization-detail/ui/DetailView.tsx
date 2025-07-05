@@ -6,7 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 import type { Gremium } from '@/entities/public/organization';
 
 import { Button } from '@/shared/shadcn';
-import { AnimatedText, GlassCard, ParallaxCard } from '@/shared/ui';
+import { , AnimatedValue, GlassCard, ParallaxCard } from '@/shared/ui';
 
 import { DetailHero } from './Hero';
 import { HighlightSection } from './HighlightSection';
@@ -44,9 +44,9 @@ export const DetailView = ({ gremium }: DetailViewProps) => {
           {/* Introduction */}
           <ParallaxCard>
             <GlassCard className="mb-12 p-8">
-              <AnimatedText gradient className="mb-4 text-2xl font-bold">
+              <AnimatedValue gradient className="mb-4 text-2xl font-bold">
                 Über das {gremium.name}
-              </AnimatedText>
+              </AnimatedValue>
               <p className="text-lg leading-relaxed text-[var(--color-muted-foreground)]">
                 {gremium.description}
               </p>

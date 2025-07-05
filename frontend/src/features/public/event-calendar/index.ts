@@ -1,2 +1,2 @@
 // frontend/src/features/public/event-calendar/index.ts
-export { CalendarView as EventCalendarView } from './ui/CalendarView';
+export { View as EventCalendarView } from './View';

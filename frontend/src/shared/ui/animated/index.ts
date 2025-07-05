@@ -1,2 +1,2 @@
-export { AnimatedNumber } from './AnimatedNumber';
-export { AnimatedText } from './AnimatedText';
+// frontend/src/shared/ui/animated/index.ts
+export { AnimatedValue } from './AnimatedValue';

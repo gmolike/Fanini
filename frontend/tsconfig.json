@@ -82,7 +82,9 @@
     "tailwind.config.ts",
     "src/pages/_public/.tsx",
     "eslint/**/*",
-    "demo/**/*"
+    "demo/**/*",
+    ".storybook/**/*",
+    "../packages/charts/src/charts"
   ],
   "exclude": [
     "node_modules",

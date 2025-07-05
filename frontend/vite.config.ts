@@ -11,18 +11,20 @@ export default defineConfig(({ mode }: ConfigEnv) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
   const isProd = mode === 'production';
+  const isTest = mode === 'test';
 
   return {
     plugins: [
       // Tailwind CSS v4
       tailwindcss(),
 
-      // TanStack Router mit FSD-konformen Routes
-      tanstackRouter({
-        routesDirectory: './src/pages',
-        generatedRouteTree: './src/app/routeTree.gen.ts',
-        quoteStyle: 'single',
-      }),
+      // TanStack Router mit FSD-konformen Routes (nicht im Test-Modus)
+      !isTest &&
+        tanstackRouter({
+          routesDirectory: './src/pages',
+          generatedRouteTree: './src/app/routeTree.gen.ts',
+          quoteStyle: 'single',
+        }),
 
       // React mit SWC für 20x schnellere Builds
       react({
@@ -58,12 +60,38 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       },
     },
 
+    // Test Configuration für Vitest
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.ts',
+      css: true,
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        exclude: [
+          'node_modules/',
+          'src/test/',
+          '**/*.stories.tsx',
+          '**/*.test.tsx',
+          '**/index.ts',
+          'src/app/routeTree.gen.ts',
+        ],
+      },
+      // Browser-basierte Tests für Storybook
+      browser: {
+        enabled: false, // Aktiviere nur wenn benötigt
+        name: 'chromium',
+        provider: 'playwright',
+      },
+    },
+
     // Development Server
     server: {
       port: 5173,
       strictPort: true,
       host: true,
-      open: true,
+      open: !isTest, // Nicht im Test-Modus öffnen
       cors: true,
       hmr: {
         overlay: true,
@@ -129,6 +157,8 @@ export default defineConfig(({ mode }: ConfigEnv) => {
         'date-fns',
         'clsx',
         'tailwind-merge',
+        // Storybook dependencies
+        ...(isTest ? ['@storybook/react', '@storybook/addon-docs', '@storybook/addon-vitest'] : []),
       ],
       exclude: ['@vite/client', '@vite/env'],
       esbuildOptions: {
@@ -166,6 +196,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       'process.env.NODE_ENV': JSON.stringify(mode),
       __DEV__: JSON.stringify(isDev),
       __PROD__: JSON.stringify(isProd),
+      __TEST__: JSON.stringify(isTest),
     },
   };
 });

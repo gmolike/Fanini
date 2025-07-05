@@ -28,3 +28,6 @@ routeTree.gen.ts
 
 # Generated files
 src/tailwind.output.css
+
+*storybook.log
+storybook-static

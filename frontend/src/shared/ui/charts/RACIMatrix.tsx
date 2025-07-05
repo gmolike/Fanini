@@ -87,7 +87,11 @@ export const RACIMatrix = ({ assignments, people, onCellClick, className }: RACI
                   >
                     {config ? (
                       <button
-                        onClick={() => onCellClick?.(assignment.taskName, person, role!)}
+                        onClick={() => {
+                          if (role) {
+                            onCellClick?.(assignment.taskName, person, role);
+                          }
+                        }}
                         className="group/badge"
                       >
                         <Badge
@@ -115,7 +119,8 @@ export const RACIMatrix = ({ assignments, people, onCellClick, className }: RACI
       <div className="mt-6 flex flex-wrap gap-4 border-t pt-4">
         <h4 className="w-full text-sm font-semibold">Legende:</h4>
         {(['responsible', 'accountable', 'consulted', 'informed'] as const).map(role => {
-          const config = getRoleConfig(role)!;
+          const config = getRoleConfig(role);
+          if (!config) return null;
           return (
             <div key={role} className="flex items-center gap-2">
               <Badge

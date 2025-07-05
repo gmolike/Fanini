@@ -93,8 +93,13 @@ export function createRemoteQuery<TData, TParams = void>(
     const enabled = resolveConfigValue(config.enabled, params) ?? DEFAULT_ENABLED;
 
     return useQuery<TData, Error, TData>({
-      queryKey,
-      queryFn: async () => fetchAndValidate<TData>(endpoint, config.schema),
+      queryKey: queryKey ?? ['unknown'], // Fallback für undefined
+      queryFn: async () => {
+        if (!endpoint) {
+          throw new Error('Endpoint is required');
+        }
+        return fetchAndValidate<TData>(endpoint, config.schema);
+      },
       enabled,
       retry: createRetryHandler(),
       staleTime: config.staleTime,

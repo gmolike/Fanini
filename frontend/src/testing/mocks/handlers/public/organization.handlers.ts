@@ -44,19 +44,11 @@ export const organizationHandlers = [
     // Direkt auf GREMIEN_DETAILS zugreifen
     const gremium = GREMIEN_DETAILS[gremiumId as GremiumType];
 
-    if (!gremium) {
-      return new HttpResponse(JSON.stringify({ error: 'Gremium nicht gefunden' }), {
-        status: 404,
-        headers: { 'content-type': 'application/json' },
-      });
-    }
-
     return HttpResponse.json({ data: gremium });
   }),
 
   // Documents Handler
   http.get('/api/organization/public/documents', async () => {
-    console.log('[MSW] GET /api/organization/public/documents');
     await delay(200);
     const response = createDocumentsResponse();
     return HttpResponse.json(response);

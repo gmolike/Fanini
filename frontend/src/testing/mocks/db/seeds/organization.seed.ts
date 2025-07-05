@@ -94,7 +94,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Geschäftsführendes Organ des Vereins mit strategischer Verantwortung',
     description:
       'Der Vorstand führt die Geschäfte des Vereins und vertritt ihn nach außen gemäß § 26 BGB. Er besteht aus dem geschäftsführenden Vorstand (Erste und Zweite Vorsitzende sowie Kassenwart) und dem erweiterten Vorstand (Schriftführung). Die Hauptverantwortung liegt in der strategischen Ausrichtung, rechtlichen Vertretung und finanziellen Führung des Vereins.',
-    memberCount: 4,
     establishedDate: '2025-01-15',
     gradient: 'from-blue-500 to-blue-600',
     headerImage:
@@ -177,7 +176,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Operative Leitung der Teams und Beratung des Vorstands',
     description:
       'Der Beirat fungiert als Bindeglied zwischen dem Vorstand und den operativen Arbeitsstrukturen des Vereins. Die gewählten Beiratsmitglieder leiten in ihrer Funktion die ihnen zugewiesenen Arbeitsbereiche und beraten den Vorstand in allen wesentlichen Vereinsangelegenheiten. Der Beirat koordiniert die Teams und stellt die operative Umsetzung der Vereinsziele sicher.',
-    memberCount: 4,
     establishedDate: '2025-01-15',
     gradient: 'from-purple-500 to-purple-600',
     members: [
@@ -249,7 +247,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Organisation unvergesslicher Veranstaltungen und Fan-Treffen',
     description:
       'Wir sind Team Events! Bei uns dreht sich alles um die Planung und Durchführung unvergesslicher Veranstaltungen. Von kleinen Viewing Parties über Auswärtsfahrten bis hin zu großen Fan-Festen - wir sorgen dafür, dass jedes Treffen zu einem besonderen Erlebnis wird. Aktuell planen wir bereits die Gamescom 2025 und viele weitere spannende Events!',
-    memberCount: 3,
     establishedDate: '2025-01-15',
     gradient: 'from-green-500 to-green-600',
     headerImage:
@@ -323,7 +320,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Kreative Köpfe für Memes, Grafiken und Social Media Content',
     description:
       'Das kreative Herz der Fanini! Wir erstellen Memes, Grafiken und Content für alle Social Media Kanäle. Von Instagram über Twitter bis TikTok - wir sind überall und sorgen dafür, dass die Faninitiative online präsent und sichtbar ist. Mit unserem neuen Postingplan versorgen wir euch regelmäßig mit dem besten Content rund um Eintracht Spandau!',
-    memberCount: 4,
     establishedDate: '2025-01-15',
     gradient: 'from-pink-500 to-pink-600',
     headerImage:
@@ -393,7 +389,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Digitale Infrastruktur, Discord und technischer Support',
     description:
       'Die digitalen Helden im Hintergrund! Wir kümmern uns um Discord-Server, Website-Entwicklung, Ticketsysteme und alles was Strom braucht. Ohne uns läuft nix - aber mit uns läuft alles reibungslos. Von technischem Support bis zur Entwicklung neuer Features sind wir für alle digitalen Belange da.',
-    memberCount: 3,
     establishedDate: '2025-01-15',
     gradient: 'from-amber-500 to-amber-600',
     members: [
@@ -442,7 +437,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Mitgliederverwaltung, Beiträge und interne Organisation',
     description:
       'Wir kümmern uns um alles Organisatorische - Mitgliederverwaltung, Beitragsverwaltung, Anträge und die ganze Bürokratie. Damit sich alle anderen auf den Spaß konzentrieren können! Mit bereits über 70 Mitgliedern wächst unsere Community stetig und wir sorgen dafür, dass alles reibungslos läuft.',
-    memberCount: 2,
     establishedDate: '2025-01-15',
     gradient: 'from-cyan-500 to-cyan-600',
     members: [
@@ -483,7 +477,6 @@ export const GREMIEN_DETAILS: Record<GremiumType, Gremium> = {
     shortDescription: 'Unabhängige Finanzprüfung und Kontrolle',
     description:
       'Die Kassenprüfer*innen arbeiten unabhängig von Vorstand und Beirat. Sie kontrollieren die finanzielle Integrität des Vereins und stellen sicher, dass alle Mittel satzungsgemäß verwendet werden. Die direkte Rechenschaftspflicht besteht gegenüber der Mitgliederversammlung.',
-    memberCount: 2,
     establishedDate: '2025-03-20',
     gradient: 'from-red-500 to-red-600',
     members: [

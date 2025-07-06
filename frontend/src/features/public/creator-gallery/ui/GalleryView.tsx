@@ -138,30 +138,6 @@ type GalleryItemProps = {
 };
 
 const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
-  // Extract content rendering logic to avoid nested ternaries
-  let content: React.ReactNode;
-  if (work.type === 'image') {
-    content = (
-      <SharedImage
-        src={work.thumbnailUrl ?? work.fileUrl}
-        alt={work.title}
-        className="h-full w-full object-cover"
-      />
-    );
-  } else if (work.type === 'video') {
-    content = (
-      <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--color-fanini-blue)]/20 to-[var(--color-fanini-red)]/20">
-        <span className="text-4xl">🎬</span>
-      </div>
-    );
-  } else {
-    content = (
-      <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-        <span className="text-4xl">📄</span>
-      </div>
-    );
-  }
-
   return (
     <motion.div
       variants={{
@@ -172,7 +148,31 @@ const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
       className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-[var(--color-muted)]"
       onClick={onClick}
     >
-      {content}
+      {(() => {
+        let content;
+        if (work.type === 'image') {
+          content = (
+            <SharedImage
+              src={work.thumbnailUrl ?? work.fileUrl}
+              alt={work.title}
+              className="h-full w-full object-cover"
+            />
+          );
+        } else if (work.type === 'video') {
+          content = (
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--color-fanini-blue)]/20 to-[var(--color-fanini-red)]/20">
+              <span className="text-4xl">🎬</span>
+            </div>
+          );
+        } else {
+          content = (
+            <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+              <span className="text-4xl">📄</span>
+            </div>
+          );
+        }
+        return content;
+      })()}
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">

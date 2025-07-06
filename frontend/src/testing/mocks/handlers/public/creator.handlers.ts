@@ -10,12 +10,13 @@ import type {
 
 import {
   CREATORS_DATA,
+  CREATOR_WORKS_DATA,
   getCreatorWorks,
-  getGalleryWorks,
   toCreatorListItem,
 } from '../../db/seeds/creator.seed';
 
 console.log('[MSW] Loading creator handlers...');
+console.log('[MSW] CREATOR_WORKS_DATA:', CREATOR_WORKS_DATA);
 
 const listHandler = http.get('/api/creators/public/list', async () => {
   await delay(300);
@@ -77,11 +78,61 @@ const worksHandler = http.get(
   }
 );
 
+// Gallery Handler mit robuster Fehlerbehandlung
 const galleryHandler = http.get('/api/creators/public/gallery', async () => {
+  console.log('[MSW] Gallery handler called!');
   await delay(400);
 
-  const response: CreatorWorksResponse = getGalleryWorks();
-  return HttpResponse.json(response);
+  try {
+    // Sicherstellen, dass CREATOR_WORKS_DATA verfügbar ist
+    if (!CREATOR_WORKS_DATA || !Array.isArray(CREATOR_WORKS_DATA)) {
+      console.error('[MSW] CREATOR_WORKS_DATA is not available or not an array');
+      return HttpResponse.json({
+        data: [],
+        meta: {
+          total: 0,
+          hasMore: false,
+        },
+      });
+    }
+
+    // Direkt die gefilterten Werke zurückgeben
+    const publicWorks = CREATOR_WORKS_DATA.filter(work => {
+      return work && work.isPublic === true;
+    });
+
+    console.log('[MSW] Filtered public works:', publicWorks.length);
+
+    // Sortieren nach publishedAt, aber mit Null-Check
+    const sortedWorks = publicWorks.sort((a, b) => {
+      const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+      const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    const response: CreatorWorksResponse = {
+      data: sortedWorks,
+      meta: {
+        total: sortedWorks.length,
+        hasMore: false,
+      },
+    };
+
+    console.log('[MSW] Returning gallery response with', sortedWorks.length, 'works');
+    return HttpResponse.json(response);
+  } catch (error) {
+    console.error('[MSW] Error in gallery handler:', error);
+    // Trotzdem eine valide Antwort zurückgeben
+    return HttpResponse.json({
+      data: [],
+      meta: {
+        total: 0,
+        hasMore: false,
+      },
+    });
+  }
 });
 
 export const creatorHandlers = [listHandler, detailHandler, worksHandler, galleryHandler];
+
+console.log('[MSW] Creator handlers exported:', creatorHandlers.length);

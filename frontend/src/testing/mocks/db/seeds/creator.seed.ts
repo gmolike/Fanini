@@ -296,3 +296,8 @@ export const seedCreators = () => {
     works: CREATOR_WORKS_DATA,
   };
 };
+
+console.log('[MSW] creator.seed.ts loaded completely');
+console.log('[MSW] CREATORS_DATA length:', CREATORS_DATA.length);
+console.log('[MSW] CREATOR_WORKS_DATA length:', CREATOR_WORKS_DATA.length);
+console.log('[MSW] First work:', CREATOR_WORKS_DATA[0]);

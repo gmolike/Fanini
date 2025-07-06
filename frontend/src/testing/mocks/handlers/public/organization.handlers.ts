@@ -3,6 +3,7 @@
 import { delay, http, HttpResponse } from 'msw';
 
 import type { GremiumType } from '@/entities/public/organization';
+import type { OrganizationNode } from '@/entities/public/organization-structure';
 
 import {
   createDocumentsResponse,
@@ -10,7 +11,113 @@ import {
   GREMIEN_DETAILS,
 } from '../../db/seeds/organization.seed';
 
+// Erstelle die Organization Structure basierend auf den Gremien
+const createOrganizationStructure = (): OrganizationNode => {
+  return {
+    id: 'fanini-root',
+    name: 'Faninitiative Spandau e.V.',
+    type: 'root',
+    description: 'Offizieller Fanverein der Eintracht Spandau',
+    memberCount: 70,
+    color: 'from-blue-600 to-blue-800',
+    children: [
+      {
+        id: 'eintracht-spandau',
+        name: 'Eintracht Spandau',
+        type: 'partner',
+        description: 'Unser Profi-Fußballverein',
+        logo: '/images/eintracht-logo.png',
+        color: 'from-blue-500 to-blue-700',
+        link: 'https://eintracht-spandau.de',
+        isExternal: true,
+      },
+      {
+        id: 'vorstand-dept',
+        name: 'Vorstand',
+        type: 'department',
+        description: 'Geschäftsführendes Organ',
+        memberCount: 4,
+        lead: 'Glenn Odya',
+        color: 'from-blue-500 to-blue-600',
+        children: [
+          {
+            id: 'vorstand-team',
+            name: 'Geschäftsführender Vorstand',
+            type: 'team',
+            memberCount: 3,
+            lead: 'Glenn Odya',
+          },
+          {
+            id: 'erweiterter-vorstand',
+            name: 'Erweiterter Vorstand',
+            type: 'team',
+            memberCount: 1,
+            lead: 'Sarah Weber',
+          },
+        ],
+      },
+      {
+        id: 'beirat-dept',
+        name: 'Beirat',
+        type: 'department',
+        description: 'Operative Leitung',
+        memberCount: 4,
+        color: 'from-purple-500 to-purple-600',
+        children: [
+          {
+            id: 'team-event',
+            name: 'Team Event',
+            type: 'team',
+            memberCount: 3,
+            lead: 'lisamon',
+            email: 'events@fanini-spandau.de',
+          },
+          {
+            id: 'team-medien',
+            name: 'Team Medien',
+            type: 'team',
+            memberCount: 4,
+            lead: 'Rifton',
+            email: 'medien@fanini-spandau.de',
+          },
+          {
+            id: 'team-technik',
+            name: 'Team Technik',
+            type: 'team',
+            memberCount: 3,
+            lead: 'Kaya',
+            email: 'technik@fanini-spandau.de',
+          },
+          {
+            id: 'team-verein',
+            name: 'Team Verein',
+            type: 'team',
+            memberCount: 2,
+            lead: 'franZee',
+            email: 'mitglieder@fanini-spandau.de',
+          },
+        ],
+      },
+      {
+        id: 'kassenpruefung-dept',
+        name: 'Kassenprüfung',
+        type: 'department',
+        description: 'Unabhängige Finanzprüfung',
+        memberCount: 2,
+        color: 'from-red-500 to-red-600',
+      },
+    ],
+  };
+};
+
 export const organizationHandlers = [
+  // Organization Structure Handler - NEUER HANDLER
+  http.get('/api/public/organization/structure', async () => {
+    await delay(200);
+    const structure = createOrganizationStructure();
+    return HttpResponse.json(structure);
+  }),
+
   // List Handler
   http.get('/api/organization/public/gremien', async () => {
     await delay(300);

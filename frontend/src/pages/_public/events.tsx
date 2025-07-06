@@ -1,11 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
-
-import { EventsWidget } from '@/widgets/public/events';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_public/events')({
-  component: RouteComponent,
+  component: EventsLayout,
 });
 
-function RouteComponent() {
-  return <EventsWidget />;
+function EventsLayout() {
+  return <Outlet />;
 }

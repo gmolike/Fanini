@@ -1,2 +1,1 @@
-// frontend/src/features/public/event-detail/index.ts
-export { DetailPanel as EventDetailPanel } from './DetailPanel';
+export { DetailView as EventDetailView } from './ui/DetailView';

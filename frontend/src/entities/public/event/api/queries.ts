@@ -1,11 +1,11 @@
-// frontend/src/entities/public/event/api/queries.ts
-import { createSimpleRemoteQuery } from '@/shared/api';
+// entities/public/event/api/queries.ts
+import { createRemoteQuery, createSimpleRemoteQuery } from '@/shared/api';
 
 import { publicEventDetailResponseSchema, publicEventListResponseSchema } from '../model/schemas';
 
 import type { PublicEventDetailResponse, PublicEventListResponse } from '../model/types';
 
-// NEUE QUERIES
+// Simple Query für Event List
 export const usePublicEventList = createSimpleRemoteQuery<PublicEventListResponse>({
   queryKey: ['events', 'public', 'list'],
   endpoint: '/api/public/event/list',
@@ -13,12 +13,17 @@ export const usePublicEventList = createSimpleRemoteQuery<PublicEventListRespons
   staleTime: 1000 * 60 * 5,
 });
 
-export const usePublicEventDetail = (eventId: string | null, options?: { enabled?: boolean }) =>
-  createSimpleRemoteQuery<PublicEventDetailResponse>({
-    queryKey: ['events', 'public', 'detail', eventId ?? ''],
-    endpoint: eventId ? `/api/public/event/${eventId}` : '/api/public/event/',
+// Parametrisierte Query für Event Detail - analog zu useGremiumDetail
+type EventDetailParams = {
+  eventId: string;
+};
+
+export const usePublicEventDetail = createRemoteQuery<PublicEventDetailResponse, EventDetailParams>(
+  {
+    queryKey: ({ eventId }) => ['events', 'public', 'detail', eventId],
+    endpoint: ({ eventId }) => `/api/public/event/${eventId}`,
     schema: publicEventDetailResponseSchema,
     staleTime: 1000 * 60 * 10,
-    enabled: !!eventId && options?.enabled !== false,
-    ...options,
-  });
+    enabled: ({ eventId }) => !!eventId,
+  }
+);

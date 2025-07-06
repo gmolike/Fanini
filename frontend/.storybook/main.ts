@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 // frontend/.storybook/main.ts
-import type { StorybookConfig } from '@storybook/react-vite';
-import { mergeConfig } from 'vite';
+import autoprefixer from 'autoprefixer';
 import path from 'path';
+import tailwindcss from 'tailwindcss';
+import { mergeConfig } from 'vite';
+
+import type { StorybookConfig } from '@storybook/react-vite';
 
 const config: StorybookConfig = {
   stories: [
@@ -23,12 +27,19 @@ const config: StorybookConfig = {
     reactDocgen: 'react-docgen-typescript',
   },
 
-  async viteFinal(config) {
+  viteFinal(config) {
     return mergeConfig(config, {
       resolve: {
         alias: {
           '@shared': path.resolve(__dirname, '../src/shared'),
           '@': path.resolve(__dirname, '../src'),
+        },
+      },
+      // Stelle sicher, dass PostCSS und Tailwind korrekt geladen werden
+      plugins: [],
+      css: {
+        postcss: {
+          plugins: [tailwindcss, autoprefixer],
         },
       },
     });

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 import { motion } from 'framer-motion';
-import { Calendar, Download, Eye, FileText, RefreshCw } from 'lucide-react';
+import { Calendar, Eye, FileText, RefreshCw } from 'lucide-react';
 
 import { DocumentDetailModal } from '@/features/public/document-detail';
 
@@ -17,17 +17,15 @@ import { GlassCard, HoverCard } from '@/shared/ui';
 
 type DocumentCardProps = {
   document: DocumentListItem;
-  onDownload: (id: string) => void;
 };
 
-export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
+export const DocumentCard = ({ document }: DocumentCardProps) => {
   const [showDetail, setShowDetail] = useState(false);
-  const { data: fullDocument, isLoading } = useDocumentDetail(
-    { documentId: document.id },
-    {
-      enabled: showDetail, // Query nur aktivieren wenn Modal offen ist
-    }
-  );
+  const { data: response, isLoading } = useDocumentDetail({
+    documentId: document.id,
+    enabled: showDetail,
+  });
+  const fullDocument = response?.data;
   const categoryConfig = DOCUMENT_CATEGORY_CONFIG[document.category];
 
   const formatFileSize = (bytes: number) => {
@@ -104,17 +102,6 @@ export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
               >
                 <Eye className="mr-2 h-3.5 w-3.5 transition-transform group-hover/btn:scale-110" />
                 Vorschau
-              </Button>
-              <Button
-                size="sm"
-                variant="default"
-                onClick={() => {
-                  onDownload(document.id);
-                }}
-                className="group/btn flex-1"
-              >
-                <Download className="mr-2 h-3.5 w-3.5 transition-transform group-hover/btn:translate-y-0.5" />
-                Download
               </Button>
             </div>
           </GlassCard>

@@ -16,11 +16,6 @@ export const DocumentWidget = () => {
 
   const documentsQuery = useDocumentList();
 
-  const handleDownload = (documentId: string) => {
-    // TODO: Implement download logic
-    console.log('Download document:', documentId);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--color-fanini-blue)]/5 via-transparent to-[var(--color-fanini-red)]/5">
       {/* Hero Section */}
@@ -94,7 +89,7 @@ export const DocumentWidget = () => {
                 className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
               >
                 {documents.map(document => (
-                  <DocumentCard key={document.id} document={document} onDownload={handleDownload} />
+                  <DocumentCard key={document.id} document={document} />
                 ))}
               </motion.div>
             );

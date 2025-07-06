@@ -6,7 +6,11 @@ export const documentSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
   category: z.enum(['satzung', 'protokolle', 'formulare', 'richtlinien', 'guides']),
-  fileUrl: z.string().url(),
+  fileUrl: z
+    .string()
+    .refine(val => val.startsWith('/') || val.startsWith('http://') || val.startsWith('https://'), {
+      message: 'Must be a valid URL or relative path',
+    }),
   fileSize: z.number(),
   fileType: z.string(),
   version: z.string(),

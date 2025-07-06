@@ -1,4 +1,6 @@
 // frontend/src/entities/public/document/api/queries.ts
+import z from 'zod';
+
 import { createRemoteQuery, createSimpleRemoteQuery } from '@/shared/api';
 
 import { documentListResponseSchema, documentSchema } from '../model/schemas';
@@ -17,14 +19,22 @@ export const useDocumentList = createSimpleRemoteQuery<{
 });
 
 // Einzelnes Dokument nach ID
-export const useDocumentDetail = createRemoteQuery<Document, { documentId: string }>({
+// Type für wrapped response
+type ApiResponse<T> = {
+  data: T;
+};
+
+// Einzelnes Dokument nach ID - mit korrektem Type
+export const useDocumentDetail = createRemoteQuery<
+  ApiResponse<Document>,
+  { documentId: string; enabled?: boolean }
+>({
   queryKey: ({ documentId }) => ['documents', 'detail', documentId],
   endpoint: ({ documentId }) => `/api/public/documents/${documentId}`,
-  schema: documentSchema,
-  staleTime: 1000 * 60 * 60, // 1 hour
-  enabled: ({ documentId }) => !!documentId,
+  schema: z.object({ data: documentSchema }),
+  staleTime: 1000 * 60 * 60,
+  enabled: ({ documentId, enabled = true }) => !!documentId && enabled,
 });
-
 // Dokument nach Kategorie
 export const useDocumentByCategory = createRemoteQuery<Document, { category: DocumentCategory }>({
   queryKey: ({ category }) => ['documents', 'category', category],

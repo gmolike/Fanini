@@ -50,7 +50,7 @@ export const DesktopNavigation = ({ items, currentPath }: DesktopNavigationProps
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="border-border bg-background min-w-[220px] rounded-lg border shadow-xl"
+                    className="border-border bg-background/95 min-w-[220px] rounded-lg border shadow-xl backdrop-blur-xl"
                   >
                     <div className="p-2">
                       {item.children.map(child => (

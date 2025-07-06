@@ -42,6 +42,9 @@
     color: white;
   }
 
+  /* Header Background Overlay für Light Mode */
+  --header-bg-overlay: rgba(255, 255, 255, 0.85);
+
   button[data-variant="outline"] {
     border-color: var(--color-border);
     color: var(--color-foreground);
@@ -166,4 +169,40 @@ body {
 
 .group:hover .dropdown-menu {
   animation: dropdown-fade-in 0.2s ease-out;
+}
+
+/* Besserer Kontrast für Header-Elemente */
+@supports (backdrop-filter: blur(1px)) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(16px) saturate(180%);
+  }
+
+  .backdrop-blur-2xl {
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+}
+
+/* Schatten für bessere Abgrenzung */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Zusätzlicher weißer Overlay für Light Mode Header */
+.backdrop-blur-xl::before,
+.backdrop-blur-2xl::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--header-bg-overlay);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.dark .backdrop-blur-xl::before,
+.dark .backdrop-blur-2xl::before {
+  display: none;
 }

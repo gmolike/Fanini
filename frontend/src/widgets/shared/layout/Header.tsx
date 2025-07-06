@@ -41,7 +41,9 @@ export const Header = () => {
       transition={{ type: 'spring', damping: 30 }}
       className={cn(
         'sticky top-0 z-50 w-full transition-all duration-300',
-        scrolled ? 'bg-background/80 border-border/50 border-b backdrop-blur-xl' : 'bg-transparent'
+        scrolled
+          ? 'bg-background/98 dark:bg-background/95 border-border border-b shadow-sm backdrop-blur-2xl'
+          : 'bg-background/95 dark:bg-background/90 backdrop-blur-xl'
       )}
     >
       <div className="w-full px-4 md:px-6 lg:px-8">
@@ -67,7 +69,7 @@ export const Header = () => {
               </SheetTrigger>
               <SheetContent
                 side="right"
-                className="bg-background/95 w-[300px] backdrop-blur-xl sm:w-[400px]"
+                className="bg-background/98 w-[300px] backdrop-blur-2xl sm:w-[400px]"
               >
                 <MobileNavigation
                   items={navigationItems}

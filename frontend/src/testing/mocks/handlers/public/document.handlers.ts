@@ -50,21 +50,15 @@ export const documentHandlers = [
   }),
 
   // GET /api/public/documents/:id
-  http.get('/api/public/documents/:id', async ({ params }) => {
-    await delay(200);
+  http.get('/api/public/documents/:id', ({ params }) => {
+    const { id } = params;
 
-    const documentId = params['id'] as string;
-    const document = DOCUMENTS_DATA.find(doc => doc.id === documentId);
+    // Finde das Dokument mit der ID
+    const document = DOCUMENTS_DATA.find(doc => doc.id === id);
 
     if (!document) {
-      return new HttpResponse(JSON.stringify({ error: 'Dokument nicht gefunden' }), {
-        status: 404,
-        headers: { 'content-type': 'application/json' },
-      });
+      return HttpResponse.json(null, { status: 404 });
     }
-
-    // Increment download count simulation
-    document.downloads += 1;
 
     return HttpResponse.json({ data: document });
   }),

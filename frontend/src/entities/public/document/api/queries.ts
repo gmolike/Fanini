@@ -1,46 +1,34 @@
 // frontend/src/entities/public/document/api/queries.ts
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-
-import { apiClient } from '@/shared/api';
+import { createRemoteQuery, createSimpleRemoteQuery } from '@/shared/api';
 
 import { documentListResponseSchema, documentSchema } from '../model/schemas';
 
 import type { Document, DocumentCategory, DocumentListItem } from '../model/types';
 
-export const useDocumentList = (): UseQueryResult<{
+// Liste aller Dokumente
+export const useDocumentList = createSimpleRemoteQuery<{
   data: DocumentListItem[];
   meta: { total: number; categories: string[] };
-}> => {
-  return useQuery({
-    queryKey: ['documents', 'list'],
-    queryFn: async () => {
-      const response = await apiClient.get('/api/public/documents');
-      return documentListResponseSchema.parse(response);
-    },
-    staleTime: 1000 * 60 * 30, // 30 minutes
-  });
-};
+}>({
+  queryKey: ['documents', 'list'],
+  endpoint: '/api/public/documents',
+  schema: documentListResponseSchema,
+  staleTime: 1000 * 60 * 30, // 30 minutes
+});
 
-export const useDocumentDetail = (documentId: string | undefined): UseQueryResult<Document> => {
-  return useQuery({
-    queryKey: ['documents', 'detail', documentId ?? ''],
-    queryFn: async () => {
-      if (!documentId) throw new Error('Document ID is required');
-      const response = await apiClient.get(`/api/public/documents/${documentId}`);
-      return documentSchema.parse(response);
-    },
-    enabled: !!documentId,
-    staleTime: 1000 * 60 * 60, // 1 hour
-  });
-};
+// Einzelnes Dokument nach ID
+export const useDocumentDetail = createRemoteQuery<Document, { documentId: string }>({
+  queryKey: ({ documentId }) => ['documents', 'detail', documentId],
+  endpoint: ({ documentId }) => `/api/public/documents/${documentId}`,
+  schema: documentSchema,
+  staleTime: 1000 * 60 * 60, // 1 hour
+  enabled: ({ documentId }) => !!documentId,
+});
 
-export const useDocumentByCategory = (category: DocumentCategory): UseQueryResult<Document> => {
-  return useQuery({
-    queryKey: ['documents', 'category', category],
-    queryFn: async () => {
-      const response = await apiClient.get(`/api/public/documents/category/${category}`);
-      return documentSchema.parse(response);
-    },
-    staleTime: 1000 * 60 * 60 * 24, // 24 hours für Satzung etc.
-  });
-};
+// Dokument nach Kategorie
+export const useDocumentByCategory = createRemoteQuery<Document, { category: DocumentCategory }>({
+  queryKey: ({ category }) => ['documents', 'category', category],
+  endpoint: ({ category }) => `/api/public/documents/category/${category}`,
+  schema: documentSchema,
+  staleTime: 1000 * 60 * 60 * 24, // 24 hours für Satzung etc.
+});

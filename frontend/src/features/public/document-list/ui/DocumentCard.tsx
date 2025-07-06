@@ -1,4 +1,4 @@
-// frontend/src/features/public/document-list/ui/DocumentCard.tsx (korrigiert)
+// frontend/src/features/public/document-list/ui/DocumentCard.tsx
 import { useState } from 'react';
 
 import { motion } from 'framer-motion';
@@ -22,8 +22,12 @@ type DocumentCardProps = {
 
 export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
   const [showDetail, setShowDetail] = useState(false);
-  const { data: fullDocument } = useDocumentDetail(showDetail ? document.id : undefined);
-
+  const { data: fullDocument, isLoading } = useDocumentDetail(
+    { documentId: document.id },
+    {
+      enabled: showDetail, // Query nur aktivieren wenn Modal offen ist
+    }
+  );
   const categoryConfig = DOCUMENT_CATEGORY_CONFIG[document.category];
 
   const formatFileSize = (bytes: number) => {
@@ -42,7 +46,6 @@ export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
       >
         <HoverCard>
           <GlassCard className="group h-full p-6 transition-all hover:shadow-xl">
-            {/* Header */}
             <div className="mb-4 flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <motion.div
@@ -67,7 +70,6 @@ export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
               )}
             </div>
 
-            {/* Meta Info */}
             <div className="mb-4 space-y-2 text-sm text-[var(--color-muted-foreground)]">
               <div className="flex items-center gap-2">
                 <Calendar className="h-3.5 w-3.5" />
@@ -79,21 +81,18 @@ export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
               </div>
             </div>
 
-            {/* Preview */}
             {document.preview ? (
               <p className="mb-4 line-clamp-2 text-sm text-[var(--color-muted-foreground)]">
                 {document.preview}
               </p>
             ) : null}
 
-            {/* Footer */}
             <div className="flex items-center justify-between">
               <span className="text-xs text-[var(--color-muted-foreground)]">
                 {document.fileType.toUpperCase()} • {formatFileSize(document.fileSize)}
               </span>
             </div>
 
-            {/* Actions */}
             <div className="mt-4 flex gap-2">
               <Button
                 size="sm"
@@ -122,13 +121,13 @@ export const DocumentCard = ({ document, onDownload }: DocumentCardProps) => {
         </HoverCard>
       </motion.div>
 
-      {/* Detail Modal */}
       <DocumentDetailModal
         document={fullDocument ?? null}
         isOpen={showDetail}
         onClose={() => {
           setShowDetail(false);
         }}
+        isLoading={isLoading}
       />
     </>
   );

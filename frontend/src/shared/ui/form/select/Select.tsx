@@ -16,7 +16,6 @@ import {
   PopoverTrigger,
 } from '@/shared/shadcn';
 
-import { ICON_SIZES } from '../constants';
 import { FormFieldWrapper } from '../fieldWrapper';
 import { useFieldReset } from '../hooks';
 
@@ -68,20 +67,17 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
   showClear = true,
   testId,
 }: Props<TFieldValues, TValue>) => {
-  const { isDisabled, normalizedValue, displayValue, open, setOpen, onValueChange, ariaProps } =
-    useController({
-      control,
-      name,
-      disabled,
-      required,
-      options,
-      placeholder,
-      label,
-    });
+  const { isDisabled, normalizedValue, open, setOpen, onValueChange, ariaProps } = useController({
+    control,
+    name,
+    disabled,
+    required,
+    options,
+    placeholder,
+    label,
+  });
 
   const { handleClear } = useFieldReset(control, name);
-  const selectedOption = options.find(opt => String(opt.value) === normalizedValue);
-  const SelectedIcon = selectedOption?.icon;
 
   return (
     <FormFieldWrapper
@@ -96,24 +92,34 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
         <div className="flex items-center gap-2">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-              <Button
-                {...ariaProps}
-                variant="outline"
-                role="combobox"
-                className={cn(
-                  'flex-1 justify-between font-normal',
-                  !normalizedValue && 'text-muted-foreground'
-                )}
-                disabled={isDisabled}
-                type="button"
-                data-testid={testId}
-              >
-                <span className="flex items-center gap-2">
-                  {SelectedIcon ? <SelectedIcon className={ICON_SIZES.default} /> : null}
-                  <span className="truncate">{displayValue}</span>
+              <div className="relative flex-1">
+                <input
+                  {...ariaProps}
+                  list={`select-options-${name}`}
+                  className={cn(
+                    'w-full flex-1 justify-between rounded border px-3 py-2 font-normal',
+                    !normalizedValue && 'text-muted-foreground'
+                  )}
+                  disabled={isDisabled}
+                  value={normalizedValue || ''}
+                  onChange={e => {
+                    onValueChange(e.target.value, field.onChange);
+                  }}
+                  placeholder={placeholder}
+                  data-testid={testId}
+                  aria-label={label}
+                />
+                <datalist id={`select-options-${name}`}>
+                  {options.map(option => (
+                    <option key={String(option.value)} value={String(option.value)}>
+                      {option.label}
+                    </option>
+                  ))}
+                </datalist>
+                <span className="pointer-events-none absolute top-1/2 right-2 -translate-y-1/2">
+                  <ChevronsUpDown className="size-4 shrink-0 opacity-50" />
                 </span>
-                <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />
-              </Button>
+              </div>
             </PopoverTrigger>
             <PopoverContent className="w-full p-0" align="start">
               <Command>
@@ -129,8 +135,11 @@ const Component = <TFieldValues extends FieldValues = FieldValues, TValue = stri
                         <CommandItem
                           key={value}
                           value={value}
-                          onSelect={() => {
-                            onValueChange(value, field.onChange);
+                          onSelect={currentValue => {
+                            onValueChange(
+                              currentValue === value ? value : currentValue,
+                              field.onChange
+                            );
                           }}
                           disabled={!!option.disabled}
                         >

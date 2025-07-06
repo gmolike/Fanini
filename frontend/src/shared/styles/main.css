@@ -206,3 +206,36 @@ body {
 .dark .backdrop-blur-2xl::before {
   display: none;
 }
+
+/* Popover Content für besseren Kontrast */
+[role="presentation"][data-radix-popper-content-wrapper] {
+  --popover-background: var(--color-card);
+}
+
+.dark [role="presentation"][data-radix-popper-content-wrapper] {
+  --popover-background: #1f3440; /* Etwas heller als card für besseren Kontrast */
+}
+
+/* Command Komponente Basis-Styling */
+[cmdk-root] {
+  background-color: var(--popover-background, var(--color-popover));
+}
+
+/* Selected Item Highlighting */
+[cmdk-item][aria-selected="true"] {
+  background-color: var(--color-accent);
+}
+
+.dark [cmdk-item][aria-selected="true"] {
+  background-color: rgba(90, 138, 160, 0.2); /* Transparentes Fanini Blue */
+}
+
+/* Hover States */
+[cmdk-item]:hover:not([aria-disabled="true"]) {
+  background-color: var(--color-muted);
+  cursor: pointer;
+}
+
+.dark [cmdk-item]:hover:not([aria-disabled="true"]) {
+  background-color: rgba(255, 255, 255, 0.05);
+}

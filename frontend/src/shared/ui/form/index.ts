@@ -4,7 +4,7 @@
  * A comprehensive set of form components built on React Hook Form
  * with Zod validation and shadcn/ui styling
  *
- * @module shared/ui/form
+ * @module form
  */
 
 // Core Form component
@@ -33,6 +33,7 @@ export type {
 export { FormProvider, useForm, useFormContext } from 'react-hook-form';
 
 // Input components
+export { ActionButton as FormActionButton } from './actionButton';
 export { Checkbox as FormCheckbox } from './checkbox';
 export { Combobox as FormCombobox } from './combobox';
 export { DatePicker as FormDatePicker } from './datePicker';

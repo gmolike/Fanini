@@ -70,7 +70,7 @@ export const EventWidget = () => {
           </motion.div>
 
           <AnimatedValue delay={0.2}>
-            <h1 className="mb-6 bg-gradient-to-r from-[var(--color-fanini-blue)] via-purple-600 to-[var(--color-fanini-red)] bg-clip-text text-6xl font-bold text-transparent md:text-8xl">
+            <h1 className="mb-6 bg-gradient-to-r from-[var(--color-fanini-blue)] via-purple-600 to-[var(--color-fanini-red)] bg-clip-text pb-6 text-6xl font-bold text-transparent md:text-8xl">
               Events & Highlights
             </h1>
           </AnimatedValue>

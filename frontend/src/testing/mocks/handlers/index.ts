@@ -2,7 +2,9 @@
 import { http, HttpResponse } from 'msw';
 
 import { creatorHandlers } from './public/creator.handlers';
+import { documentHandlers } from './public/document.handlers';
 import { eventsHandlers } from './public/events.handlers';
+import { faqHandlers } from './public/faq.handlers';
 import { newsletterHandlers } from './public/newsletter.handlers';
 import { organizationHandlers } from './public/organization.handlers';
 import { statsHandlers } from './public/stats.handlers';
@@ -41,11 +43,11 @@ const testGalleryHandler = http.get('/api/creators/public/gallery', () => {
 export const handlers = [
   testGalleryHandler, // Test handler an erster Stelle
   ...creatorHandlers,
+  ...documentHandlers,
   ...eventsHandlers,
-  ...statsHandlers,
-  ...organizationHandlers,
-  ...teamHistoryHandlers,
+  ...faqHandlers,
   ...newsletterHandlers,
+  ...organizationHandlers,
+  ...statsHandlers,
+  ...teamHistoryHandlers,
 ];
-
-// Debug: Zeige alle registrierten Handler

@@ -11,6 +11,8 @@ import { router } from '@/shared/config';
 import './shared/styles/font.css';
 import './shared/styles/main.css';
 
+import { logActiveHandlers } from '@/testing/mocks/browser';
+
 /**
  * Prepare app before rendering
  * @description Startet MSW in Development wenn aktiviert
@@ -20,6 +22,7 @@ async function prepare(): Promise<void> {
     // Dynamischer Import nur wenn benötigt
     const { startMockServer } = await import('@/testing');
     await startMockServer();
+    logActiveHandlers(); // Das zeigt alle registrierten Handler
   }
 }
 

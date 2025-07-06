@@ -1,5 +1,5 @@
 // frontend/src/testing/mocks/handlers/index.ts
-import { creatorHandlers } from './public/creator.handler';
+import { creatorHandlers } from './public/creator.handlers';
 import { eventsHandlers } from './public/events.handlers';
 import { newsletterHandlers } from './public/newsletter.handlers';
 import { organizationHandlers } from './public/organization.handlers';

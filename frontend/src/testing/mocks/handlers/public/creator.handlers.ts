@@ -15,6 +15,8 @@ import {
   toCreatorListItem,
 } from '../../db/seeds/creator.seed';
 
+console.log('[MSW] Loading creator handlers...');
+
 export const creatorHandlers = [
   // GET /api/creators/public/list
   http.get('/api/creators/public/list', async () => {
@@ -84,3 +86,4 @@ export const creatorHandlers = [
     return HttpResponse.json(response);
   }),
 ];
+console.log('[MSW] Creator handlers:', creatorHandlers);

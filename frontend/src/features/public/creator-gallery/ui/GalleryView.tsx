@@ -131,6 +131,30 @@ type GalleryItemProps = {
 };
 
 const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
+  // Extract content rendering logic to avoid nested ternaries
+  let content: React.ReactNode;
+  if (work.type === 'image') {
+    content = (
+      <SharedImage
+        src={work.thumbnailUrl ?? work.fileUrl}
+        alt={work.title}
+        className="h-full w-full object-cover"
+      />
+    );
+  } else if (work.type === 'video') {
+    content = (
+      <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--color-fanini-blue)]/20 to-[var(--color-fanini-red)]/20">
+        <span className="text-4xl">🎬</span>
+      </div>
+    );
+  } else {
+    content = (
+      <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+        <span className="text-4xl">📄</span>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       variants={{
@@ -141,21 +165,7 @@ const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
       className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-[var(--color-muted)]"
       onClick={onClick}
     >
-      {work.type === 'image' ? (
-        <SharedImage
-          src={work.thumbnailUrl || work.fileUrl}
-          alt={work.title}
-          className="h-full w-full object-cover"
-        />
-      ) : work.type === 'video' ? (
-        <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--color-fanini-blue)]/20 to-[var(--color-fanini-red)]/20">
-          <span className="text-4xl">🎬</span>
-        </div>
-      ) : (
-        <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-          <span className="text-4xl">📄</span>
-        </div>
-      )}
+      {content}
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
@@ -212,19 +222,30 @@ const LightboxModal = ({ work, onClose }: LightboxModalProps) => {
           e.stopPropagation();
         }}
       >
-        {work.type === 'image' ? (
-          <SharedImage
-            src={work.fileUrl}
-            alt={work.title}
-            className="max-h-[80vh] rounded-lg object-contain"
-          />
-        ) : work.type === 'video' ? (
-          <video src={work.fileUrl} controls className="max-h-[80vh] rounded-lg" />
-        ) : (
-          <div className="flex h-96 w-96 items-center justify-center rounded-lg bg-white">
-            <p className="text-gray-500">Vorschau nicht verfügbar</p>
-          </div>
-        )}
+        {(() => {
+          if (work.type === 'image') {
+            return (
+              <SharedImage
+                src={work.fileUrl}
+                alt={work.title}
+                className="max-h-[80vh] rounded-lg object-contain"
+              />
+            );
+          } else if (work.type === 'video') {
+            return (
+              <video src={work.fileUrl} controls className="max-h-[80vh] rounded-lg">
+                <track kind="captions" />
+                Sorry, your browser does not support embedded videos.
+              </video>
+            );
+          } else {
+            return (
+              <div className="flex h-96 w-96 items-center justify-center rounded-lg bg-white">
+                <p className="text-gray-500">Vorschau nicht verfügbar</p>
+              </div>
+            );
+          }
+        })()}
 
         {/* Info Bar */}
         <div className="mt-4 rounded-lg bg-white/10 p-4 backdrop-blur-sm">

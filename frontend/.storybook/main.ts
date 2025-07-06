@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 // frontend/.storybook/main.ts
-import autoprefixer from 'autoprefixer';
 import path from 'path';
-import tailwindcss from 'tailwindcss';
 import { mergeConfig } from 'vite';
 
 import type { StorybookConfig } from '@storybook/react-vite';
@@ -37,13 +35,7 @@ const config: StorybookConfig = {
       },
       // Stelle sicher, dass PostCSS und Tailwind korrekt geladen werden
       plugins: [],
-      css: {
-        postcss: {
-          plugins: [tailwindcss, autoprefixer],
-        },
-      },
     });
-
   },
 };
 

@@ -258,6 +258,7 @@ export const toCreatorListItem = (creator: Creator): CreatorListItem => ({
 
 export const getGalleryWorks = (): CreatorWorksResponse => {
   const publicWorks = CREATOR_WORKS_DATA.filter(work => work.isPublic).sort(
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     (a, b) => new Date(b.publishedAt!).getTime() - new Date(a.publishedAt!).getTime()
   );
 

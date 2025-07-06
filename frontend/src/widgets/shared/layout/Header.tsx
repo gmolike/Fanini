@@ -1,12 +1,12 @@
 // widgets/shared/layout/Header.tsx - Mit Active States
 import { useState } from 'react';
 
-import { Button, Sheet, SheetContent, SheetTrigger } from '@/shared/shadcn';
 import { Link, useLocation } from '@tanstack/react-router';
 import { ChevronDown, Menu, Users } from 'lucide-react';
 
-import { Container, ThemeToggle } from '@/shared/ui';
 import { cn } from '@/shared/lib';
+import { Button, Sheet, SheetContent, SheetTrigger } from '@/shared/shadcn';
+import { Container, ThemeToggle } from '@/shared/ui';
 
 export const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -161,7 +161,7 @@ export const Header = () => {
                               <Link
                                 key={child.href}
                                 to={child.href}
-                                onClick={() => setIsOpen(false)}
+                                onClick={() => { setIsOpen(false); }}
                                 className={cn(
                                   'block text-base transition-colors hover:text-[var(--color-fanini-blue)]',
                                   isActive(child.href) &&
@@ -176,7 +176,7 @@ export const Header = () => {
                       ) : (
                         <Link
                           to={item.href}
-                          onClick={() => setIsOpen(false)}
+                          onClick={() => { setIsOpen(false); }}
                           className={cn(
                             'text-lg font-medium transition-colors hover:text-[var(--color-fanini-blue)]',
                             isActive(item.href) && 'text-[var(--color-fanini-blue)]'
@@ -188,7 +188,7 @@ export const Header = () => {
                     </div>
                   ))}
                   <hr className="my-4" />
-                  <Button asChild className="w-full" onClick={() => setIsOpen(false)}>
+                  <Button asChild className="w-full" onClick={() => { setIsOpen(false); }}>
                     <Link to="/app">
                       <Users className="mr-2 h-4 w-4" />
                       Mitgliederbereich

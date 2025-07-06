@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+ 
+ 
+ 
 /* eslint-disable no-console */
 // frontend/src/shared/ui/dataTable/DataTable.stories.tsx
 import { expect, userEvent, within } from '@storybook/test';

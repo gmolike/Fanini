@@ -1,6 +1,7 @@
 // features/public/creator-gallery/ui/GalleryView.tsx
 import { useState } from 'react';
 
+import { useSearch } from '@tanstack/react-router';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Eye, Filter, Heart, ImageIcon, X } from 'lucide-react';
 
@@ -10,6 +11,10 @@ import { Badge, Button } from '@/shared/shadcn';
 import { AnimatedValue, GlassCard, Image as SharedImage, LoadingState } from '@/shared/ui';
 
 export const GalleryView = () => {
+  // TanStack Router way to get search params
+  const search = useSearch({ strict: false });
+  const creatorFilter = (search as { creator?: string }).creator;
+
   const [selectedWork, setSelectedWork] = useState<CreatorWork | null>(null);
   const [filterType, setFilterType] = useState<string>('all');
 
@@ -20,9 +25,12 @@ export const GalleryView = () => {
       {response => {
         const works = response.data;
 
-        // Filter works by type
-        const filteredWorks =
-          filterType === 'all' ? works : works.filter(work => work.type === filterType);
+        // Filter works by type and creator
+        const filteredWorks = works.filter(work => {
+          const matchesType = filterType === 'all' || work.type === filterType;
+          const matchesCreator = !creatorFilter || work.creatorId === creatorFilter;
+          return matchesType && matchesCreator;
+        });
 
         return (
           <>
@@ -67,28 +75,36 @@ export const GalleryView = () => {
             </GlassCard>
 
             {/* Gallery Grid */}
-            <motion.div
-              initial="hidden"
-              animate="show"
-              variants={{
-                hidden: { opacity: 0 },
-                show: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.05 },
-                },
-              }}
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-            >
-              {filteredWorks.map(work => (
-                <GalleryItem
-                  key={work.id}
-                  work={work}
-                  onClick={() => {
-                    setSelectedWork(work);
-                  }}
-                />
-              ))}
-            </motion.div>
+            {filteredWorks.length > 0 ? (
+              <motion.div
+                initial="hidden"
+                animate="show"
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: { staggerChildren: 0.05 },
+                  },
+                }}
+                className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+              >
+                {filteredWorks.map(work => (
+                  <GalleryItem
+                    key={work.id}
+                    work={work}
+                    onClick={() => {
+                      setSelectedWork(work);
+                    }}
+                  />
+                ))}
+              </motion.div>
+            ) : (
+              <GlassCard className="p-12 text-center">
+                <p className="text-[var(--color-muted-foreground)]">
+                  Keine Werke in dieser Kategorie gefunden.
+                </p>
+              </GlassCard>
+            )}
 
             {/* Lightbox Modal */}
             <AnimatePresence>
@@ -101,15 +117,6 @@ export const GalleryView = () => {
                 />
               ) : null}
             </AnimatePresence>
-
-            {/* Empty State */}
-            {filteredWorks.length === 0 && (
-              <GlassCard className="p-12 text-center">
-                <p className="text-[var(--color-muted-foreground)]">
-                  Keine Werke in dieser Kategorie gefunden.
-                </p>
-              </GlassCard>
-            )}
           </>
         );
       }}
@@ -117,30 +124,13 @@ export const GalleryView = () => {
   );
 };
 
-// Gallery Item Component
+// Gallery Item Component (bleibt gleich)
 type GalleryItemProps = {
   work: CreatorWork;
   onClick: () => void;
 };
 
 const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
-  let content: React.ReactNode = null;
-  if (work.type === 'image') {
-    content = (
-      <SharedImage
-        src={work.thumbnailUrl ?? work.fileUrl}
-        alt={work.title}
-        className="h-full w-full object-cover"
-      />
-    );
-  } else if (work.type === 'video') {
-    content = (
-      <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--color-fanini-blue)]/20 to-[var(--color-fanini-red)]/20">
-        <span className="text-4xl">🎬</span>
-      </div>
-    );
-  }
-
   return (
     <motion.div
       variants={{
@@ -151,7 +141,21 @@ const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
       className="group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-[var(--color-muted)]"
       onClick={onClick}
     >
-      {content}
+      {work.type === 'image' ? (
+        <SharedImage
+          src={work.thumbnailUrl || work.fileUrl}
+          alt={work.title}
+          className="h-full w-full object-cover"
+        />
+      ) : work.type === 'video' ? (
+        <div className="flex h-full items-center justify-center bg-gradient-to-br from-[var(--color-fanini-blue)]/20 to-[var(--color-fanini-red)]/20">
+          <span className="text-4xl">🎬</span>
+        </div>
+      ) : (
+        <div className="flex h-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+          <span className="text-4xl">📄</span>
+        </div>
+      )}
 
       {/* Overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 transition-opacity group-hover:opacity-100">
@@ -173,7 +177,7 @@ const GalleryItem = ({ work, onClick }: GalleryItemProps) => {
   );
 };
 
-// Lightbox Modal Component
+// Lightbox Modal Component (bleibt gleich)
 type LightboxModalProps = {
   work: CreatorWork;
   onClose: () => void;
@@ -208,26 +212,19 @@ const LightboxModal = ({ work, onClose }: LightboxModalProps) => {
           e.stopPropagation();
         }}
       >
-        {(() => {
-          if (work.type === 'image') {
-            return (
-              <SharedImage
-                src={work.fileUrl}
-                alt={work.title}
-                className="max-h-[80vh] rounded-lg object-contain"
-              />
-            );
-          } else if (work.type === 'video') {
-            return (
-              <video src={work.fileUrl} controls className="max-h-[80vh] rounded-lg">
-                <track kind="captions" />
-                Sorry, your browser does not support embedded videos.
-              </video>
-            );
-          } else {
-            return null;
-          }
-        })()}
+        {work.type === 'image' ? (
+          <SharedImage
+            src={work.fileUrl}
+            alt={work.title}
+            className="max-h-[80vh] rounded-lg object-contain"
+          />
+        ) : work.type === 'video' ? (
+          <video src={work.fileUrl} controls className="max-h-[80vh] rounded-lg" />
+        ) : (
+          <div className="flex h-96 w-96 items-center justify-center rounded-lg bg-white">
+            <p className="text-gray-500">Vorschau nicht verfügbar</p>
+          </div>
+        )}
 
         {/* Info Bar */}
         <div className="mt-4 rounded-lg bg-white/10 p-4 backdrop-blur-sm">

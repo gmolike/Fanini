@@ -75,7 +75,7 @@ export const CreatorCard = ({ creator, onSelect }: CreatorCardProps) => {
               </p>
             </div>
 
-            {/* Action */}
+            {/* Action - Nur ein Button */}
             <Button
               onClick={() => {
                 onSelect(creator.id);

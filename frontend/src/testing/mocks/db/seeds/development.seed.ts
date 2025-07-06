@@ -3,7 +3,7 @@ import { seedEvents } from './event.seed';
 import { seedNewsletters } from './newsletter.seed';
 import { seedTeamHistory } from './teamHistory.seed';
 
-import { seedOrganization } from '@/testing/mocks/db';
+import { seedCreators, seedOrganization } from '@/testing/mocks/db';
 
 export const seedDevelopmentData = () => {
   console.info('[MSW] Seeding development data...');
@@ -19,6 +19,9 @@ export const seedDevelopmentData = () => {
 
   // organiation
   seedOrganization();
+
+  // Creators
+  seedCreators();
 
   console.info('[MSW] Development data seeded successfully!');
 };

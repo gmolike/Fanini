@@ -1,6 +1,7 @@
 // features/public/creator-info/ui/InfoCard.tsx
+import { Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Brush, Camera, Film, Music, Sparkles } from 'lucide-react';
+import { Brush, Camera, Film, Grid3x3, Music, Sparkles } from 'lucide-react';
 
 import { GlassCard, ParallaxCard } from '@/shared/ui';
 import { socialIcons } from '@/shared/ui/icons/socialIcons';
@@ -116,6 +117,23 @@ export const InfoCard = () => {
               >
                 Kontaktiere uns →
               </a>
+            </div>
+            {/* Quick Actions */}
+            <div className="mt-6 space-y-2">
+              <Link
+                to="/kreativ/galerie"
+                className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-purple-500 to-amber-500 px-4 py-3 font-medium text-white transition-transform hover:scale-105"
+              >
+                <Grid3x3 className="h-5 w-5" />
+                Galerie öffnen
+              </Link>
+
+              <Link
+                to="/kontakt"
+                className="flex items-center justify-center gap-2 rounded-lg border px-4 py-3 font-medium transition-colors hover:bg-[var(--color-muted)]"
+              >
+                Künstler werden
+              </Link>
             </div>
           </div>
         </GlassCard>

@@ -1,6 +1,7 @@
 // widgets/public/creator/ui/Widget.tsx
+import { Link } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Palette } from 'lucide-react';
+import { Grid3x3, Palette } from 'lucide-react';
 
 import { CreatorInfoCard } from '@/features/public/creator-info';
 import { CreatorListView } from '@/features/public/creator-list';
@@ -41,6 +42,22 @@ export const CreatorWidget = () => {
               Content Creator präsentieren ihre Werke.
             </p>
           </AnimatedValue>
+
+          {/* Gallery Button - KORRIGIERT: Kein Button mit asChild */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-8"
+          >
+            <Link
+              to="/kreativ/galerie"
+              className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-500 to-amber-500 px-6 py-3 text-lg font-medium text-white transition-all hover:scale-105 hover:shadow-lg"
+            >
+              <Grid3x3 className="h-5 w-5" />
+              Zur Galerie
+            </Link>
+          </motion.div>
         </div>
       </div>
 
@@ -51,7 +68,7 @@ export const CreatorWidget = () => {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.5 }}
             className="lg:col-span-2"
           >
             <CreatorListView />
@@ -61,7 +78,7 @@ export const CreatorWidget = () => {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.6 }}
             className="lg:col-span-1"
           >
             <div className="sticky top-24">

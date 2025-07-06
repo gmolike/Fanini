@@ -20,6 +20,13 @@ export const GalleryView = () => {
 
   const galleryQuery = useGalleryWorks();
 
+  console.log(
+    '[Gallery] Query status:',
+    galleryQuery.data,
+    galleryQuery.isLoading,
+    galleryQuery.isError
+  );
+
   return (
     <LoadingState query={galleryQuery}>
       {response => {

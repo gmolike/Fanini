@@ -5,7 +5,7 @@ import { FileText } from 'lucide-react';
 
 import { InlineDocumentViewer } from '@/features/public/document-viewer';
 
-import { useDocumentByCategory } from '@/entities/public/document';
+import { useDocumentDetail } from '@/entities/public/document';
 
 import { AnimatedValue, LoadingState } from '@/shared/ui';
 
@@ -14,7 +14,7 @@ export const Route = createFileRoute('/_public/satzung')({
 });
 
 function SatzungPage() {
-  const satzungQuery = useDocumentByCategory('satzung');
+  const satzungQuery = useDocumentDetail({ documentId: 'doc-satzung' });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[var(--color-fanini-blue)]/5 via-transparent to-[var(--color-fanini-red)]/5">
@@ -59,7 +59,7 @@ function SatzungPage() {
               transition={{ delay: 0.4 }}
               className="mx-auto max-w-5xl"
             >
-              <InlineDocumentViewer document={document} showInfo />
+              <InlineDocumentViewer document={document.data} showInfo />
             </motion.div>
           )}
         </LoadingState>

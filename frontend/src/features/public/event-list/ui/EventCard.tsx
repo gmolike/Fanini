@@ -51,7 +51,7 @@ const getTimeUntilEvent = (eventDate: string, eventTime: string): string => {
   if (days === 1) return `Morgen`;
   if (days < 7) return `In ${String(days)} Tagen`;
   if (days < 30) return `In ${String(Math.floor(days / 7))} Wochen`;
-  return `In $String({Math.floor(days / 30))} Monaten`;
+  return `In ${String(Math.floor(days / 30))} Monaten`;
 };
 
 export const EventCard = ({ event, onSelect }: EventCardProps) => {

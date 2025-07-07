@@ -56,8 +56,8 @@ const documentLabels = {
 
 const builder = createDTOSchemaBuilder(documentDTO, documentLabels);
 
-export const documentSchema = builder.extend(
-  b => ({
+export const documentSchema = builder
+  .extend(b => ({
     id: b.requiredString('id'),
     title: b.requiredString('title', 3),
     description: b.optionalString('description'),
@@ -73,25 +73,21 @@ export const documentSchema = builder.extend(
     downloads: b.requiredNumber('downloads', { min: 0 }),
     tags: b.array('tags', z.string(), { optional: true }),
     isFeatured: z.boolean().optional(),
-  }),
-  {
-    refine: [
-      {
-        check: data => {
-          return (
-            data.fileUrl.startsWith('/') ||
-            data.fileUrl.startsWith('http://') ||
-            data.fileUrl.startsWith('https://')
-          );
-        },
-        params: {
-          message: 'Datei-URL muss ein gültiger Pfad oder eine vollständige URL sein',
-          path: ['fileUrl'],
-        },
-      },
-    ],
-  }
-);
+  }))
+  .refine(
+    data => {
+      return (
+        typeof data.fileUrl === 'string' &&
+        (data.fileUrl.startsWith('/') ||
+          data.fileUrl.startsWith('http://') ||
+          data.fileUrl.startsWith('https://'))
+      );
+    },
+    {
+      message: 'Datei-URL muss ein gültiger Pfad oder eine vollständige URL sein',
+      path: ['fileUrl'],
+    }
+  );
 
 // List Item Schema explizit definiert
 export const documentListItemSchema = z.object({

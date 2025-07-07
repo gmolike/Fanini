@@ -26,22 +26,39 @@ services:
       - fanini-network
     restart: unless-stopped
 
-  # Backend (für Phase 3)
+  # Backend (Next.js API)
   backend:
     image: node:20-alpine
     ports:
       - "3000:3000"
     volumes:
       - ./backend:/app
+      - /app/node_modules
     working_dir: /app
-    command: sh -c "echo 'Backend wird in Phase 3 implementiert' && sleep infinity"
+    command: >
+      sh -c "
+        echo 'Installing pnpm...' &&
+        npm install -g pnpm@10.12.4 &&
+        echo 'Installing backend dependencies...' &&
+        pnpm install &&
+        echo 'Waiting for database...' &&
+        sleep 10 &&
+        echo 'Starting Next.js backend...' &&
+        pnpm dev
+      "
     environment:
       - NODE_ENV=development
       - DATABASE_URL=mysql://fanini:password@mysql:3306/fanini_db
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=fanini
+      - DB_PASSWORD=password
+      - DB_NAME=fanini_db
     depends_on:
       - mysql
     networks:
       - fanini-network
+    restart: unless-stopped
 
   # MySQL Database
   mysql:

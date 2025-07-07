@@ -10,8 +10,13 @@ ignoredBuiltDependencies:
   - esbuild
 
 onlyBuiltDependencies:
+  - '@scarf/scarf'
   - '@swc/core'
   - '@tailwindcss/oxide'
+  - '@tree-sitter-grammars/tree-sitter-yaml'
+  - core-js-pure
   - esbuild
   - msw
+  - tree-sitter
+  - tree-sitter-json
   - unrs-resolver

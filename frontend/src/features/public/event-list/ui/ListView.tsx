@@ -32,6 +32,7 @@ export const ListView = () => {
 
         const filtered = events.filter(event => {
           // Filter past events
+          if (!event.date || !event.time) return false;
           const eventDate = new Date(`${event.date}T${event.time}`);
           const isPast = eventDate < now;
           if (!showPastEvents && isPast) return false;
@@ -53,8 +54,10 @@ export const ListView = () => {
 
         // Sort by date - upcoming first
         filtered.sort((a, b) => {
-          const dateA = new Date(`${a.date}T${a.time}`);
-          const dateB = new Date(`${b.date}T${b.time}`);
+          const dateAStr = a.date && a.time ? `${a.date}T${a.time}` : '';
+          const dateBStr = b.date && b.time ? `${b.date}T${b.time}` : '';
+          const dateA = dateAStr ? new Date(dateAStr) : new Date(0);
+          const dateB = dateBStr ? new Date(dateBStr) : new Date(0);
           return showPastEvents
             ? dateB.getTime() - dateA.getTime()
             : dateA.getTime() - dateB.getTime();

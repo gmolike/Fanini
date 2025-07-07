@@ -58,7 +58,7 @@ export const EventCard = ({ event, onSelect }: EventCardProps) => {
   const typeConfig = EVENT_TYPE_CONFIG[event.type];
   const orgConfig = EVENT_ORGANIZER_CONFIG[event.organizer];
   const categoryConfig = EVENT_CATEGORY_CONFIG[event.category];
-  const timeUntil = getTimeUntilEvent(event.date, event.time);
+  const timeUntil = getTimeUntilEvent(event.date ?? '', event.time);
 
   const getTimeUntilBadgeClass = () => {
     if (timeUntil === 'Vergangen') return 'bg-gray-900/80 text-gray-300';
@@ -136,11 +136,13 @@ export const EventCard = ({ event, onSelect }: EventCardProps) => {
             <div className="flex flex-wrap gap-3 text-sm text-[var(--color-muted-foreground)]">
               <span className="flex items-center gap-1">
                 <Calendar className="h-3.5 w-3.5" />
-                {new Date(event.date).toLocaleDateString('de-DE', {
-                  weekday: 'short',
-                  day: 'numeric',
-                  month: 'short',
-                })}
+                {event.date
+                  ? new Date(event.date).toLocaleDateString('de-DE', {
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short',
+                    })
+                  : 'Unbekanntes Datum'}
                 , {event.time} Uhr
               </span>
               <span className="flex items-center gap-1">

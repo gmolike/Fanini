@@ -1,4 +1,4 @@
-// frontend/src/entities/public/event/model/types.ts
+// entities/public/event/model/types.ts
 import type {
   publicEventDetailResponseSchema,
   publicEventDetailSchema,
@@ -7,17 +7,25 @@ import type {
 } from './schemas';
 import type { z } from 'zod';
 
-// NEUE TYPES (behalten)
+// Direkte Type-Exporte aus den Schemas
 export type PublicEventListItem = z.infer<typeof publicEventListItemSchema>;
 export type PublicEventDetail = z.infer<typeof publicEventDetailSchema>;
 export type PublicEventListResponse = z.infer<typeof publicEventListResponseSchema>;
 export type PublicEventDetailResponse = z.infer<typeof publicEventDetailResponseSchema>;
 
-// Type für backward compatibility
-export type EventType = PublicEventListItem['type'];
+// EventType als Union Type definieren
+export type EventType = 'party' | 'away' | 'meeting' | 'match' | 'concert' | 'training';
+export type EventCategory = 'sport' | 'culture' | 'social' | 'official';
+export type EventOrganizer = 'faninitiative' | 'eintracht' | 'external';
 
-// Configs bleiben unverändert
-export const EVENT_TYPE_CONFIG = {
+// Configs mit expliziten Typen
+export const EVENT_TYPE_CONFIG: Record<
+  EventType,
+  {
+    label: string;
+    color: string;
+  }
+> = {
   party: {
     label: 'Party',
     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
@@ -42,9 +50,18 @@ export const EVENT_TYPE_CONFIG = {
     label: 'Training',
     color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300',
   },
-} as const;
+};
 
-export const EVENT_ORGANIZER_CONFIG = {
+export const EVENT_ORGANIZER_CONFIG: Record<
+  EventOrganizer,
+  {
+    name: string;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+    badge: string;
+  }
+> = {
   faninitiative: {
     name: 'Faninitiative Spandau',
     color: 'var(--color-fanini-blue)',
@@ -66,9 +83,16 @@ export const EVENT_ORGANIZER_CONFIG = {
     borderColor: 'border-gray-300',
     badge: 'bg-gray-500 text-white',
   },
-} as const;
+};
 
-export const EVENT_CATEGORY_CONFIG = {
+export const EVENT_CATEGORY_CONFIG: Record<
+  EventCategory,
+  {
+    label: string;
+    icon: string;
+    color: string;
+  }
+> = {
   sport: {
     label: 'Sport',
     icon: '⚽',
@@ -89,4 +113,4 @@ export const EVENT_CATEGORY_CONFIG = {
     icon: '📋',
     color: 'text-gray-600',
   },
-} as const;
+};

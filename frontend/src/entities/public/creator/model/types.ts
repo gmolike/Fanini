@@ -1,59 +1,22 @@
 // entities/public/creator/model/types.ts
+import type {
+  creatorDetailResponseSchema,
+  creatorListItemSchema,
+  creatorSchema,
+  creatorsListResponseSchema,
+  creatorWorkSchema,
+  creatorWorksResponseSchema,
+} from './schemas';
+import type { z } from 'zod';
+
+// Type Exports
+export type Creator = z.infer<typeof creatorSchema>;
+export type CreatorListItem = z.infer<typeof creatorListItemSchema>;
+export type CreatorWork = z.infer<typeof creatorWorkSchema>;
+export type CreatorsListResponse = z.infer<typeof creatorsListResponseSchema>;
+export type CreatorDetailResponse = z.infer<typeof creatorDetailResponseSchema>;
+export type CreatorWorksResponse = z.infer<typeof creatorWorksResponseSchema>;
 export type CreatorType = 'grafik' | 'foto' | 'video' | 'musik' | 'other';
-
-export type Creator = {
-  id: string;
-  memberId: string;
-  artistName: string;
-  realName?: string;
-  profileImage?: string;
-  description: string;
-  type: CreatorType[];
-  portfolio: string;
-  isActive: boolean;
-  activeSince: string;
-  deactivatedAt?: string;
-  instagram?: string;
-  twitter?: string;
-  facebook?: string;
-  youtube?: string;
-  tiktok?: string;
-  website?: string;
-  stats: {
-    worksCount: number;
-    viewsCount: number;
-    likesCount: number;
-  };
-};
-
-export type CreatorWork = {
-  id: string;
-  creatorId: string;
-  title: string;
-  description?: string;
-  type: 'image' | 'video' | 'audio' | 'text';
-  fileUrl: string;
-  thumbnailUrl?: string;
-  createdAt: string;
-  publishedAt?: string;
-  isPublic: boolean;
-  order: number;
-  tags: string[];
-  stats: {
-    views: number;
-    likes: number;
-  };
-};
-
-export type CreatorListItem = {
-  id: string;
-  artistName: string;
-  profileImage?: string;
-  type: CreatorType[];
-  shortDescription: string;
-  worksCount: number;
-  isActive: boolean;
-};
 
 // Constants
 export const CREATOR_TYPE_CONFIG: Record<
@@ -95,24 +58,4 @@ export const CREATOR_TYPE_CONFIG: Record<
     gradient: 'from-gray-500 to-gray-600',
     color: 'gray',
   },
-};
-
-export type CreatorsListResponse = {
-  data: CreatorListItem[];
-  meta?: {
-    total: number;
-    types: string[];
-  };
-};
-
-export type CreatorDetailResponse = {
-  data: Creator;
-};
-
-export type CreatorWorksResponse = {
-  data: CreatorWork[];
-  meta?: {
-    total: number;
-    hasMore: boolean;
-  };
 };

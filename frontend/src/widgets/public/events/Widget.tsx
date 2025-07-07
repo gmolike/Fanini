@@ -86,7 +86,7 @@ export const EventWidget = () => {
           <LoadingState query={eventsQuery}>
             {response => {
               const upcomingCount = response.data.filter(
-                e => new Date(`${e.date}T${e.time}`) > new Date()
+                e => e.date !== undefined && new Date(`${e.date}T${e.time}`) > new Date()
               ).length;
 
               return (

@@ -9,20 +9,6 @@ import { type z } from 'zod';
 
 import { apiClient } from '../client/apiClient';
 
-export type RemoteMutationConfig<TData, TVariables, TContext = unknown> = {
-  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  endpoint: string | ((variables: TVariables) => string);
-  schema?: z.ZodSchema<TData>;
-  invalidateQueries?: (string | readonly unknown[])[];
-  onSuccess?: (
-    data: TData,
-    variables: TVariables,
-    context: TContext | undefined
-  ) => void | Promise<void>;
-  optimisticUpdate?: (variables: TVariables) => TContext;
-  rollback?: (context: TContext) => void;
-}
-
 export function createRemoteMutation<TData = unknown, TVariables = void, TContext = unknown>(
   config: RemoteMutationConfig<TData, TVariables, TContext>
 ) {
@@ -99,4 +85,18 @@ export function createRemoteMutation<TData = unknown, TVariables = void, TContex
       ...options,
     });
   };
+}
+
+export type RemoteMutationConfig<TData, TVariables, TContext = unknown> = {
+  method: 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  endpoint: string | ((variables: TVariables) => string);
+  schema?: z.ZodSchema<TData>;
+  invalidateQueries?: (string | readonly unknown[])[];
+  onSuccess?: (
+    data: TData,
+    variables: TVariables,
+    context: TContext | undefined
+  ) => void | Promise<void>;
+  optimisticUpdate?: (variables: TVariables) => TContext;
+  rollback?: (context: TContext) => void;
 }

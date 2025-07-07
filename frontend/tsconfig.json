@@ -15,7 +15,13 @@
     "jsxImportSource": "react",
     // Stricteste Type-Safety
     "strict": true,
-    "exactOptionalPropertyTypes": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -41,6 +47,9 @@
     // FSD Path Mapping
     "baseUrl": ".",
     "paths": {
+      "@/*": [
+        "src/*"
+      ],
       "@app/*": [
         "src/app/*"
       ],
@@ -58,9 +67,6 @@
       ],
       "@shared/*": [
         "src/shared/*"
-      ],
-      "@/*": [
-        "src/*"
       ]
     },
     // Vite/Node Support
@@ -73,7 +79,12 @@
   "include": [
     "src/**/*",
     "vite.config.ts",
-    "tailwind.config.ts"
+    "tailwind.config.ts",
+    "src/pages/_public/.tsx",
+    "eslint/**/*",
+    "demo/**/*",
+    ".storybook/**/*",
+    "../packages/charts/src/charts"
   ],
   "exclude": [
     "node_modules",

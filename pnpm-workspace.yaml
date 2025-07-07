@@ -6,9 +6,12 @@ packages:
 
 ignoredBuiltDependencies:
   - '@tailwindcss/oxide'
+  - core-js
   - esbuild
 
 onlyBuiltDependencies:
+  - '@swc/core'
   - '@tailwindcss/oxide'
   - esbuild
+  - msw
   - unrs-resolver

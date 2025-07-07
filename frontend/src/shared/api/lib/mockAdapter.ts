@@ -1,7 +1,7 @@
 ﻿// frontend/src/shared/api/lib/mockAdapter.ts
 // MSW adapter wrapper
 
-import { delay as mswDelay, HttpResponse, type DefaultBodyType } from 'msw';
+import { type DefaultBodyType,delay as mswDelay, HttpResponse } from 'msw';
 
 /**
  * Berechnet realistische Delays für Mocks
@@ -13,6 +13,32 @@ export const getMockDelay = (min = 100, max = 600): number => {
   // eslint-disable-next-line sonarjs/pseudo-random
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
+
+
+/**
+ * Mock Error Response Helper
+ * @param message - Error message
+ * @param statusCode - HTTP status code
+ * @param code - Optional error code
+ */
+export const mockErrorResponse = async (
+  message: string,
+  statusCode = 400,
+  code?: string
+): Promise<HttpResponse<Record<string, unknown>>> => {
+  await mswDelay(getMockDelay(50, 200));
+
+  return HttpResponse.json(
+    {
+      message,
+      statusCode,
+      code,
+      timestamp: new Date().toISOString(),
+    },
+    { status: statusCode }
+  );
+};
+
 
 /**
  * Erstellt eine Mock Response mit realistischem Delay
@@ -37,30 +63,6 @@ export const mockResponse = async <T extends DefaultBodyType>(
     responseInit.headers = options.headers;
   }
   return HttpResponse.json(data, responseInit);
-};
-
-/**
- * Mock Error Response Helper
- * @param message - Error message
- * @param statusCode - HTTP status code
- * @param code - Optional error code
- */
-export const mockErrorResponse = async (
-  message: string,
-  statusCode = 400,
-  code?: string
-): Promise<HttpResponse<Record<string, unknown>>> => {
-  await mswDelay(getMockDelay(50, 200));
-
-  return HttpResponse.json(
-    {
-      message,
-      statusCode,
-      code,
-      timestamp: new Date().toISOString(),
-    },
-    { status: statusCode }
-  );
 };
 
 /**

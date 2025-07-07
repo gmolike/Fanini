@@ -1,11 +1,17 @@
 // frontend/src/main.tsx
-import { RouterProvider } from '@tanstack/react-router';
+// CSS imports in korrekter Reihenfolge
 import ReactDOM from 'react-dom/client';
 
+import { RouterProvider } from '@tanstack/react-router';
+
 import { AppProvider } from '@/app/providers';
+
 import { router } from '@/shared/config';
+
 import './shared/styles/font.css';
 import './shared/styles/main.css';
+
+import { logActiveHandlers } from '@/testing/mocks/browser';
 
 /**
  * Prepare app before rendering
@@ -16,6 +22,7 @@ async function prepare(): Promise<void> {
     // Dynamischer Import nur wenn benötigt
     const { startMockServer } = await import('@/testing');
     await startMockServer();
+    logActiveHandlers(); // Das zeigt alle registrierten Handler
   }
 }
 

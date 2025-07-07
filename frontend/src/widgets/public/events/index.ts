@@ -1,0 +1,1 @@
+export { EventWidget } from './Widget';

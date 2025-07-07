@@ -2,42 +2,6 @@
 import { z } from 'zod';
 
 /**
- * API Error Schema
- */
-export const apiErrorSchema = z.object({
-  message: z.string(),
-  code: z.string().optional(),
-  statusCode: z.number(),
-  details: z.record(z.unknown()).optional(),
-});
-
-export type ApiError = z.infer<typeof apiErrorSchema>;
-
-/**
- * Custom API Error Klasse
- */
-export class ApiClientError extends Error implements ApiError {
-  code: string | undefined;
-  statusCode: number;
-  details: Record<string, unknown> | undefined;
-
-  constructor(error: ApiError) {
-    super(error.message);
-    this.name = 'ApiClientError';
-    this.code = error.code;
-    this.statusCode = error.statusCode;
-    this.details = error.details;
-  }
-}
-
-/**
- * Request Options Type
- */
-export type RequestOptions = {
-  params?: Record<string, string | number | boolean>;
-} & Omit<RequestInit, 'body' | 'method'>
-
-/**
  * API Client Klasse
  * @description Wrapper um fetch mit TypeScript und Error Handling
  */
@@ -180,7 +144,7 @@ class ApiClient {
       }
 
       try {
-        return await response.json() as T;
+        return (await response.json()) as T;
       } catch {
         // Response ist kein JSON
         return {} as T;
@@ -191,7 +155,7 @@ class ApiClient {
     let errorData: Partial<ApiError>;
 
     try {
-      errorData = await response.json() as Partial<ApiError>;
+      errorData = (await response.json()) as Partial<ApiError>;
     } catch {
       errorData = {
         message: response.statusText || 'Ein Fehler ist aufgetreten',
@@ -327,9 +291,44 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 }
+/**
+ * Request Options Type
+ */
+export { ApiClient };
 
-// Singleton Instance
+/**
+ * Custom API Error Klasse
+ */
 export const apiClient = new ApiClient();
 
+export class ApiClientError extends Error implements ApiError {
+  code: string | undefined;
+  statusCode: number;
+  details: Record<string, unknown> | undefined;
+
+  constructor(error: ApiError) {
+    super(error.message);
+    this.name = 'ApiClientError';
+    this.code = error.code;
+    this.statusCode = error.statusCode;
+    this.details = error.details;
+  }
+}
+
+/**
+ * API Error Schema
+ */
+export const apiErrorSchema = z.object({
+  message: z.string(),
+  code: z.string().optional(),
+  statusCode: z.number(),
+  details: z.record(z.unknown()).optional(),
+});
+
+// Singleton Instance
+export type ApiError = z.infer<typeof apiErrorSchema>;
+
 // Export für Tests oder spezielle Use Cases
-export { ApiClient };
+export type RequestOptions = {
+  params?: Record<string, string | number | boolean>;
+} & Omit<RequestInit, 'body' | 'method'>;

@@ -1,0 +1,126 @@
+/* Storybook-spezifische Fixes für Popups und Portals */
+
+/* Sicherstellen, dass der Body die richtige Position hat */
+body {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* Portal-Container für Radix UI */
+#radix-portal-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+/* Storybook iframe fixes */
+.sb-show-main {
+  position: relative;
+}
+
+/* Dialog und Popover Fixes */
+[data-radix-popper-content-wrapper] {
+  z-index: 50 !important;
+}
+
+/* Select Dropdown Fix */
+[data-radix-select-content] {
+  z-index: 50 !important;
+  background-color: var(--color-popover) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: var(--radius) !important;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Dialog Overlay Fix */
+[data-radix-dialog-overlay] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+/* Dialog Content Fix */
+[data-radix-dialog-content] {
+  position: fixed !important;
+  z-index: 50 !important;
+  background-color: var(--color-card) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+/* Dropdown Menu Fix */
+[data-radix-dropdown-menu-content] {
+  z-index: 50 !important;
+  background-color: var(--color-popover) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Popover Fix */
+[data-radix-popover-content] {
+  z-index: 50 !important;
+  background-color: var(--color-popover) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Tooltip Fix */
+[data-radix-tooltip-content] {
+  z-index: 50 !important;
+  background-color: var(--color-popover) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+/* Context Menu Fix */
+[data-radix-context-menu-content] {
+  z-index: 50 !important;
+  background-color: var(--color-popover) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Alert Dialog Fix */
+[data-radix-alert-dialog-overlay] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 50 !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+[data-radix-alert-dialog-content] {
+  position: fixed !important;
+  z-index: 50 !important;
+  background-color: var(--color-card) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+/* Storybook Canvas Container */
+#storybook-root {
+  position: relative;
+  min-height: 400px;
+}
+
+/* Sicherstellen, dass alle Portals die richtigen Farben haben */
+[data-radix-portal] {
+  --color-background: #eff1f3;
+  --color-foreground: #1a2e38;
+  --color-card: #fafbfc;
+  --color-card-foreground: #1a2e38;
+  --color-popover: #fafbfc;
+  --color-popover-foreground: #1a2e38;
+  --color-border: #c9d1d9;
+  --color-fanini-blue: #34687e;
+  --color-fanini-red: #b94f46;
+}

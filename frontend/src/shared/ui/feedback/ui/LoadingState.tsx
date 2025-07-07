@@ -1,14 +1,15 @@
-import { Loader2 } from 'lucide-react'
+// frontend/src/shared/ui/feedback/ui/LoadingState.tsx
+import { Loader2 } from 'lucide-react';
 
-import { Alert, AlertDescription } from '@/shared/shadcn'
+import { Alert, AlertDescription } from '@/shared/shadcn';
 
-import type { LoadingStateProps } from '../model/types'
+import type { LoadingStateProps } from '../model/types';
 
 /**
  * LoadingState Komponente
  * @description Handhabt Loading, Error und Empty States für TanStack Query
  */
-export const LoadingState = <TData,>({
+export const LoadingState = <TData = unknown,>({
   query,
   children,
   loadingFallback,
@@ -20,11 +21,11 @@ export const LoadingState = <TData,>({
       <>
         {loadingFallback ?? (
           <div className="flex items-center justify-center p-8">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
           </div>
         )}
       </>
-    )
+    );
   }
 
   if (query.isError) {
@@ -38,12 +39,14 @@ export const LoadingState = <TData,>({
           </Alert>
         )}
       </>
-    )
+    );
   }
 
-  if (query.data === undefined || query.data == null) {
-    return <>{emptyFallback ?? <div>Keine Daten vorhanden</div>}</>
+  // eslint-disable-next-line no-extra-boolean-cast
+  if (!Boolean(query.data)) {
+    return <>{emptyFallback ?? <div>Keine Daten vorhanden</div>}</>;
   }
 
-  return <>{children(query.data)}</>
-}
+  // Type assertion needed here due to React children type constraints
+  return <>{children(query.data as NonNullable<TData>)}</>;
+};

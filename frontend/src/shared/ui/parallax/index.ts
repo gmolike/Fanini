@@ -1,0 +1,1 @@
+export { ParallaxCard } from './ParallaxCard';

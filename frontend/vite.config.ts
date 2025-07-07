@@ -1,37 +1,47 @@
-import { defineConfig, loadEnv } from 'vite';
-import react from '@vitejs/plugin-react-swc';
+// frontend/vite.config.ts
+/* eslint-disable @typescript-eslint/naming-convention */
+import tailwindcss from '@tailwindcss/vite';
 import { tanstackRouter } from '@tanstack/router-plugin/vite';
+import react from '@vitejs/plugin-react-swc';
 import { resolve } from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
-import type { PluginOption } from 'vite';
+import { type ConfigEnv, defineConfig, loadEnv, type PluginOption } from 'vite';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }: ConfigEnv) => {
   const env = loadEnv(mode, process.cwd(), '');
   const isDev = mode === 'development';
   const isProd = mode === 'production';
+  const isTest = mode === 'test';
+  const isBuildingStorybook = command === 'build' && process.env['STORYBOOK'] === 'true';
 
   return {
     plugins: [
-      // TanStack Router mit FSD-konformen Routes
-      tanstackRouter({
-        routesDirectory: './src/pages',
-        generatedRouteTree: './src/app/routeTree.gen.ts',
-        quoteStyle: 'single',
-      }),
+      // Tailwind CSS v4
+      tailwindcss(),
+
+      // TanStack Router mit FSD-konformen Routes (nicht im Test-Modus oder Storybook)
+      !isTest &&
+        !isBuildingStorybook &&
+        tanstackRouter({
+          routesDirectory: './src/pages',
+          generatedRouteTree: './src/app/routeTree.gen.ts',
+          quoteStyle: 'single',
+        }),
 
       // React mit SWC für 20x schnellere Builds
       react({
         jsxImportSource: 'react',
         tsDecorators: true,
-        plugins: [
-          ['@swc/plugin-styled-jsx', {}],
-          isProd && ['@swc/plugin-remove-console', {}],
-        ].filter(Boolean) as [string, Record<string, unknown>][],
+        plugins: !isBuildingStorybook
+          ? ([['@swc/plugin-styled-jsx', {}], isProd && ['@swc/plugin-remove-console', {}]].filter(
+              Boolean
+            ) as [string, Record<string, unknown>][])
+          : [],
       }),
 
       // Bundle Analyzer nur bei Bedarf
       isProd &&
-        process.env.ANALYZE &&
+        process.env['ANALYZE'] &&
         visualizer({
           open: true,
           filename: './dist/stats.html',
@@ -53,22 +63,51 @@ export default defineConfig(({ mode }) => {
       },
     },
 
+    // Test Configuration für Vitest
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './src/test/setup.ts',
+      css: true,
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'json', 'html'],
+        exclude: [
+          'node_modules/',
+          'src/test/',
+          '**/*.stories.tsx',
+          '**/*.test.tsx',
+          '**/index.ts',
+          'src/app/routeTree.gen.ts',
+        ],
+      },
+      // Browser-basierte Tests für Storybook
+      browser: {
+        enabled: false, // Aktiviere nur wenn benötigt
+        name: 'chromium',
+        provider: 'playwright',
+      },
+    },
+
     // Development Server
     server: {
       port: 5173,
       strictPort: true,
       host: true,
-      open: true,
+      open: !isTest && !isBuildingStorybook, // Nicht im Test-Modus oder Storybook öffnen
       cors: true,
       hmr: {
         overlay: true,
         protocol: 'ws',
         host: 'localhost',
       },
+      fs: {
+        allow: ['..'], // Erlaubt Zugriff auf Dateien außerhalb des Projektverzeichnisses
+      },
       // Proxy für EasyVerein API
       proxy: {
         '/api/easyverein': {
-          target: env.VITE_EASYVEREIN_API_URL || 'https://api.easyverein.com',
+          target: env['VITE_EASYVEREIN_API_URL'] ?? 'https://api.easyverein.com',
           changeOrigin: true,
           rewrite: path => path.replace(/^\/api\/easyverein/, ''),
           secure: true,
@@ -84,82 +123,12 @@ export default defineConfig(({ mode }) => {
       cors: true,
     },
 
+    publicDir: 'public',
+
     // Build Optimizations
     build: {
       target: 'esnext',
-      minify: isProd ? 'terser' : false,
-      terserOptions: isProd
-        ? {
-            compress: {
-              drop_console: true,
-              drop_debugger: true,
-              pure_funcs: ['console.log', 'console.debug'],
-              passes: 2,
-            },
-            mangle: {
-              safari10: true,
-            },
-            format: {
-              comments: false,
-              ecma: 2020,
-            },
-          }
-        : undefined,
-      sourcemap: isDev ? 'inline' : false,
-      cssCodeSplit: true,
-      cssMinify: 'lightningcss',
-      assetsInlineLimit: 4096,
-      chunkSizeWarningLimit: 1000,
-
-      // Rollup Options für optimales Chunking
-      rollupOptions: {
-        output: {
-          // Manuelle Chunks für besseres Caching
-          manualChunks: {
-            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-            'vendor-tanstack': [
-              '@tanstack/react-query',
-              '@tanstack/react-router',
-              '@tanstack/react-table',
-            ],
-            'vendor-ui': [
-              '@radix-ui/react-dialog',
-              '@radix-ui/react-dropdown-menu',
-              '@radix-ui/react-select',
-            ],
-            'vendor-form': ['react-hook-form', '@hookform/resolvers', 'zod'],
-            'vendor-utils': ['date-fns', 'clsx', 'tailwind-merge'],
-          },
-          // Asset Naming
-          entryFileNames: isDev ? '[name].js' : 'assets/js/[name]-[hash].js',
-          chunkFileNames: isDev ? '[name].js' : 'assets/js/[name]-[hash].js',
-          assetFileNames: assetInfo => {
-            const info = assetInfo.name?.split('.');
-            const ext = info?.[info.length - 1];
-            if (/\.(png|jpe?g|svg|gif|tiff|bmp|ico)$/i.test(assetInfo.name ?? '')) {
-              return isDev ? '[name][extname]' : 'assets/images/[name]-[hash][extname]';
-            }
-            if (ext === 'css') {
-              return isDev ? '[name].css' : 'assets/css/[name]-[hash].css';
-            }
-            return isDev ? '[name][extname]' : 'assets/[ext]/[name]-[hash][extname]';
-          },
-        },
-        // Tree-shaking Optimierungen
-        treeshake: {
-          moduleSideEffects: false,
-          propertyReadSideEffects: false,
-          tryCatchDeoptimization: false,
-        },
-      },
-
-      // Worker Options
-      modulePreload: {
-        polyfill: true,
-      },
-
-      // Reporting
-      reportCompressedSize: true,
+      minify: isProd && !isBuildingStorybook ? 'terser' : false,
     },
 
     // Dependency Optimization
@@ -176,6 +145,8 @@ export default defineConfig(({ mode }) => {
         'date-fns',
         'clsx',
         'tailwind-merge',
+        // Storybook dependencies
+        ...(isTest || isBuildingStorybook ? ['@storybook/react', '@storybook/react-vite'] : []),
       ],
       exclude: ['@vite/client', '@vite/env'],
       esbuildOptions: {
@@ -190,20 +161,7 @@ export default defineConfig(({ mode }) => {
         localsConvention: 'camelCase',
         generateScopedName: isDev ? '[name]__[local]__[hash:base64:5]' : '[hash:base64:8]',
       },
-      preprocessorOptions: {
-        scss: {
-          additionalData: `@import "@shared/styles/variables.scss";`,
-        },
-      },
       devSourcemap: isDev,
-      transformer: 'lightningcss',
-      lightningcss: {
-        targets: {
-          chrome: 115,
-          firefox: 115,
-          safari: 15,
-        },
-      },
     },
 
     // Performance
@@ -211,9 +169,9 @@ export default defineConfig(({ mode }) => {
       target: 'es2020',
       legalComments: 'none',
       treeShaking: true,
-      minifyIdentifiers: isProd,
-      minifySyntax: isProd,
-      minifyWhitespace: isProd,
+      minifyIdentifiers: isProd && !isBuildingStorybook,
+      minifySyntax: isProd && !isBuildingStorybook,
+      minifyWhitespace: isProd && !isBuildingStorybook,
     },
 
     // SSR/SSG (für zukünftige Erweiterungen)
@@ -226,6 +184,8 @@ export default defineConfig(({ mode }) => {
       'process.env.NODE_ENV': JSON.stringify(mode),
       __DEV__: JSON.stringify(isDev),
       __PROD__: JSON.stringify(isProd),
+      __TEST__: JSON.stringify(isTest),
+      __STORYBOOK__: JSON.stringify(isBuildingStorybook),
     },
   };
 });

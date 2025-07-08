@@ -1,4 +1,6 @@
 // src/features/team/model/types.ts
+import { z } from 'zod';
+
 import type { Option } from '@/shared/ui/form';
 
 import type { FieldArrayWithId, UseFormReturn } from 'react-hook-form';
@@ -9,24 +11,44 @@ import type { FieldArrayWithId, UseFormReturn } from 'react-hook-form';
 export type TeamMemberRole = 'developer' | 'designer' | 'manager' | 'tester';
 
 /**
- * Team member DTO
+ * Base DTOs für Schema-Erstellung
  */
-export type TeamMemberDto = {
-  name: string;
-  email: string;
-  role: TeamMemberRole;
-  startDate: string;
-  isActive: boolean;
-};
+export const teamMemberDTO = z.object({
+  name: z.string(),
+  email: z.string(),
+  role: z.string() as z.ZodType<TeamMemberRole>,
+  startDate: z.string(),
+  isActive: z.boolean(),
+});
+
+export const teamFormDTO = z.object({
+  teamName: z.string(),
+  description: z.string().optional(),
+  members: z.array(teamMemberDTO),
+});
 
 /**
- * Main team form DTO
+ * Labels für Fehlermeldungen
  */
-export type TeamFormDto = {
-  teamName: string;
-  description: string;
-  members: TeamMemberDto[];
-};
+export const teamMemberLabels = {
+  name: 'Name',
+  email: 'E-Mail',
+  role: 'Rolle',
+  startDate: 'Startdatum',
+  isActive: 'Aktiv',
+} as const;
+
+export const teamFormLabels = {
+  teamName: 'Team Name',
+  description: 'Beschreibung',
+  members: 'Team-Mitglieder',
+} as const;
+
+/**
+ * Inferred Types aus DTOs
+ */
+export type TeamMemberDto = z.infer<typeof teamMemberDTO>;
+export type TeamFormDto = z.infer<typeof teamFormDTO>;
 
 /**
  * Props for the TeamForm component

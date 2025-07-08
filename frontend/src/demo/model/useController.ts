@@ -38,21 +38,21 @@ export const TEAM_MEMBER_ROLES: TeamMemberRoleOption[] = [
  * Team member validation schema
  */
 const teamMemberSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().email('Invalid email address'),
+  name: z.string().min(2, 'Name muss mindestens 2 Zeichen haben'),
+  email: z.string().email('E-Mail muss eine gültige E-Mail-Adresse sein'),
   role: z.enum(['developer', 'designer', 'manager', 'tester']),
   startDate: z.string(),
   isActive: z.boolean(),
-}) satisfies z.ZodType<TeamMemberDto>;
+});
 
 /**
  * Main team form validation schema
  */
 export const teamFormSchema = z.object({
-  teamName: z.string().min(3, 'Team name must be at least 3 characters'),
-  description: z.string(),
-  members: z.array(teamMemberSchema).min(1, 'At least one member is required'),
-}) satisfies z.ZodType<TeamFormDto>;
+  teamName: z.string().min(3, 'Team Name muss mindestens 3 Zeichen haben'),
+  description: z.string().optional(),
+  members: z.array(teamMemberSchema).min(1, 'Team-Mitglieder muss mindestens 1 Einträge haben'),
+});
 
 /**
  * Controller hook for team form logic

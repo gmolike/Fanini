@@ -96,8 +96,9 @@ MemberFieldGroup.displayName = 'MemberFieldGroup';
  *
  * Features:
  * - Dynamic member addition/removal
- * - Form validation with Zod
+ * - Form validation with DTOSchemaBuilder
  * - Type-safe field management
+ * - Localized error messages
  *
  * @example
  * ```tsx

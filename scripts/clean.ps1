@@ -13,13 +13,13 @@ Write-Host "Cleaning project..." -ForegroundColor Green
 
 if ($All -or $Build) {
   Write-Host "Removing build artifacts..." -ForegroundColor Blue
-  if (Test-Path "frontend/dist") {
-    Remove-Item -Recurse -Force "frontend/dist"
-    Write-Host "   OK Removed frontend/dist" -ForegroundColor Gray
+  if (Test-Path "apps/web/dist") {
+    Remove-Item -Recurse -Force "apps/web/dist"
+    Write-Host "   OK Removed apps/web/dist" -ForegroundColor Gray
   }
-  if (Test-Path "backend/dist") {
-    Remove-Item -Recurse -Force "backend/dist"
-    Write-Host "   OK Removed backend/dist" -ForegroundColor Gray
+  if (Test-Path "apps/api/dist") {
+    Remove-Item -Recurse -Force "apps/api/dist"
+    Write-Host "   OK Removed apps/api/dist" -ForegroundColor Gray
   }
   if (Test-Path ".next") {
     Remove-Item -Recurse -Force ".next"
@@ -41,15 +41,15 @@ if ($All -or $Deps -or $NodeModules) {
     Remove-Item -Recurse -Force "node_modules" -ErrorAction SilentlyContinue
     Write-Host "   OK Removed root node_modules" -ForegroundColor Gray
   }
-  if (Test-Path "frontend/node_modules") {
+  if (Test-Path "apps/web/node_modules") {
     Write-Host "   Removing frontend node_modules..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force "frontend/node_modules" -ErrorAction SilentlyContinue
-    Write-Host "   OK Removed frontend/node_modules" -ForegroundColor Gray
+    Remove-Item -Recurse -Force "apps/web/node_modules" -ErrorAction SilentlyContinue
+    Write-Host "   OK Removed apps/web/node_modules" -ForegroundColor Gray
   }
-  if (Test-Path "backend/node_modules") {
+  if (Test-Path "apps/api/node_modules") {
     Write-Host "   Removing backend node_modules..." -ForegroundColor Yellow
-    Remove-Item -Recurse -Force "backend/node_modules" -ErrorAction SilentlyContinue
-    Write-Host "   OK Removed backend/node_modules" -ForegroundColor Gray
+    Remove-Item -Recurse -Force "apps/api/node_modules" -ErrorAction SilentlyContinue
+    Write-Host "   OK Removed apps/api/node_modules" -ForegroundColor Gray
   }
   if (Test-Path "pnpm-lock.yaml") {
     Remove-Item "pnpm-lock.yaml"

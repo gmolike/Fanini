@@ -1,5 +1,5 @@
 {
-  "name": "faninitiative-spandau-frontend",
+  "name": "@faninitiative/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",

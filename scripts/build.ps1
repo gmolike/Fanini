@@ -5,11 +5,11 @@ Write-Host "🏗️  Building for production..." -ForegroundColor Green
 
 # Clean previous builds
 Write-Host "🧹 Cleaning previous builds..." -ForegroundColor Blue
-if (Test-Path "frontend/dist") {
-  Remove-Item -Recurse -Force "frontend/dist"
+if (Test-Path "apps/web/dist") {
+  Remove-Item -Recurse -Force "apps/web/dist"
 }
-if (Test-Path "backend/dist") {
-  Remove-Item -Recurse -Force "backend/dist"
+if (Test-Path "apps/api/dist") {
+  Remove-Item -Recurse -Force "apps/api/dist"
 }
 
 # Install production dependencies

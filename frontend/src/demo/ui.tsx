@@ -1,5 +1,5 @@
 // src/features/team/ui/TeamForm.tsx
-import { memo } from 'react';
+import { memo, useState } from 'react';
 
 import { Plus, Trash2, Users } from 'lucide-react';
 
@@ -17,8 +17,9 @@ import {
 } from '@/shared/ui/form';
 
 import { TEAM_MEMBER_ROLES, useController } from './model/useController';
+import { PersonSelectButton } from './ui/PersonSelectButton';
 
-import type { MemberFieldGroupProps, TeamFormProps } from './model/types';
+import type { MemberFieldGroupProps, PersonInfo, TeamFormProps } from './model/types';
 
 /**
  * Member Field Group Component - Renders fields for a single team member
@@ -92,27 +93,35 @@ const MemberFieldGroup = memo(({ control, index, onRemove, canRemove }: MemberFi
 MemberFieldGroup.displayName = 'MemberFieldGroup';
 
 /**
- * Team Form Component - Manages team with dynamic member list
- *
- * Features:
- * - Dynamic member addition/removal
- * - Form validation with DTOSchemaBuilder
- * - Type-safe field management
- * - Localized error messages
+ * Team Form Component with person selection
  *
  * @example
  * ```tsx
+ * // Creating new team
  * <TeamForm
- *   defaultValues={{ teamName: 'Frontend Team' }}
  *   onSubmit={handleSubmit}
- *   onCancel={handleCancel}
+ * />
+ *
+ * // Editing existing team
+ * <TeamForm
+ *   defaultValues={teamData}
+ *   defaultPersonInfo={personData}
+ *   onSubmit={handleSubmit}
  * />
  * ```
  */
-const Component = ({ defaultValues, onSubmit, onCancel }: TeamFormProps) => {
+const Component = ({
+  defaultValues,
+  defaultPersonInfo,
+  onSubmit,
+  onCancel,
+}: TeamFormProps & { defaultPersonInfo?: PersonInfo }) => {
   const { form, fields, handleAddMember, handleRemoveMember, canRemoveMember } = useController({
     defaultValues,
   });
+
+  // State for person info (not part of form DTO)
+  const [personInfo, setPersonInfo] = useState<PersonInfo | undefined>(defaultPersonInfo);
 
   return (
     <Form form={form} onSubmit={onSubmit}>
@@ -139,6 +148,17 @@ const Component = ({ defaultValues, onSubmit, onCancel }: TeamFormProps) => {
             label="Description"
             placeholder="Describe your team's purpose"
             rows={3}
+          />
+
+          {/* Person Selection */}
+          <PersonSelectButton
+            control={form.control}
+            name="verantwortlichId"
+            label="Verantwortliche Person"
+            description="Wählen Sie die verantwortliche Person für dieses Team"
+            required
+            personInfo={personInfo}
+            onPersonChange={setPersonInfo}
           />
         </div>
 

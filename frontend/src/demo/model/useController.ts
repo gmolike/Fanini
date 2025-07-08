@@ -8,7 +8,7 @@ import { z } from 'zod';
 import type {
   ControllerProps,
   ControllerResult,
-  TeamFormDto,
+  TeamDto,
   TeamMemberDto,
   TeamMemberRoleOption,
 } from './types';
@@ -62,7 +62,7 @@ export const teamFormSchema = z.object({
  */
 export const useController = ({ defaultValues }: ControllerProps): ControllerResult => {
   // Initialize form with validation
-  const form = useForm<TeamFormDto>({
+  const form = useForm<TeamDto>({
     resolver: zodResolver(teamFormSchema),
     defaultValues: {
       teamName: defaultValues?.teamName ?? '',

@@ -28,63 +28,67 @@ import type { MemberFieldGroupProps, PersonInfo, TeamFormProps } from './model/t
  */
 const MemberFieldGroup = memo(({ control, index, onRemove, canRemove }: MemberFieldGroupProps) => {
   return (
-    <div className={cn('relative rounded-lg border p-4', 'bg-muted/20')}>
-      {/* Remove Button */}
-      {canRemove ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onRemove}
-          className="absolute top-2 right-2 h-8 w-8"
-          aria-label="Remove member"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      ) : null}
+    <div className={cn('rounded-lg border', 'bg-muted/20')}>
+      <div className="flex items-center gap-4 p-4">
+        {/* Tabellenartige Anordnung der Felder */}
+        <div className="flex flex-1 flex-col gap-4 lg:flex-row lg:items-end">
+          <FormInput
+            control={control}
+            name={`members.${index}.name`}
+            label="Name"
+            placeholder="Member name"
+            required
+            className="lg:flex-1"
+          />
 
-      {/* Member Fields */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <FormInput
-          control={control}
-          name={`members.${index}.name`}
-          label="Name"
-          placeholder="Member name"
-          required
-        />
+          <FormInput
+            control={control}
+            name={`members.${index}.email`}
+            label="Email"
+            type="email"
+            placeholder="member@example.com"
+            required
+            className="lg:flex-1"
+          />
 
-        <FormInput
-          control={control}
-          name={`members.${index}.email`}
-          label="Email"
-          type="email"
-          placeholder="member@example.com"
-          required
-        />
+          <FormSelect
+            control={control}
+            name={`members.${index}.role`}
+            label="Role"
+            options={TEAM_MEMBER_ROLES}
+            required
+            className="lg:w-40"
+          />
 
-        <FormSelect
-          control={control}
-          name={`members.${index}.role`}
-          label="Role"
-          options={TEAM_MEMBER_ROLES}
-          required
-        />
+          <FormDatePicker
+            control={control}
+            name={`members.${index}.startDate`}
+            label="Start Date"
+            max={new Date()}
+            className="lg:w-40"
+          />
 
-        <FormDatePicker
-          control={control}
-          name={`members.${index}.startDate`}
-          label="Start Date"
-          max={new Date()}
-        />
-
-        <div className="md:col-span-2">
           <FormCheckbox
             control={control}
             name={`members.${index}.isActive`}
-            label="Active Member"
-            description="Uncheck if member is no longer active"
+            label="Active"
+            className="lg:w-24"
           />
         </div>
+
+        {/* Remove Button mit Label */}
+        {canRemove ? (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onRemove}
+            className="border-destructive text-destructive hover:bg-destructive/10 shrink-0"
+            aria-label="Remove member"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Entfernen
+          </Button>
+        ) : null}
       </div>
     </div>
   );
@@ -122,6 +126,11 @@ const Component = ({
 
   // State for person info (not part of form DTO)
   const [personInfo, setPersonInfo] = useState<PersonInfo | undefined>(defaultPersonInfo);
+  const sortedFields = [...fields].sort((a, b) => {
+    const dateA = new Date(a.startDate).getTime();
+    const dateB = new Date(b.startDate).getTime();
+    return dateB - dateA; // Neueste zuerst
+  });
 
   return (
     <Form form={form} onSubmit={onSubmit}>
@@ -171,19 +180,23 @@ const Component = ({
               Add Member
             </Button>
           </div>
-
           <div className="space-y-4">
-            {fields.map((field, index) => (
-              <MemberFieldGroup
-                key={field.id}
-                control={form.control}
-                index={index}
-                onRemove={() => {
-                  handleRemoveMember(index);
-                }}
-                canRemove={canRemoveMember}
-              />
-            ))}
+            {sortedFields.map(field => {
+              // Finde den original Index für die form control
+              const originalIndex = fields.findIndex(f => f.id === field.id);
+
+              return (
+                <MemberFieldGroup
+                  key={field.id}
+                  control={form.control}
+                  index={originalIndex}
+                  onRemove={() => {
+                    handleRemoveMember(originalIndex);
+                  }}
+                  canRemove={canRemoveMember}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

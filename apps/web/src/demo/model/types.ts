@@ -131,12 +131,7 @@ export type TeamMemberRoleOption = Option<TeamMemberRole>;
 /**
  * Team DTO for backend
  */
-export type TeamDto = {
-  teamName: string;
-  description?: string;
-  verantwortlichId?: string; // Only ID is sent to backend
-  members: TeamMemberDto[];
-};
+export type TeamDto = z.infer<typeof teamFormDTO>;
 
 /**
  * Team detail DTO from backend (includes full person info)

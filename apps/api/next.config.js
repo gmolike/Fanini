@@ -1,5 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: true,
+  transpilePackages: ["@faninitiative/shared"],
+
+  // Wichtig für Path Aliases
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@": __dirname + "/src",
+      "@/domain": __dirname + "/src/domain",
+      "@/application": __dirname + "/src/application",
+      "@/infrastructure": __dirname + "/src/infrastructure",
+      "@/presentation": __dirname + "/src/presentation",
+    };
+    return config;
+  },
+
   // API Routes only - kein Frontend
   rewrites: async () => {
     return [
@@ -19,8 +35,8 @@ const nextConfig = {
           { key: "Access-Control-Allow-Credentials", value: "true" },
           {
             key: "Access-Control-Allow-Origin",
-            value: "http://localhost:5173",
-          }, // Frontend URL
+            value: "http://localhost:3001", // Frontend URL
+          },
           {
             key: "Access-Control-Allow-Methods",
             value: "GET,OPTIONS,PATCH,DELETE,POST,PUT",

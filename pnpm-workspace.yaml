@@ -1,20 +1,21 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - apps/*
+  - packages/*
 
 ignoredBuiltDependencies:
-  - "@tailwindcss/oxide"
+  - '@tailwindcss/oxide'
   - core-js
   - esbuild
 
 onlyBuiltDependencies:
-  - "@scarf/scarf"
-  - "@swc/core"
-  - "@tailwindcss/oxide"
-  - "@tree-sitter-grammars/tree-sitter-yaml"
+  - '@scarf/scarf'
+  - '@swc/core'
+  - '@tailwindcss/oxide'
+  - '@tree-sitter-grammars/tree-sitter-yaml'
   - core-js-pure
   - esbuild
   - msw
+  - sharp
   - tree-sitter
   - tree-sitter-json
   - unrs-resolver

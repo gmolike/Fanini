@@ -1,4 +1,7 @@
-import swaggerJsdoc from "swagger-jsdoc";
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const swaggerJsdoc = require('swagger-jsdoc');
+
 
 const options = {
   definition: {

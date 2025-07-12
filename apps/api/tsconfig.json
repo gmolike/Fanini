@@ -6,7 +6,7 @@
     "lib": [
       "ES2022"
     ],
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "moduleResolution": "bundler",
     "allowJs": true,
     "strict": true,
@@ -33,7 +33,12 @@
       "@/presentation/*": [
         "presentation/*"
       ]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "src/**/*.ts",

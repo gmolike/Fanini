@@ -1,3 +1,4 @@
+// apps/api/next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -7,11 +8,12 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      "@": __dirname + "/src",
-      "@/domain": __dirname + "/src/domain",
-      "@/application": __dirname + "/src/application",
-      "@/infrastructure": __dirname + "/src/infrastructure",
-      "@/presentation": __dirname + "/src/presentation",
+      "@": new URL("./src", import.meta.url).pathname,
+      "@/domain": new URL("./src/domain", import.meta.url).pathname,
+      "@/application": new URL("./src/application", import.meta.url).pathname,
+      "@/infrastructure": new URL("./src/infrastructure", import.meta.url)
+        .pathname,
+      "@/presentation": new URL("./src/presentation", import.meta.url).pathname,
     };
     return config;
   },
@@ -52,4 +54,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

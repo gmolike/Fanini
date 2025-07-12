@@ -1,6 +1,5 @@
 import { pool } from "./connection";
-import { v4 as uuidv4 } from "uuid";
-
+import { randomUUID } from "crypto";
 async function seedDatabase() {
   console.log("🌱 Füge Test-Daten ein...\n");
 
@@ -8,7 +7,7 @@ async function seedDatabase() {
     // Test-Mitglieder
     const mitglieder = [
       {
-        id: `usr_${uuidv4()}`,
+        id: `usr_${randomUUID()}`,
         vorname: "Max",
         nachname: "Mustermann",
         email: "max@example.com",
@@ -17,7 +16,7 @@ async function seedDatabase() {
         hat_vertraulichkeitserklaerung: true,
       },
       {
-        id: `usr_${uuidv4()}`,
+        id: `usr_${randomUUID()}`,
         vorname: "Anna",
         nachname: "Schmidt",
         email: "anna@example.com",
@@ -26,7 +25,7 @@ async function seedDatabase() {
         hat_vertraulichkeitserklaerung: true,
       },
       {
-        id: `usr_${uuidv4()}`,
+        id: `usr_${randomUUID()}`,
         vorname: "Tom",
         nachname: "Meyer",
         email: "tom@example.com",
@@ -60,7 +59,7 @@ async function seedDatabase() {
     // Test-Events
     const events = [
       {
-        id: `evt_${uuidv4()}`,
+        id: `evt_${randomUUID()}`,
         titel: "Fanfahrt nach Berlin",
         beschreibung: "Gemeinsame Fahrt zum Auswärtsspiel",
         datum: "2024-06-15",
@@ -81,7 +80,7 @@ async function seedDatabase() {
         erstellt_von: mitglieder[0].id,
       },
       {
-        id: `evt_${uuidv4()}`,
+        id: `evt_${randomUUID()}`,
         titel: "Vereinstreffen",
         beschreibung: "Monatliches Treffen aller Mitglieder",
         datum: "2024-05-20",

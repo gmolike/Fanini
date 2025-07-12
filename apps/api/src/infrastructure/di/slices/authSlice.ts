@@ -4,8 +4,8 @@ import {
   LoginUseCase,
   RefreshTokenUseCase,
 } from "@/application/use-cases/auth";
+import { AuthRepository } from "@/infrastructure/repositories/auth/AuthRepository";
 import { AuthController } from "@/presentation/controllers";
-import { AuthRepository } from "@/infrastructure/repositories/auth";
 
 export const registerAuthSlice = (container: Container) => {
   // Repository

@@ -1,5 +1,7 @@
 // src/config/swagger.ts
-import swaggerJsdoc from "swagger-jsdoc";
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
+const swaggerJsdoc = require("swagger-jsdoc");
 
 const options = {
   definition: {
@@ -16,59 +18,45 @@ const options = {
       },
     ],
     tags: [
-      // Hauptkategorien (Slices)
+      // Public
       {
-        name: "🔐 Auth",
-        description: "Authentifizierung und Autorisierung",
-        "x-displayName": "Authentication",
+        name: "🌐 Public Events",
+        description: "Öffentliche Event-Informationen",
       },
       {
-        name: "📅 Events",
-        description: "Event-Management",
-        "x-displayName": "Events",
+        name: "🌐 Public Creators",
+        description: "Öffentliche Creator-Profile",
       },
-      {
-        name: "👥 Members",
-        description: "Mitgliederverwaltung",
-        "x-displayName": "Members",
-      },
-      {
-        name: "📄 Documents",
-        description: "Dokumentenverwaltung",
-        "x-displayName": "Documents",
-      },
-      {
-        name: "📊 Stats",
-        description: "Statistiken und Metriken",
-        "x-displayName": "Statistics",
-      },
-      {
-        name: "🎨 Creators",
-        description: "Creator-Profile und Werke",
-        "x-displayName": "Creators",
-      },
-      {
-        name: "📰 Newsletter",
-        description: "Newsletter-Verwaltung",
-        "x-displayName": "Newsletter",
-      },
+      { name: "🌐 Public Documents", description: "Öffentliche Dokumente" },
+      { name: "🌐 Public Newsletter", description: "Newsletter-Verwaltung" },
+      { name: "🌐 Public Organization", description: "Vereinsstruktur" },
+      { name: "🌐 Public Stats", description: "Öffentliche Statistiken" },
+
+      // Protected
+      { name: "🔐 Auth", description: "Authentifizierung" },
+      { name: "📅 Events", description: "Event-Management (geschützt)" },
+      { name: "👥 Members", description: "Mitgliederverwaltung" },
+      { name: "📄 Documents", description: "Dokumentenverwaltung (geschützt)" },
     ],
     "x-tagGroups": [
       {
         name: "Public API",
-        tags: ["🌐 Public"],
+        tags: [
+          "🌐 Public Events",
+          "🌐 Public Creators",
+          "🌐 Public Documents",
+          "🌐 Public Newsletter",
+          "🌐 Public Organization",
+          "🌐 Public Stats",
+        ],
       },
       {
-        name: "Core Features",
-        tags: ["🔐 Auth", "📅 Events", "👥 Members"],
+        name: "Authentication",
+        tags: ["🔐 Auth"],
       },
       {
-        name: "Content Management",
-        tags: ["📄 Documents", "🎨 Creators", "📰 Newsletter"],
-      },
-      {
-        name: "Analytics",
-        tags: ["📊 Stats"],
+        name: "Protected API",
+        tags: ["📅 Events", "👥 Members", "📄 Documents"],
       },
     ],
     components: {
@@ -79,11 +67,48 @@ const options = {
           bearerFormat: "JWT",
         },
       },
+      schemas: {
+        Event: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            title: { type: "string" },
+            description: { type: "string" },
+            date: { type: "string", format: "date-time" },
+            location: { type: "string" },
+            status: {
+              type: "string",
+              enum: ["draft", "published", "cancelled"],
+            },
+          },
+        },
+        Member: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            vorname: { type: "string" },
+            nachname: { type: "string" },
+            email: { type: "string" },
+            istAktiv: { type: "boolean" },
+          },
+        },
+        Document: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            title: { type: "string" },
+            category: { type: "string" },
+            fileUrl: { type: "string" },
+            isPublic: { type: "boolean" },
+          },
+        },
+      },
     },
   },
   apis: [
-    "./src/presentation/routes/**/*.ts",
-    "./src/presentation/controllers/**/*.ts",
+    "./src/presentation/controllers/**/*.ts", // UPDATED!
+    "./src/presentation/routes/**/*.ts", // UPDATED!
+    "./app/api/documents/upload/route.ts", // Special route
   ],
 };
 

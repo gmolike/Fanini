@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@10.12.4",
+  "packageManager": "pnpm@10.13.1",
   "scripts": {
     "// ========== SETUP & INIT ========== //": "",
     "setup": "powershell -ExecutionPolicy Bypass -File scripts/setup.ps1",

@@ -1,7 +1,39 @@
 // apps/api/app/api/documents/upload/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { setupContainer } from "../../../../src/infrastructure/di/container";
-
+/**
+ *   post:
+ *     summary: Dokument hochladen
+ *     tags: ["📄 Documents"]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *                 enum: [satzung, protokolle, formulare, richtlinien, guides]
+ *               isPublic:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Upload erfolgreich
+ *       400:
+ *         description: Keine Datei
+ *       500:
+ *         description: Upload fehlgeschlagen
+ */
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();

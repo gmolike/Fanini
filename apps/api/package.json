@@ -16,6 +16,7 @@
   "dependencies": {
     "@faninitiative/shared": "workspace:*",
     "@google-cloud/local-auth": "^3.0.1",
+    "@scalar/api-reference-react": "^0.7.30",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "fs": "0.0.1-security",

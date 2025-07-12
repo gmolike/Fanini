@@ -15,7 +15,7 @@ async function runMigrations() {
     // Lese alle SQL-Dateien aus dem migrations Ordner
     const migrationsDir = path.join(__dirname, "migrations");
     const files = await fs.readdir(migrationsDir);
-    const sqlFiles = files.filter((f) => f.endsWith(".sql")).sort();
+    const sqlFiles = files.filter((f) => f.endsWith(".sql")).sort((a, b) => a.localeCompare(b));
 
     console.log(`📋 Gefundene Migrations: ${sqlFiles.length}\n`);
 

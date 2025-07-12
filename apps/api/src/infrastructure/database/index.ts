@@ -1,4 +1,4 @@
-export { MySQLConnection } from './MySQLConnection';
-export { MySQLEventRepository } from './MySQLEventRepository';
-export { MySQLMemberRepository } from './MySQLMemberRepository';
-export { MySQLStatsRepository } from './MySQLStatsRepository';
+export { MySQLConnection } from '../repositories/MySQLConnection';
+export { MySQLEventRepository } from '../repositories/MySQLEventRepository';
+export { MySQLMemberRepository } from '../repositories/MySQLMemberRepository';
+export { MySQLStatsRepository } from '../repositories/MySQLStatsRepository';

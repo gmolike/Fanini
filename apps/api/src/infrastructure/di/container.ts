@@ -1,6 +1,6 @@
-import { MySQLConnection } from "@/infrastructure/database/MySQLConnection";
-import { MySQLEventRepository } from "@/infrastructure/database/MySQLEventRepository";
-import { MySQLMemberRepository } from "@/infrastructure/database/MySQLMemberRepository";
+import { MySQLConnection } from "@/infrastructure/repositories/MySQLConnection";
+import { MySQLEventRepository } from "@/infrastructure/repositories/MySQLEventRepository";
+import { MySQLMemberRepository } from "@/infrastructure/repositories/MySQLMemberRepository";
 import { GetEventsUseCase } from "@/application/use-cases/GetEventsUseCase";
 import { CreateEventUseCase } from "@/application/use-cases/CreateEventUseCase";
 import { UpdateEventUseCase } from "@/application/use-cases/UpdateEventUseCase";
@@ -14,7 +14,11 @@ import { MemberController } from "@/presentation/controllers/MemberController";
 import { AuthController } from "@/presentation/controllers/AuthController";
 import { GetPublicStatsUseCase } from "@/application/use-cases/GetPublicStatsUseCase";
 import { StatsController } from "@/presentation/controllers/StatsController";
-import { MySQLStatsRepository } from "../database/MySQLStatsRepository";
+import { MySQLStatsRepository } from "../repositories/MySQLStatsRepository";
+import { RetryableGoogleDriveService } from "../services/RetryableGoogleDriveService";
+import { UploadDocumentUseCase } from "@/application/use-cases/UploadDocumentUseCase";
+import { GetDocumentsUseCase } from "@/application/use-cases/GetDocumentsUseCase";
+import { MySQLDocumentRepository } from "../repositories/MySQLDocumentRepository";
 
 export class Container {
   private readonly services = new Map<string, any>();
@@ -139,6 +143,29 @@ export function setupContainer(): Container {
   container.register("StatsController", () => {
     const getPublicStats = container.get("GetPublicStatsUseCase");
     return new StatsController(getPublicStats);
+  });
+  // Register Google Drive Service
+  container.register("GoogleDriveService", () => {
+    return new RetryableGoogleDriveService();
+  });
+
+  // Register Document Repository
+  container.register("DocumentRepository", () => {
+    const db = container.get("Database");
+    const googleDrive = container.get("GoogleDriveService");
+    return new MySQLDocumentRepository(db, googleDrive);
+  });
+
+  // Register Document Use Cases
+  container.register("UploadDocumentUseCase", () => {
+    const repo = container.get("DocumentRepository");
+    const googleDrive = container.get("GoogleDriveService");
+    return new UploadDocumentUseCase(repo, googleDrive);
+  });
+
+  container.register("GetDocumentsUseCase", () => {
+    const repo = container.get("DocumentRepository");
+    return new GetDocumentsUseCase(repo);
   });
 
   return container;

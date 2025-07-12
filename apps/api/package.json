@@ -15,8 +15,12 @@
   },
   "dependencies": {
     "@faninitiative/shared": "workspace:*",
+    "@google-cloud/local-auth": "^3.0.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
+    "fs": "0.0.1-security",
+    "google-auth-library": "^10.1.0",
+    "googleapis": "^152.0.0",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.6.0",
     "next": "15.2.0",

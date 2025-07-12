@@ -1,3 +1,4 @@
+// apps/api/src/domain/entities/Event.ts (Ergänzung)
 import { generateId } from "@faninitiative/shared";
 
 export type EventStatus = "draft" | "published" | "cancelled";
@@ -13,6 +14,7 @@ export class Event {
     public readonly createdBy: string,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
+    public readonly istOeffentlich: boolean = false, // NEU!
   ) {}
 
   static create(params: {
@@ -21,6 +23,7 @@ export class Event {
     date: Date;
     location: string;
     createdBy: string;
+    istOeffentlich?: boolean; // NEU!
   }): Event {
     const now = new Date();
     return new Event(
@@ -33,6 +36,7 @@ export class Event {
       params.createdBy,
       now,
       now,
+      params.istOeffentlich || false, // NEU!
     );
   }
 
@@ -51,6 +55,7 @@ export class Event {
       createdBy: this.createdBy,
       createdAt: this.createdAt.toISOString(),
       updatedAt: this.updatedAt.toISOString(),
+      istOeffentlich: this.istOeffentlich, // NEU!
     };
   }
 }

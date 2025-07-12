@@ -48,6 +48,7 @@ export class MySQLEventRepository implements IEventRepository {
           row.created_by,
           new Date(row.created_at),
           new Date(row.updated_at),
+          Boolean(row.ist_oeffentlich), // NEU!
         ),
     );
   }
@@ -71,22 +72,23 @@ export class MySQLEventRepository implements IEventRepository {
       row.created_by,
       new Date(row.created_at),
       new Date(row.updated_at),
+      Boolean(row.ist_oeffentlich), // NEU!
     );
   }
-
   async save(event: Event): Promise<Event> {
     const sql = `
-      INSERT INTO events
-      (id, title, description, date, location, status, created_by, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-      title = VALUES(title),
-      description = VALUES(description),
-      date = VALUES(date),
-      location = VALUES(location),
-      status = VALUES(status),
-      updated_at = VALUES(updated_at)
-    `;
+    INSERT INTO events
+    (id, title, description, date, location, status, created_by, created_at, updated_at, ist_oeffentlich)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON DUPLICATE KEY UPDATE
+    title = VALUES(title),
+    description = VALUES(description),
+    date = VALUES(date),
+    location = VALUES(location),
+    status = VALUES(status),
+    updated_at = VALUES(updated_at),
+    ist_oeffentlich = VALUES(ist_oeffentlich)
+  `;
 
     await this.db.query(sql, [
       event.id,
@@ -98,6 +100,7 @@ export class MySQLEventRepository implements IEventRepository {
       event.createdBy,
       event.createdAt,
       event.updatedAt,
+      event.istOeffentlich, // NEU!
     ]);
 
     return event;

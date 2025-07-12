@@ -7,7 +7,7 @@ import { Stats } from "@/domain/entities/Stats";
  * @description Business Logik für öffentliche Statistiken
  */
 export class GetPublicStatsUseCase {
-  constructor(private statsRepository: IStatsRepository) {}
+  constructor(private readonly statsRepository: IStatsRepository) {}
 
   /**
    * Führt den Use Case aus

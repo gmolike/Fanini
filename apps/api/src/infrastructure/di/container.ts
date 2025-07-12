@@ -20,6 +20,7 @@ import { UploadDocumentUseCase } from "@/application/use-cases/UploadDocumentUse
 import { GetDocumentsUseCase } from "@/application/use-cases/GetDocumentsUseCase";
 import { MySQLDocumentRepository } from "../repositories/MySQLDocumentRepository";
 import { DocumentController } from "@/presentation/controllers";
+import { LoggerService } from "../services/LoggerService";
 
 export class Container {
   private readonly services = new Map<string, any>();
@@ -151,8 +152,14 @@ export function setupContainer(): Container {
     console.log("🔍 Creating GoogleDriveService instance...");
     const service = new RetryableGoogleDriveService();
     console.log("✅ Service created:", service.constructor.name);
-    console.log("📋 Available methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(service)));
-    console.log("🔍 Has ensureFolderStructure?", typeof service.ensureFolderStructure === 'function');
+    console.log(
+      "📋 Available methods:",
+      Object.getOwnPropertyNames(Object.getPrototypeOf(service)),
+    );
+    console.log(
+      "🔍 Has ensureFolderStructure?",
+      typeof service.ensureFolderStructure === "function",
+    );
     return service;
   });
 
@@ -179,6 +186,11 @@ export function setupContainer(): Container {
   container.register("DocumentController", () => {
     const getDocuments = container.get("GetDocumentsUseCase");
     return new DocumentController(getDocuments);
+  });
+
+  // Nach den anderen Registrierungen:
+  container.register("LoggerService", () => {
+    return new LoggerService();
   });
 
   return container;

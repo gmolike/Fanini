@@ -1,12 +1,13 @@
 // apps/api/src/application/use-cases/UploadDocumentUseCase.ts
-import { GoogleDriveService } from '@/infrastructure/services/GoogleDriveService';
-import { Document, DocumentCategory } from '@/domain/entities/Document';
-import { IDocumentRepository } from '@/domain/repositories/IDocumentRepository';
+import { GoogleDriveService } from "@/infrastructure/services/GoogleDriveService";
+import { Document, DocumentCategory } from "@/domain/entities/Document";
+import { IDocumentRepository } from "@/domain/repositories/IDocumentRepository";
+import { logger } from "@/infrastructure/services/LoggerService";
 
 export class UploadDocumentUseCase {
   constructor(
     private readonly documentRepository: IDocumentRepository,
-    private readonly googleDriveService: GoogleDriveService
+    private readonly googleDriveService: GoogleDriveService,
   ) {}
 
   async execute(params: {
@@ -19,19 +20,41 @@ export class UploadDocumentUseCase {
     version: string;
     isPublic: boolean;
     userId: string;
+    userName?: string; // NEU
+    ipAddress?: string; // NEU
   }): Promise<Document> {
+    const startTime = Date.now();
+
+    logger.info("Starting document upload", {
+      userId: params.userId,
+      action: "upload_document",
+      resource: "document",
+      metadata: {
+        fileName: params.fileName,
+        category: params.category,
+        fileSize: params.fileBuffer.length,
+        isPublic: params.isPublic,
+      },
+    });
+
     try {
       // Ensure folder structure exists
       const folders = await this.googleDriveService.ensureFolderStructure();
       const folderId = folders[params.category];
 
       // Upload to Google Drive
+      logger.debug("Uploading to Google Drive", {
+        userId: params.userId,
+        action: "google_drive_upload",
+        metadata: { folderId, fileName: params.fileName },
+      });
+
       const uploadResult = await this.googleDriveService.uploadFile({
         fileName: params.fileName,
         mimeType: params.mimeType,
         fileContent: params.fileBuffer,
         folderId,
-        isPublic: params.isPublic
+        isPublic: params.isPublic,
       });
 
       // Create document entity
@@ -46,15 +69,48 @@ export class UploadDocumentUseCase {
         version: params.version,
         isPublic: params.isPublic,
         createdBy: params.userId,
-        documentType: params.category as any, // Replace 'as any' with correct mapping if needed
-        folderPath: folders[params.category] // Or provide the correct folder path string
+        documentType: Document.getDocumentType(params.mimeType),
+        folderPath: folders[params.category],
       });
 
       // Save to database
-      return await this.documentRepository.save(document);
+      const savedDocument = await this.documentRepository.save(document);
+
+      const duration = Date.now() - startTime;
+      logger.info("Document upload successful", {
+        userId: params.userId,
+        action: "upload_document_success",
+        resource: "document",
+        resourceId: savedDocument.id,
+        metadata: {
+          googleDriveFileId: uploadResult.fileId,
+          duration,
+          fileSize: params.fileBuffer.length,
+          userName: params.userName,
+          ipAddress: params.ipAddress,
+        },
+      });
+
+      // TODO: Save to upload_logs table
+      // await this.uploadLogRepository.save(uploadLog);
+
+      return savedDocument;
     } catch (error) {
-      console.error('Upload document error:', error);
-      throw new Error('Failed to upload document');
+      const duration = Date.now() - startTime;
+      logger.error("Document upload failed", {
+        userId: params.userId,
+        action: "upload_document_error",
+        resource: "document",
+        metadata: {
+          error: error instanceof Error ? error.message : "Unknown error",
+          fileName: params.fileName,
+          duration,
+          userName: params.userName,
+          ipAddress: params.ipAddress,
+        },
+      });
+
+      throw new Error("Failed to upload document");
     }
   }
 }

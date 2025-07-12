@@ -52,7 +52,7 @@ export interface EventFolderResult {
 }
 
 /**
- * Google Drive Service mit Service Account
+ * Google Drive Service mit Service Account für Shared Drives
  * @description Handles all interactions with Google Drive API using Service Account
  */
 export class GoogleDriveService {
@@ -134,9 +134,6 @@ export class GoogleDriveService {
   /**
    * Upload file to Google Drive
    */
-  // apps/api/src/infrastructure/services/GoogleDriveService.ts
-  // Ersetze die komplette uploadFile Methode:
-
   public async uploadFile(params: UploadFileParams): Promise<UploadResult> {
     try {
       await this.ensureAuthenticated();
@@ -153,6 +150,8 @@ export class GoogleDriveService {
         const testList = await this.drive.files.list({
           pageSize: 1,
           fields: "files(id, name)",
+          supportsAllDrives: true,
+          includeItemsFromAllDrives: true,
         });
         console.log("✅ Can access Google Drive");
       } catch (testError: any) {
@@ -162,7 +161,7 @@ export class GoogleDriveService {
 
       const fileMetadata: drive_v3.Schema$File = {
         name: params.fileName,
-        parents: [process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID!],
+        parents: [params.folderId || process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID!],
       };
 
       // Versuche verschiedene Stream-Methoden
@@ -193,7 +192,7 @@ export class GoogleDriveService {
           requestBody: fileMetadata,
           media: media,
           fields: "id, webViewLink",
-          supportsAllDrives: true, // NUR diese Zeile hinzufügen!
+          supportsAllDrives: true,
         });
         console.log("✅ drive.files.create successful");
       } catch (apiError: any) {
@@ -242,6 +241,7 @@ export class GoogleDriveService {
         fileId,
         fields:
           "id, name, mimeType, size, webViewLink, createdTime, modifiedTime",
+        supportsAllDrives: true,
       });
 
       return response.data;
@@ -257,7 +257,10 @@ export class GoogleDriveService {
   public async deleteFile(fileId: string): Promise<void> {
     try {
       await this.ensureAuthenticated();
-      await this.drive.files.delete({ fileId });
+      await this.drive.files.delete({
+        fileId,
+        supportsAllDrives: true,
+      });
     } catch (error) {
       console.error("Google Drive delete error:", error);
       throw new Error("Failed to delete file from Google Drive");
@@ -281,6 +284,8 @@ export class GoogleDriveService {
         pageToken: params.pageToken,
         fields:
           "nextPageToken, files(id, name, mimeType, size, webViewLink, createdTime)",
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
       });
 
       return {
@@ -335,6 +340,7 @@ export class GoogleDriveService {
         role: "reader",
         type: "anyone",
       },
+      supportsAllDrives: true,
     });
   }
 
@@ -348,6 +354,7 @@ export class GoogleDriveService {
       q: query,
       fields: "files(id)",
       supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
     });
 
     if (response.data.files && response.data.files.length > 0) {
@@ -366,21 +373,23 @@ export class GoogleDriveService {
     const folders: Record<string, string> = {};
     const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID!;
 
-    // Prüfe ob wir Zugriff auf den Root-Ordner haben
+    // Prüfe ob wir Zugriff auf den Shared Drive haben
     try {
       const rootFolder = await this.drive.files.get({
         fileId: rootFolderId,
-        fields: "id, name, capabilities",
+        fields: "id, name, capabilities, driveId",
+        supportsAllDrives: true,
       });
-      console.log("✅ Root folder access confirmed:", rootFolder.data.name);
+      console.log("✅ Shared Drive access confirmed:", rootFolder.data.name);
+      console.log("- Drive ID:", rootFolder.data.driveId);
       console.log(
         "- Can create children:",
         rootFolder.data.capabilities?.canAddChildren,
       );
     } catch (error) {
-      console.error("❌ Cannot access root folder:", error);
+      console.error("❌ Cannot access shared drive:", error);
       throw new Error(
-        "No access to the shared folder. Please ensure it is shared with the service account.",
+        "No access to the shared drive. Please ensure it is shared with the service account.",
       );
     }
 

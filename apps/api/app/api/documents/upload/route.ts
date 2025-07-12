@@ -4,7 +4,6 @@ import { setupContainer } from "../../../../src/infrastructure/di/container";
 
 export async function POST(request: NextRequest) {
   try {
-    // Nutze NextRequest's formData() - das ist NICHT deprecated!
     const formData = await request.formData();
     const file = formData.get("file") as File;
 
@@ -18,6 +17,12 @@ export async function POST(request: NextRequest) {
     // File zu Buffer konvertieren
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // IP-Adresse extrahieren
+    const ipAddress =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
 
     // Metadaten extrahieren
     const metadata = {
@@ -38,6 +43,8 @@ export async function POST(request: NextRequest) {
       fileName: file.name,
       mimeType: file.type,
       userId: "test-user", // TODO: Aus Auth
+      userName: "Test User", // TODO: Aus Auth
+      ipAddress,
     });
 
     return NextResponse.json({

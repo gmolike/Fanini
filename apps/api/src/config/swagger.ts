@@ -1,7 +1,5 @@
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const swaggerJsdoc = require('swagger-jsdoc');
-
+// src/config/swagger.ts
+import swaggerJsdoc from "swagger-jsdoc";
 
 const options = {
   definition: {
@@ -9,79 +7,68 @@ const options = {
     info: {
       title: "Faninitiative Spandau API",
       version: "1.0.0",
-      description: `
-# 🏟️ Faninitiative Spandau e.V. API
-
-Dies ist die offizielle API für die Webplattform der Faninitiative Spandau.
-
-## 🔑 Authentifizierung
-
-Die meisten Endpoints benötigen eine Authentifizierung über Bearer Token:
-
-\`\`\`
-Authorization: Bearer <dein-token>
-\`\`\`
-
-## 📝 Response Format
-
-Alle Responses folgen diesem Format:
-
-\`\`\`json
-{
-  "success": true,
-  "data": { ... },
-  "meta": {
-    "timestamp": "2024-01-01T00:00:00Z",
-    "version": "1.0"
-  }
-}
-\`\`\`
-
-## 🚦 Status Codes
-
-- \`200\` - OK
-- \`201\` - Created
-- \`400\` - Bad Request
-- \`401\` - Unauthorized
-- \`403\` - Forbidden
-- \`404\` - Not Found
-- \`500\` - Internal Server Error
-      `,
-      contact: {
-        name: "Faninitiative Spandau Tech Team",
-        email: "tech@faninitiative-spandau.de",
-      },
-      license: {
-        name: "Private",
-        url: "https://faninitiative-spandau.de",
-      },
+      description: "Clean Architecture Backend API mit Slice-Organisation",
     },
     servers: [
       {
         url: "http://localhost:3000",
         description: "Development Server",
       },
-      {
-        url: "https://api.faninitiative-spandau.de",
-        description: "Production Server",
-      },
     ],
     tags: [
+      // Hauptkategorien (Slices)
       {
-        name: "Public",
-        description: "Öffentlich zugängliche Endpoints",
-      },
-      {
-        name: "Auth",
+        name: "🔐 Auth",
         description: "Authentifizierung und Autorisierung",
+        "x-displayName": "Authentication",
       },
       {
-        name: "Events",
+        name: "📅 Events",
         description: "Event-Management",
+        "x-displayName": "Events",
       },
       {
-        name: "Members",
+        name: "👥 Members",
         description: "Mitgliederverwaltung",
+        "x-displayName": "Members",
+      },
+      {
+        name: "📄 Documents",
+        description: "Dokumentenverwaltung",
+        "x-displayName": "Documents",
+      },
+      {
+        name: "📊 Stats",
+        description: "Statistiken und Metriken",
+        "x-displayName": "Statistics",
+      },
+      {
+        name: "🎨 Creators",
+        description: "Creator-Profile und Werke",
+        "x-displayName": "Creators",
+      },
+      {
+        name: "📰 Newsletter",
+        description: "Newsletter-Verwaltung",
+        "x-displayName": "Newsletter",
+      },
+    ],
+    "x-tagGroups": [
+      {
+        name: "Public API",
+        tags: ["🌐 Public"],
+      },
+      {
+        name: "Core Features",
+        tags: ["🔐 Auth", "📅 Events", "👥 Members"],
+      },
+      {
+        name: "Content Management",
+        tags: ["📄 Documents", "🎨 Creators", "📰 Newsletter"],
+      },
+      {
+        name: "Analytics",
+        tags: ["📊 Stats"],
       },
     ],
     components: {
@@ -94,7 +81,10 @@ Alle Responses folgen diesem Format:
       },
     },
   },
-  apis: ["./app/api/**/*.ts", "./src/presentation/api/**/*.ts"],
+  apis: [
+    "./src/presentation/routes/**/*.ts",
+    "./src/presentation/controllers/**/*.ts",
+  ],
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

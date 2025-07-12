@@ -173,7 +173,7 @@ export function setupContainer(): Container {
   container.register("DocumentController", () => {
     const getDocuments = container.get("GetDocumentsUseCase");
     const uploadDocument = container.get("UploadDocumentUseCase");
-    return new DocumentController(getDocuments, uploadDocument);
+    return new DocumentController(getDocuments);
   });
 
   return container;

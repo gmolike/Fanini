@@ -4,7 +4,7 @@ import {
   MemberController,
   AuthController,
   StatsController,
-  DocumentController
+  DocumentController,
 } from "@/presentation/controllers";
 import { authMiddleware } from "@/presentation/middleware/auth";
 
@@ -118,14 +118,6 @@ export class ApiRouter {
       "GET",
       "/api/public/documents",
       documentController.getPublicDocuments.bind(documentController),
-    );
-
-    // Protected Routes
-    this.addRoute(
-      "POST",
-      "/api/documents/upload",
-      documentController.uploadDocument.bind(documentController),
-      [authMiddleware],
     );
   }
 

@@ -1,58 +1,73 @@
+// apps/api/src/infrastructure/database/migrate.ts
 import { pool } from "./connection";
 import fs from "fs/promises";
 import path from "path";
+import { fileURLToPath } from "url";
+
+// ES Module Ersatz für __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 async function runMigrations() {
   console.log("🚀 Starte Datenbank-Migration...\n");
 
   try {
-    // Lese die SQL-Datei
-    const migrationPath = path.join(
-      __dirname,
-      "migrations",
-      "001_create_tables.sql",
-    );
-    const sqlContent = await fs.readFile(migrationPath, "utf-8");
+    // Lese alle SQL-Dateien aus dem migrations Ordner
+    const migrationsDir = path.join(__dirname, "migrations");
+    const files = await fs.readdir(migrationsDir);
+    const sqlFiles = files.filter((f) => f.endsWith(".sql")).sort();
 
-    console.log("📄 Migration-Datei gelesen, Länge:", sqlContent.length);
+    console.log(`📋 Gefundene Migrations: ${sqlFiles.length}\n`);
 
-    // Entferne Kommentare und leere Zeilen für bessere Verarbeitung
-    const cleanedSql = sqlContent
-      .split("\n")
-      .filter((line) => !line.trim().startsWith("--") && line.trim().length > 0)
-      .join("\n");
+    for (const file of sqlFiles) {
+      console.log(`📄 Führe Migration aus: ${file}`);
 
-    // Teile in einzelne Statements (bei Semikolon, aber nicht in Strings)
-    const statements = cleanedSql
-      .split(/;(?=(?:[^']*'[^']*')*[^']*$)/)
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0);
+      const migrationPath = path.join(migrationsDir, file);
+      const sqlContent = await fs.readFile(migrationPath, "utf-8");
 
-    console.log(`📊 Gefundene SQL-Statements: ${statements.length}\n`);
+      // Entferne Kommentare und leere Zeilen
+      const cleanedSql = sqlContent
+        .split("\n")
+        .filter(
+          (line) => !line.trim().startsWith("--") && line.trim().length > 0,
+        )
+        .join("\n");
 
-    // Führe jedes Statement einzeln aus
-    for (let i = 0; i < statements.length; i++) {
-      const statement = statements[i];
+      // Teile in einzelne Statements
+      const statements = cleanedSql
+        .split(/;(?=(?:[^']*'[^']*')*[^']*$)/)
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0);
 
-      // Zeige ersten Teil des Statements
-      const preview = statement.substring(0, 60).replace(/\n/g, " ");
-      console.log(
-        `📝 [${i + 1}/${statements.length}] Führe aus: ${preview}...`,
-      );
+      console.log(`   📊 Statements: ${statements.length}`);
 
-      try {
-        await pool.query(statement);
-        console.log(`   ✅ Erfolgreich`);
-      } catch (error: any) {
-        console.error(`   ❌ Fehler: ${error.message}`);
-        // Bei kritischen Fehlern abbrechen
-        if (!error.message.includes("already exists")) {
-          throw error;
+      // Führe jedes Statement aus
+      for (let i = 0; i < statements.length; i++) {
+        const statement = statements[i];
+
+        try {
+          await pool.query(statement);
+          console.log(
+            `   ✅ Statement ${i + 1}/${statements.length} erfolgreich`,
+          );
+        } catch (error: any) {
+          if (error.message.includes("already exists")) {
+            console.log(
+              `   ⚠️  Statement ${i + 1}/${statements.length} - Bereits vorhanden`,
+            );
+          } else {
+            console.error(
+              `   ❌ Statement ${i + 1}/${statements.length} - Fehler: ${error.message}`,
+            );
+            throw error;
+          }
         }
       }
+
+      console.log(`   ✅ Migration ${file} abgeschlossen\n`);
     }
 
-    console.log("\n✅ Migration erfolgreich abgeschlossen!");
+    console.log("✅ Alle Migrationen erfolgreich abgeschlossen!");
 
     // Zeige Tabellen zur Kontrolle
     const [tables] = await pool.query("SHOW TABLES");

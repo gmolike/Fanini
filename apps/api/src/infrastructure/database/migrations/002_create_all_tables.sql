@@ -253,10 +253,11 @@ CREATE TABLE
 -- Member Responsibilities
 CREATE TABLE
   IF NOT EXISTS member_responsibilities (
+    id VARCHAR(36) PRIMARY KEY,
     member_id VARCHAR(36) NOT NULL,
     responsibility TEXT NOT NULL,
-    PRIMARY KEY (member_id, responsibility),
-    FOREIGN KEY (member_id) REFERENCES gremium_members (id) ON DELETE CASCADE
+    FOREIGN KEY (member_id) REFERENCES gremium_members (id) ON DELETE CASCADE,
+    INDEX idx_member (member_id)
   );
 
 -- Gremium Highlights
@@ -671,7 +672,7 @@ CREATE TABLE
     ) NOT NULL,
     description TEXT,
     member_count INT,
-    lead VARCHAR(100),
+    team_lead VARCHAR(100),
     email VARCHAR(255),
     logo VARCHAR(500),
     color VARCHAR(50),

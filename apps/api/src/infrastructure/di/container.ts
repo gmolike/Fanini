@@ -12,10 +12,13 @@ import { RefreshTokenUseCase } from "@/application/use-cases/RefreshTokenUseCase
 import { EventController } from "@/presentation/controllers/EventController";
 import { MemberController } from "@/presentation/controllers/MemberController";
 import { AuthController } from "@/presentation/controllers/AuthController";
+import { GetPublicStatsUseCase } from "@/application/use-cases/GetPublicStatsUseCase";
+import { StatsController } from "@/presentation/controllers/StatsController";
+import { MySQLStatsRepository } from "../database/MySQLStatsRepository";
 
 export class Container {
-  private services = new Map<string, any>();
-  private factories = new Map<string, () => any>();
+  private readonly services = new Map<string, any>();
+  private readonly factories = new Map<string, () => any>();
 
   register(name: string, factory: () => any): void {
     this.factories.set(name, factory);
@@ -120,6 +123,22 @@ export function setupContainer(): Container {
     const login = container.get("LoginUseCase");
     const refreshToken = container.get("RefreshTokenUseCase");
     return new AuthController(login, refreshToken);
+  });
+  container.register("StatsRepository", () => {
+    const db = container.get("Database");
+    return new MySQLStatsRepository(db);
+  });
+
+  // Register Stats Use Case
+  container.register("GetPublicStatsUseCase", () => {
+    const repo = container.get("StatsRepository");
+    return new GetPublicStatsUseCase(repo);
+  });
+
+  // Register Stats Controller
+  container.register("StatsController", () => {
+    const getPublicStats = container.get("GetPublicStatsUseCase");
+    return new StatsController(getPublicStats);
   });
 
   return container;

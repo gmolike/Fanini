@@ -1,40 +1,25 @@
-# frontend/Dockerfile
 FROM node:20-alpine AS base
-
-# Install pnpm
-RUN npm install -g pnpm@9.15.1
-
+RUN npm install -g pnpm@10.12.4
 WORKDIR /app
 
-# Copy only package files first (for better caching)
+# Dependencies
 COPY package.json pnpm-lock.yaml* ./
-COPY frontend/package.json ./frontend/
-
-# Install dependencies in container (not from host)
 RUN pnpm install --frozen-lockfile
 
-# Development stage
+# Development
 FROM base AS development
-WORKDIR /app/frontend
-
-# Copy source code (node_modules are excluded via .dockerignore)
-COPY frontend/ ./
-
+COPY . .
 EXPOSE 5173
 CMD ["pnpm", "dev", "--host", "0.0.0.0"]
 
-# Build stage
+# Production build
 FROM base AS build
-WORKDIR /app/frontend
-
-# Copy source code
-COPY frontend/ ./
-
+COPY . .
 RUN pnpm build
 
-# Production stage
+# Production
 FROM nginx:alpine AS production
-COPY --from=build /app/frontend/dist /usr/share/nginx/html
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

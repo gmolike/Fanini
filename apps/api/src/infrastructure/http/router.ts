@@ -4,6 +4,7 @@ import {
   MemberController,
   AuthController,
 } from "@/presentation/controllers";
+import { StatsController } from "@/presentation/controllers/StatsController";
 import { authMiddleware } from "@/presentation/middleware/auth";
 
 type RouteHandler = (req: Request) => Promise<Response>;
@@ -20,9 +21,9 @@ interface Route {
 }
 
 export class ApiRouter {
-  private routes: Route[] = [];
+  private readonly routes: Route[] = [];
 
-  constructor(private container: Container) {
+  constructor(private readonly container: Container) {
     this.setupRoutes();
   }
 
@@ -37,6 +38,9 @@ export class ApiRouter {
     const authController = this.container.get(
       "AuthController",
     ) as AuthController;
+    const statsController = this.container.get(
+      "StatsController",
+    ) as StatsController;
 
     // Public Routes
     this.addRoute(
@@ -98,6 +102,12 @@ export class ApiRouter {
       "/api/members/:id",
       memberController.getMember.bind(memberController),
       [authMiddleware],
+    );
+    // Public Stats Route
+    this.addRoute(
+      "GET",
+      "/api/public/stats",
+      statsController.getPublicStats.bind(statsController),
     );
   }
 

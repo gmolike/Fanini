@@ -45,6 +45,8 @@ services:
     volumes:
       # Mount entire monorepo
       - ./:/workspace
+        # Mount .env file
+      - ./apps/api/.env:/workspace/apps/api/.env
       # Exclude node_modules
       - /workspace/node_modules
       - /workspace/apps/web/node_modules
@@ -52,6 +54,8 @@ services:
       - /workspace/packages/config/node_modules
       - /workspace/packages/shared/node_modules
       - /workspace/packages/ui/node_modules
+    env_file:
+      - ./apps/api/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=mysql://fanini:password@mysql:3306/fanini_db

@@ -145,9 +145,15 @@ export function setupContainer(): Container {
     const getPublicStats = container.get("GetPublicStatsUseCase");
     return new StatsController(getPublicStats);
   });
+
   // Register Google Drive Service
   container.register("GoogleDriveService", () => {
-    return new RetryableGoogleDriveService();
+    console.log("🔍 Creating GoogleDriveService instance...");
+    const service = new RetryableGoogleDriveService();
+    console.log("✅ Service created:", service.constructor.name);
+    console.log("📋 Available methods:", Object.getOwnPropertyNames(Object.getPrototypeOf(service)));
+    console.log("🔍 Has ensureFolderStructure?", typeof service.ensureFolderStructure === 'function');
+    return service;
   });
 
   // Register Document Repository
@@ -172,7 +178,6 @@ export function setupContainer(): Container {
   // Register Document Controller
   container.register("DocumentController", () => {
     const getDocuments = container.get("GetDocumentsUseCase");
-    const uploadDocument = container.get("UploadDocumentUseCase");
     return new DocumentController(getDocuments);
   });
 

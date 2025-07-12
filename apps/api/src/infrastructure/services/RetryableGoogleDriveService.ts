@@ -38,8 +38,6 @@ const withRetry = async <T>(
  * Google Drive Service with retry logic
  */
 export class RetryableGoogleDriveService extends GoogleDriveService {
-  // Kein Constructor mehr nötig, da GoogleDriveService jetzt parameterlos ist
-
   async uploadFile(params: Parameters<GoogleDriveService["uploadFile"]>[0]) {
     return withRetry(() => super.uploadFile(params));
   }
@@ -60,7 +58,12 @@ export class RetryableGoogleDriveService extends GoogleDriveService {
     return withRetry(() => super.createFolder(name, parentId));
   }
 
+  // DIESE BEIDEN METHODEN FEHLTEN!
   async ensureFolderStructure() {
     return withRetry(() => super.ensureFolderStructure());
+  }
+
+  async createEventFolder(eventDate: Date, eventName: string) {
+    return withRetry(() => super.createEventFolder(eventDate, eventName));
   }
 }

@@ -1,6 +1,7 @@
 // apps/api/src/infrastructure/services/GoogleDriveService.ts
 import { google, drive_v3 } from "googleapis";
 import { JWT } from "google-auth-library";
+import { Readable } from "stream";
 
 export type FolderCategory =
   | "dokumente/satzung"
@@ -16,85 +17,207 @@ export type FolderCategory =
   | "listen"
   | "archiv";
 
+export interface UploadFileParams {
+  fileName: string;
+  mimeType: string;
+  fileContent: Buffer;
+  folderId?: string;
+  isPublic?: boolean;
+}
+
+export interface ListFilesParams {
+  folderId?: string;
+  pageSize?: number;
+  pageToken?: string;
+}
+
+export interface UploadResult {
+  fileId: string;
+  webViewLink: string;
+  downloadLink: string;
+}
+
+export interface ListFilesResult {
+  files: drive_v3.Schema$File[];
+  nextPageToken?: string;
+}
+
+export interface EventFolderResult {
+  mainFolder: string;
+  subFolders: {
+    fotos: string;
+    dokumente: string;
+    abrechnung: string;
+  };
+}
+
 /**
  * Google Drive Service mit Service Account
  * @description Handles all interactions with Google Drive API using Service Account
  */
 export class GoogleDriveService {
-  private drive: drive_v3.Drive;
-  private auth: JWT;
+  protected drive: drive_v3.Drive;
+  protected auth: JWT;
+  private isAuthenticated = false;
 
   constructor() {
-    // Service Account Authentication
-    const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    console.log("🔧 GoogleDriveService Constructor");
+
+    // Versuche beide Varianten
+    let serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_BASE64;
+    let isBase64 = true;
 
     if (!serviceAccountKey) {
-      throw new Error("Google Service Account Key not configured");
+      // Fallback zu direktem JSON
+      serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+      isBase64 = false;
     }
 
-    // Parse the service account key
-    const credentials = JSON.parse(serviceAccountKey);
+    if (!serviceAccountKey) {
+      throw new Error(
+        "Neither GOOGLE_SERVICE_ACCOUNT_KEY_BASE64 nor GOOGLE_SERVICE_ACCOUNT_KEY is set",
+      );
+    }
 
-    this.auth = new JWT({
-      email: credentials.client_email,
-      key: credentials.private_key,
-      scopes: ["https://www.googleapis.com/auth/drive"],
-    });
+    const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID;
+    if (!rootFolderId) {
+      throw new Error(
+        "GOOGLE_DRIVE_ROOT_FOLDER_ID environment variable is not set",
+      );
+    }
 
-    this.drive = google.drive({ version: "v3", auth: this.auth });
+    try {
+      // Decode wenn Base64, sonst direkt nutzen
+      const jsonString = isBase64
+        ? Buffer.from(serviceAccountKey, "base64").toString("utf-8")
+        : serviceAccountKey;
+
+      const credentials = JSON.parse(jsonString);
+
+      console.log("✅ Service Account parsed successfully");
+      console.log("- Client Email:", credentials.client_email);
+      console.log("- Project ID:", credentials.project_id);
+      console.log("- Key format:", isBase64 ? "Base64" : "Direct JSON");
+
+      this.auth = new JWT({
+        email: credentials.client_email,
+        key: credentials.private_key,
+        scopes: ["https://www.googleapis.com/auth/drive"],
+      });
+
+      this.drive = google.drive({ version: "v3", auth: this.auth });
+    } catch (error) {
+      console.error("❌ Failed to initialize Google Drive Service:", error);
+      throw new Error("Failed to initialize Google Drive Service");
+    }
   }
 
   /**
    * Initialize authentication
    */
-  private async ensureAuthenticated(): Promise<void> {
+  protected async ensureAuthenticated(): Promise<void> {
+    if (this.isAuthenticated) return;
+
     try {
+      console.log("🔐 Authenticating with Google Drive...");
       await this.auth.authorize();
+      this.isAuthenticated = true;
+      console.log("✅ Authentication successful!");
     } catch (error) {
-      console.error("Authentication failed:", error);
-      throw new Error("Failed to authenticate with Google Drive");
+      console.error("❌ Authentication failed:", error);
+      throw new Error(
+        `Failed to authenticate with Google Drive: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   }
 
   /**
    * Upload file to Google Drive
    */
-  async uploadFile(params: {
-    fileName: string;
-    mimeType: string;
-    fileContent: Buffer;
-    folderId?: string;
-    isPublic?: boolean;
-  }): Promise<{ fileId: string; webViewLink: string; downloadLink: string }> {
+  // apps/api/src/infrastructure/services/GoogleDriveService.ts
+  // Ersetze die komplette uploadFile Methode:
+
+  public async uploadFile(params: UploadFileParams): Promise<UploadResult> {
     try {
-      // Ensure we're authenticated
       await this.ensureAuthenticated();
+
+      console.log("📤 Starting upload...");
+      console.log("- File name:", params.fileName);
+      console.log("- MIME type:", params.mimeType);
+      console.log("- Buffer length:", params.fileContent?.length || 0);
+      console.log("- Is Buffer?:", Buffer.isBuffer(params.fileContent));
+
+      // Test ob wir überhaupt Zugriff haben
+      try {
+        console.log("🔍 Testing Google Drive access...");
+        const testList = await this.drive.files.list({
+          pageSize: 1,
+          fields: "files(id, name)",
+        });
+        console.log("✅ Can access Google Drive");
+      } catch (testError: any) {
+        console.error("❌ Cannot access Google Drive:", testError.message);
+        throw testError;
+      }
 
       const fileMetadata: drive_v3.Schema$File = {
         name: params.fileName,
-        parents: params.folderId
-          ? [params.folderId]
-          : [process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID!],
+        parents: [process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID!],
       };
+
+      // Versuche verschiedene Stream-Methoden
+      let stream;
+      try {
+        // Methode 1: Readable.from
+        stream = Readable.from(params.fileContent);
+        console.log("✅ Created stream with Readable.from");
+      } catch (e) {
+        console.error("❌ Readable.from failed:", e);
+        // Methode 2: Manueller Stream
+        stream = new Readable();
+        stream.push(params.fileContent);
+        stream.push(null);
+        console.log("✅ Created manual stream");
+      }
 
       const media = {
         mimeType: params.mimeType,
-        body: params.fileContent,
+        body: stream,
       };
 
-      const response = await this.drive.files.create({
-        requestBody: fileMetadata,
-        media: media,
-        fields: "id, webViewLink",
-      });
+      console.log("🚀 Calling drive.files.create...");
 
-      if (!response.data.id) {
-        throw new Error("Failed to upload file - no ID returned");
+      let response;
+      try {
+        response = await this.drive.files.create({
+          requestBody: fileMetadata,
+          media: media,
+          fields: "id, webViewLink",
+          supportsAllDrives: true, // NUR diese Zeile hinzufügen!
+        });
+        console.log("✅ drive.files.create successful");
+      } catch (apiError: any) {
+        console.error("❌ Google API Error:");
+        console.error("- Code:", apiError.code);
+        console.error("- Message:", apiError.message);
+        console.error("- Errors:", JSON.stringify(apiError.errors, null, 2));
+        console.error("- Response:", apiError.response?.data);
+        throw apiError;
       }
 
-      // Set permissions if public
+      if (!response.data.id) {
+        throw new Error("No file ID in response");
+      }
+
+      console.log("📄 File created with ID:", response.data.id);
+
       if (params.isPublic) {
-        await this.makeFilePublic(response.data.id);
+        try {
+          await this.makeFilePublic(response.data.id);
+          console.log("✅ File made public");
+        } catch (e) {
+          console.error("⚠️ Failed to make public:", e);
+        }
       }
 
       return {
@@ -102,16 +225,16 @@ export class GoogleDriveService {
         webViewLink: response.data.webViewLink || "",
         downloadLink: `https://drive.google.com/uc?export=download&id=${response.data.id}`,
       };
-    } catch (error) {
-      console.error("Google Drive upload error:", error);
-      throw new Error("Failed to upload file to Google Drive");
+    } catch (error: any) {
+      console.error("❌ Final catch block error:", error);
+      throw error;
     }
   }
 
   /**
    * Get file metadata
    */
-  async getFile(fileId: string): Promise<drive_v3.Schema$File> {
+  public async getFile(fileId: string): Promise<drive_v3.Schema$File> {
     try {
       await this.ensureAuthenticated();
 
@@ -131,7 +254,7 @@ export class GoogleDriveService {
   /**
    * Delete file from Google Drive
    */
-  async deleteFile(fileId: string): Promise<void> {
+  public async deleteFile(fileId: string): Promise<void> {
     try {
       await this.ensureAuthenticated();
       await this.drive.files.delete({ fileId });
@@ -144,14 +267,7 @@ export class GoogleDriveService {
   /**
    * List files in a folder
    */
-  async listFiles(params: {
-    folderId?: string;
-    pageSize?: number;
-    pageToken?: string;
-  }): Promise<{
-    files: drive_v3.Schema$File[];
-    nextPageToken?: string;
-  }> {
+  public async listFiles(params: ListFilesParams): Promise<ListFilesResult> {
     try {
       await this.ensureAuthenticated();
 
@@ -180,7 +296,7 @@ export class GoogleDriveService {
   /**
    * Create folder in Google Drive
    */
-  async createFolder(name: string, parentId?: string): Promise<string> {
+  public async createFolder(name: string, parentId?: string): Promise<string> {
     try {
       await this.ensureAuthenticated();
 
@@ -195,6 +311,7 @@ export class GoogleDriveService {
       const response = await this.drive.files.create({
         requestBody: fileMetadata,
         fields: "id",
+        supportsAllDrives: true,
       });
 
       if (!response.data.id) {
@@ -230,6 +347,7 @@ export class GoogleDriveService {
     const response = await this.drive.files.list({
       q: query,
       fields: "files(id)",
+      supportsAllDrives: true,
     });
 
     if (response.data.files && response.data.files.length > 0) {
@@ -242,11 +360,29 @@ export class GoogleDriveService {
   /**
    * Get or create complete folder structure
    */
-  async ensureFolderStructure(): Promise<Record<string, string>> {
+  public async ensureFolderStructure(): Promise<Record<string, string>> {
     await this.ensureAuthenticated();
 
     const folders: Record<string, string> = {};
     const rootFolderId = process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID!;
+
+    // Prüfe ob wir Zugriff auf den Root-Ordner haben
+    try {
+      const rootFolder = await this.drive.files.get({
+        fileId: rootFolderId,
+        fields: "id, name, capabilities",
+      });
+      console.log("✅ Root folder access confirmed:", rootFolder.data.name);
+      console.log(
+        "- Can create children:",
+        rootFolder.data.capabilities?.canAddChildren,
+      );
+    } catch (error) {
+      console.error("❌ Cannot access root folder:", error);
+      throw new Error(
+        "No access to the shared folder. Please ensure it is shared with the service account.",
+      );
+    }
 
     // Haupt-Ordner
     const mainFolders = {
@@ -310,17 +446,10 @@ export class GoogleDriveService {
   /**
    * Create event folder with subfolders
    */
-  async createEventFolder(
+  public async createEventFolder(
     eventDate: Date,
     eventName: string,
-  ): Promise<{
-    mainFolder: string;
-    subFolders: {
-      fotos: string;
-      dokumente: string;
-      abrechnung: string;
-    };
-  }> {
+  ): Promise<EventFolderResult> {
     await this.ensureAuthenticated();
 
     const year = eventDate.getFullYear().toString();

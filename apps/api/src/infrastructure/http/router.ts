@@ -3,8 +3,9 @@ import {
   EventController,
   MemberController,
   AuthController,
+  StatsController,
+  DocumentController
 } from "@/presentation/controllers";
-import { StatsController } from "@/presentation/controllers/StatsController";
 import { authMiddleware } from "@/presentation/middleware/auth";
 
 type RouteHandler = (req: Request) => Promise<Response>;
@@ -41,6 +42,9 @@ export class ApiRouter {
     const statsController = this.container.get(
       "StatsController",
     ) as StatsController;
+    const documentController = this.container.get(
+      "DocumentController",
+    ) as DocumentController;
 
     // Public Routes
     this.addRoute(
@@ -108,6 +112,20 @@ export class ApiRouter {
       "GET",
       "/api/public/stats",
       statsController.getPublicStats.bind(statsController),
+    );
+    // Public Routes
+    this.addRoute(
+      "GET",
+      "/api/public/documents",
+      documentController.getPublicDocuments.bind(documentController),
+    );
+
+    // Protected Routes
+    this.addRoute(
+      "POST",
+      "/api/documents/upload",
+      documentController.uploadDocument.bind(documentController),
+      [authMiddleware],
     );
   }
 

@@ -19,6 +19,7 @@ import { RetryableGoogleDriveService } from "../services/RetryableGoogleDriveSer
 import { UploadDocumentUseCase } from "@/application/use-cases/UploadDocumentUseCase";
 import { GetDocumentsUseCase } from "@/application/use-cases/GetDocumentsUseCase";
 import { MySQLDocumentRepository } from "../repositories/MySQLDocumentRepository";
+import { DocumentController } from "@/presentation/controllers";
 
 export class Container {
   private readonly services = new Map<string, any>();
@@ -157,15 +158,22 @@ export function setupContainer(): Container {
   });
 
   // Register Document Use Cases
+  container.register("GetDocumentsUseCase", () => {
+    const repo = container.get("DocumentRepository");
+    return new GetDocumentsUseCase(repo);
+  });
+
   container.register("UploadDocumentUseCase", () => {
     const repo = container.get("DocumentRepository");
     const googleDrive = container.get("GoogleDriveService");
     return new UploadDocumentUseCase(repo, googleDrive);
   });
 
-  container.register("GetDocumentsUseCase", () => {
-    const repo = container.get("DocumentRepository");
-    return new GetDocumentsUseCase(repo);
+  // Register Document Controller
+  container.register("DocumentController", () => {
+    const getDocuments = container.get("GetDocumentsUseCase");
+    const uploadDocument = container.get("UploadDocumentUseCase");
+    return new DocumentController(getDocuments, uploadDocument);
   });
 
   return container;

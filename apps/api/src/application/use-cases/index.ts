@@ -6,4 +6,6 @@ export { GetMembersUseCase } from "./GetMembersUseCase";
 export { UpdateMemberUseCase } from "./UpdateMemberUseCase";
 export { LoginUseCase } from "./LoginUseCase";
 export { RefreshTokenUseCase } from "./RefreshTokenUseCase";
-export { GetPublicStatsUseCase } from './GetPublicStatsUseCase';
+export { GetPublicStatsUseCase } from "./GetPublicStatsUseCase";
+export { GetDocumentsUseCase } from "./GetDocumentsUseCase";
+export { UploadDocumentUseCase } from "./UploadDocumentUseCase";

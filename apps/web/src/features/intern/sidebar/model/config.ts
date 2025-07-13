@@ -1,11 +1,14 @@
-// features/sidebar/model/config.ts
 import {
+  BookOpen,
   Calendar,
   Camera,
   CheckSquare,
+  Code2,
   Crown,
+  GitBranch,
   Home,
   PlusCircle,
+  Rocket,
   Settings,
   Shield,
   Users,
@@ -27,6 +30,32 @@ export const navigationItems: NavItem[] = [
     requiredRole: ['admin', 'vorstand', 'beirat'],
   },
   { name: 'Verein', href: '/intern/club', icon: Crown },
+
+  // Dev Section - nur für Admins sichtbar
+  {
+    name: 'Dev Dashboard',
+    href: '/intern/dev',
+    icon: Code2,
+  },
+  {
+    name: 'Storybook',
+    href: '/intern/dev/storybook',
+    icon: BookOpen,
+    requiredRole: ['admin'],
+  },
+  {
+    name: 'Features',
+    href: '/intern/dev/features',
+    icon: Rocket,
+    requiredRole: ['admin'],
+  },
+  {
+    name: 'Roadmap',
+    href: '/intern/dev/roadmap',
+    icon: GitBranch,
+    requiredRole: ['admin'],
+  },
+
   {
     name: 'Einstellungen',
     href: '/intern/settings',

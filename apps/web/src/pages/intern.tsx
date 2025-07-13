@@ -36,6 +36,10 @@ const getPageTitle = (pathname: string): string => {
     '/intern/settings': 'Einstellungen',
     '/intern/notifications': 'Benachrichtigungen',
     '/intern/profile': 'Mein Profil',
+    '/intern/dev': 'Developer Dashboard',
+    '/intern/dev/storybook': 'Storybook',
+    '/intern/dev/features': 'Feature Requests',
+    '/intern/dev/roadmap': 'Roadmap',
   };
 
   // Exact match first

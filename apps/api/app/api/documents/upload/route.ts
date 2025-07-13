@@ -1,0 +1,93 @@
+// apps/api/app/api/documents/upload/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { setupContainer } from "../../../../src/infrastructure/di/container";
+/**
+ *   post:
+ *     summary: Dokument hochladen
+ *     tags: ["📄 Documents"]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *                 enum: [satzung, protokolle, formulare, richtlinien, guides]
+ *               isPublic:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Upload erfolgreich
+ *       400:
+ *         description: Keine Datei
+ *       500:
+ *         description: Upload fehlgeschlagen
+ */
+export async function POST(request: NextRequest) {
+  try {
+    const formData = await request.formData();
+    const file = formData.get("file") as File;
+
+    if (!file) {
+      return NextResponse.json(
+        { success: false, error: "No file provided" },
+        { status: 400 },
+      );
+    }
+
+    // File zu Buffer konvertieren
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // IP-Adresse extrahieren
+    const ipAddress =
+      request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+
+    // Metadaten extrahieren
+    const metadata = {
+      title: formData.get("title") as string,
+      description: (formData.get("description") as string) || "",
+      category: formData.get("category") as string,
+      version: (formData.get("version") as string) || "1.0",
+      isPublic: formData.get("isPublic") === "true",
+    };
+
+    // DI Container und Use Case
+    const container = setupContainer();
+    const uploadUseCase = container.get("UploadDocumentUseCase");
+
+    const document = await uploadUseCase.execute({
+      ...metadata,
+      fileBuffer: buffer,
+      fileName: file.name,
+      mimeType: file.type,
+      userId: "test-user", // TODO: Aus Auth
+      userName: "Test User", // TODO: Aus Auth
+      ipAddress,
+    });
+
+    return NextResponse.json({
+      success: true,
+      data: document.toJSON(),
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    return NextResponse.json(
+      { success: false, error: "Upload failed" },
+      { status: 500 },
+    );
+  }
+}

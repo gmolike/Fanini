@@ -1,6 +1,4 @@
 packages:
-  - frontend
-  - backend
   - apps/*
   - packages/*
 
@@ -17,6 +15,7 @@ onlyBuiltDependencies:
   - core-js-pure
   - esbuild
   - msw
+  - sharp
   - tree-sitter
   - tree-sitter-json
   - unrs-resolver

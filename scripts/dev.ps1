@@ -35,9 +35,9 @@ if (!(Test-Path ".env")) {
   Copy-Item ".env.example" ".env"
 }
 
-if (!(Test-Path "frontend/.env.development")) {
+if (!(Test-Path "apps/web/.env.development")) {
   Write-Host "Creating frontend development environment file..." -ForegroundColor Blue
-  Copy-Item "frontend/.env.example" "frontend/.env.development"
+  Copy-Item "apps/web/.env.example" "apps/web/.env.development"
 }
 
 # Start development environment

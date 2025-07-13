@@ -1,61 +1,118 @@
-// apps/api/src/domain/entities/Event.ts (Ergänzung)
+// apps/api/src/domain/entities/event.ts
 import { generateId } from "@faninitiative/shared";
 
-export type EventStatus = "draft" | "published" | "cancelled";
+// apps/api/src/domain/entities/event.ts
+export type EventStatus =
+  | "entwurf"
+  | "geplant"
+  | "genehmigt"
+  | "aktiv"
+  | "abgeschlossen"
+  | "abgesagt";
+export type EventType =
+  | "vereinstreffen"
+  | "sportveranstaltung"
+  | "fanfahrt"
+  | "social"
+  | "sitzung"
+  | "workshop"
+  | "turnier"
+  | "sonstiges";
 
-export class Event {
-  constructor(
-    public readonly id: string,
-    public readonly title: string,
-    public readonly description: string,
-    public readonly date: Date,
-    public readonly location: string,
-    public readonly status: EventStatus,
-    public readonly createdBy: string,
-    public readonly createdAt: Date,
-    public readonly updatedAt: Date,
-    public readonly istOeffentlich: boolean = false, // NEU!
-  ) {}
+export type SportBereich =
+  | "league_of_legends"
+  | "fussball"
+  | "esports_allgemein"
+  | "sonstiges";
 
-  static create(params: {
-    title: string;
-    description: string;
-    date: Date;
-    location: string;
-    createdBy: string;
-    istOeffentlich?: boolean; // NEU!
-  }): Event {
-    const now = new Date();
-    return new Event(
-      generateId(),
-      params.title,
-      params.description,
-      params.date,
-      params.location,
-      "draft" as EventStatus,
-      params.createdBy,
-      now,
-      now,
-      params.istOeffentlich || false, // NEU!
-    );
-  }
+export type EventLocation = {
+  name: string;
+  address?: string;
+  description?: string;
+};
 
-  canBeEditedBy(userId: string): boolean {
-    return this.createdBy === userId || this.status === "draft";
-  }
+export type Event = {
+  id: string;
+  title: string;
+  description: string;
+  shortDescription?: string;
+  date: Date;
+  time: string;
+  durationMinutes?: number;
+  location: EventLocation;
+  type: EventType;
+  sportBereich?: SportBereich;
+  status: EventStatus;
+  isPublic: boolean;
+  isConfidential: boolean;
+  responsibleMemberId: string;
+  deputyMemberIds?: string[];
+  budget?: number;
+  budgetUsed: number;
+  maxParticipants?: number;
+  registrationDeadline?: Date;
+  ticketLink?: string;
+  createdAt: Date;
+  createdBy: string;
+  updatedAt: Date;
+  updatedBy?: string;
+  approvedAt?: Date;
+  approvedBy?: string;
+};
 
-  toJSON() {
-    return {
-      id: this.id,
-      title: this.title,
-      description: this.description,
-      date: this.date.toISOString(),
-      location: this.location,
-      status: this.status,
-      createdBy: this.createdBy,
-      createdAt: this.createdAt.toISOString(),
-      updatedAt: this.updatedAt.toISOString(),
-      istOeffentlich: this.istOeffentlich, // NEU!
-    };
-  }
-}
+export const createEvent = (params: {
+  title: string;
+  description: string;
+  shortDescription?: string;
+  date: Date;
+  time: string;
+  location: EventLocation;
+  type: EventType;
+  responsibleMemberId: string;
+  createdBy: string;
+  isPublic?: boolean;
+}): Event => {
+  const now = new Date();
+  return {
+    id: generateId(),
+    title: params.title,
+    description: params.description,
+    shortDescription: params.shortDescription,
+    date: params.date,
+    time: params.time,
+    location: params.location,
+    type: params.type,
+    status: "entwurf",
+    isPublic: params.isPublic || false,
+    isConfidential: false,
+    responsibleMemberId: params.responsibleMemberId,
+    budgetUsed: 0,
+    createdAt: now,
+    createdBy: params.createdBy,
+    updatedAt: now,
+  };
+};
+
+export const canEventBeEditedBy = (event: Event, userId: string): boolean => {
+  return event.createdBy === userId || event.status === "entwurf";
+};
+
+export const eventToJSON = (event: Event) => ({
+  id: event.id,
+  title: event.title,
+  description: event.description,
+  shortDescription: event.shortDescription,
+  date: event.date.toISOString(),
+  time: event.time,
+  durationMinutes: event.durationMinutes,
+  location: event.location,
+  type: event.type,
+  sportBereich: event.sportBereich,
+  status: event.status,
+  isPublic: event.isPublic,
+  maxParticipants: event.maxParticipants,
+  registrationDeadline: event.registrationDeadline?.toISOString(),
+  ticketLink: event.ticketLink,
+  createdAt: event.createdAt.toISOString(),
+  updatedAt: event.updatedAt.toISOString(),
+});

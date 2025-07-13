@@ -1,5 +1,7 @@
-export { GetEventsUseCase } from "./GetEventsUseCase";
-export { CreateEventUseCase } from "./CreateEventUseCase";
-export { UpdateEventUseCase } from "./UpdateEventUseCase";
-export { DeleteEventUseCase } from "./DeleteEventUseCase";
-export { UploadEventPhotosUseCase } from "./UploadEventPhotosUseCase";
+export { createGetEventsUseCase } from "./GetEvents";
+export type { GetEventsUseCase } from "./GetEvents";
+export { CreateEventUseCase } from "./CreateEvent";
+export { UpdateEventUseCase } from "./UpdateEvent";
+export { DeleteEventUseCase } from "./DeleteEvent";
+export { UploadEventPhotosUseCase } from "./UploadEventPhotos";
+export type { GetEventByIdUseCase } from "./GetEventById";

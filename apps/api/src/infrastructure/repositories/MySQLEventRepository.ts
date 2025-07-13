@@ -1,14 +1,56 @@
-import { Event, EventStatus } from "@/domain/entities/Event";
-import {
-  IEventRepository,
+// apps/api/src/infrastructure/database/repositories/mysql-event-repository.ts
+import type { Event, EventLocation } from "@/domain/entities/Event";
+import type {
+  EventRepository,
   EventFilters,
 } from "@/domain/repositories/IEventRepository";
-import { MySQLConnection } from "./MySQLConnection";
+import type { MySQLConnection } from "./MySQLConnection";
 
-export class MySQLEventRepository implements IEventRepository {
-  constructor(private db: MySQLConnection) {}
+export const createMySQLEventRepository = (
+  db: MySQLConnection,
+): EventRepository => {
+  const parseLocation = (locationJson: string): EventLocation => {
+    try {
+      return JSON.parse(locationJson);
+    } catch {
+      return { name: locationJson };
+    }
+  };
 
-  async findAll(filters?: EventFilters): Promise<Event[]> {
+  const rowToEvent = (row: any): Event => ({
+    id: row.id,
+    title: row.titel,
+    description: row.beschreibung,
+    shortDescription: row.kurzbeschreibung,
+    date: new Date(row.datum),
+    time: row.uhrzeit,
+    durationMinutes: row.dauer_minuten,
+    location: parseLocation(row.ort),
+    type: row.typ,
+    sportBereich: row.sportbereich,
+    status: row.status,
+    isPublic: Boolean(row.ist_oeffentlich),
+    isConfidential: Boolean(row.ist_vertraulich),
+    responsibleMemberId: row.verantwortlich_id,
+    deputyMemberIds: row.stellvertreter_ids
+      ? JSON.parse(row.stellvertreter_ids)
+      : undefined,
+    budget: row.budget,
+    budgetUsed: row.budget_verbraucht || 0,
+    maxParticipants: row.max_teilnehmer,
+    registrationDeadline: row.anmeldeschluss
+      ? new Date(row.anmeldeschluss)
+      : undefined,
+    ticketLink: row.ticket_link,
+    createdAt: new Date(row.erstellt_am),
+    createdBy: row.erstellt_von,
+    updatedAt: new Date(row.aktualisiert_am || row.erstellt_am),
+    updatedBy: row.aktualisiert_von,
+    approvedAt: row.genehmigt_am ? new Date(row.genehmigt_am) : undefined,
+    approvedBy: row.genehmigt_von,
+  });
+
+  const findAll = async (filters?: EventFilters): Promise<Event[]> => {
     let sql = "SELECT * FROM events WHERE 1=1";
     const params: any[] = [];
 
@@ -17,96 +59,114 @@ export class MySQLEventRepository implements IEventRepository {
       params.push(filters.status);
     }
 
+    if (filters?.isPublic !== undefined) {
+      sql += " AND ist_oeffentlich = ?";
+      params.push(filters.isPublic);
+    }
+
     if (filters?.createdBy) {
-      sql += " AND created_by = ?";
+      sql += " AND erstellt_von = ?";
       params.push(filters.createdBy);
     }
 
     if (filters?.fromDate) {
-      sql += " AND date >= ?";
+      sql += " AND datum >= ?";
       params.push(filters.fromDate);
     }
 
     if (filters?.toDate) {
-      sql += " AND date <= ?";
+      sql += " AND datum <= ?";
       params.push(filters.toDate);
     }
 
-    sql += " ORDER BY date DESC";
+    if (filters?.type) {
+      sql += " AND typ = ?";
+      params.push(filters.type);
+    }
 
-    const rows = await this.db.query<any[]>(sql, params);
+    if (filters?.sportBereich) {
+      sql += " AND sportbereich = ?";
+      params.push(filters.sportBereich);
+    }
 
-    return rows.map(
-      (row) =>
-        new Event(
-          row.id,
-          row.title,
-          row.description,
-          new Date(row.date),
-          row.location,
-          row.status as EventStatus,
-          row.created_by,
-          new Date(row.created_at),
-          new Date(row.updated_at),
-          Boolean(row.ist_oeffentlich), // NEU!
-        ),
-    );
-  }
+    sql += " ORDER BY datum DESC, uhrzeit DESC";
 
-  async findById(id: string): Promise<Event | null> {
-    const rows = await this.db.query<any[]>(
-      "SELECT * FROM events WHERE id = ?",
-      [id],
-    );
+    const rows = await db.query<any[]>(sql, params);
+    return rows.map(rowToEvent);
+  };
+
+  const findById = async (id: string): Promise<Event | null> => {
+    const rows = await db.query<any[]>("SELECT * FROM events WHERE id = ?", [
+      id,
+    ]);
 
     if (rows.length === 0) return null;
+    return rowToEvent(rows[0]);
+  };
 
-    const row = rows[0];
-    return new Event(
-      row.id,
-      row.title,
-      row.description,
-      new Date(row.date),
-      row.location,
-      row.status as EventStatus,
-      row.created_by,
-      new Date(row.created_at),
-      new Date(row.updated_at),
-      Boolean(row.ist_oeffentlich), // NEU!
-    );
-  }
-  async save(event: Event): Promise<Event> {
+  const save = async (event: Event): Promise<Event> => {
     const sql = `
-    INSERT INTO events
-    (id, title, description, date, location, status, created_by, created_at, updated_at, ist_oeffentlich)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE
-    title = VALUES(title),
-    description = VALUES(description),
-    date = VALUES(date),
-    location = VALUES(location),
-    status = VALUES(status),
-    updated_at = VALUES(updated_at),
-    ist_oeffentlich = VALUES(ist_oeffentlich)
-  `;
+      INSERT INTO events
+      (id, titel, beschreibung, kurzbeschreibung, datum, uhrzeit,
+       dauer_minuten, ort, typ, sportbereich, status, ist_oeffentlich,
+       ist_vertraulich, verantwortlich_id, budget, budget_verbraucht,
+       max_teilnehmer, anmeldeschluss, ticket_link, erstellt_am,
+       erstellt_von, genehmigt_am, genehmigt_von)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        titel = VALUES(titel),
+        beschreibung = VALUES(beschreibung),
+        kurzbeschreibung = VALUES(kurzbeschreibung),
+        datum = VALUES(datum),
+        uhrzeit = VALUES(uhrzeit),
+        dauer_minuten = VALUES(dauer_minuten),
+        ort = VALUES(ort),
+        typ = VALUES(typ),
+        sportbereich = VALUES(sportbereich),
+        status = VALUES(status),
+        ist_oeffentlich = VALUES(ist_oeffentlich),
+        max_teilnehmer = VALUES(max_teilnehmer),
+        anmeldeschluss = VALUES(anmeldeschluss),
+        ticket_link = VALUES(ticket_link)
+    `;
 
-    await this.db.query(sql, [
+    await db.query(sql, [
       event.id,
       event.title,
       event.description,
+      event.shortDescription || null,
       event.date,
-      event.location,
+      event.time,
+      event.durationMinutes || null,
+      JSON.stringify(event.location),
+      event.type,
+      event.sportBereich || null,
       event.status,
-      event.createdBy,
+      event.isPublic,
+      event.isConfidential,
+      event.responsibleMemberId,
+      event.budget || null,
+      event.budgetUsed,
+      event.maxParticipants || null,
+      event.registrationDeadline || null,
+      event.ticketLink || null,
       event.createdAt,
-      event.updatedAt,
-      event.istOeffentlich, // NEU!
+      event.createdBy,
+      event.approvedAt || null,
+      event.approvedBy || null,
     ]);
 
     return event;
-  }
+  };
 
-  async delete(id: string): Promise<void> {
-    await this.db.query("DELETE FROM events WHERE id = ?", [id]);
-  }
-}
+  const deleteEvent = async (id: string): Promise<void> => {
+    await db.query("DELETE FROM events WHERE id = ?", [id]);
+  };
+
+  return {
+    findAll,
+    findById,
+    save,
+    delete: deleteEvent,
+  };
+};

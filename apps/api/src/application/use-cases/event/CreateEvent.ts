@@ -1,5 +1,5 @@
-import { IEventRepository } from '@/domain/repositories/IEventRepository';
-import { Event } from '@/domain/entities/Event';
+import type { IEventRepository } from '@/domain/repositories/IEventRepository';
+import type { Event } from '@/domain/entities/Event';
 
 export class CreateEventUseCase {
   constructor(private eventRepository: IEventRepository) {}

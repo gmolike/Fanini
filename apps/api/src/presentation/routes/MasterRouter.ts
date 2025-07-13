@@ -13,11 +13,12 @@ import { StatsPublicRouter } from "./public/StatsPublicRouter";
 // Protected Routers
 import { AuthRouter } from "./auth/AuthRouter";
 import { EventRouter } from "./event/EventRouter";
+import { InternalEventRouter } from "./event/InternalEventRouter"; // NEU
 import { MemberRouter } from "./member/MemberRouter";
 import { DocumentRouter } from "./document/DocumentRouter";
 
 export class MasterRouter {
-  private routers: BaseRouter[] = [];
+  private readonly routers: BaseRouter[] = [];
 
   constructor(container: Container) {
     // Initialize all routers
@@ -33,6 +34,7 @@ export class MasterRouter {
       // Protected routes
       new AuthRouter(container),
       new EventRouter(container),
+      new InternalEventRouter(container), // NEU
       new MemberRouter(container),
       new DocumentRouter(container),
     ];
@@ -44,9 +46,8 @@ export class MasterRouter {
       if (response) return response;
     }
 
-    return new Response(
-      JSON.stringify({ error: "Route not found" }),
-      { status: 404 }
-    );
+    return new Response(JSON.stringify({ error: "Route not found" }), {
+      status: 404,
+    });
   }
 }

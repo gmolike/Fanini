@@ -10,7 +10,7 @@ import {
   registerStatsSlice,
   registerCreatorSlice,
   registerNewsletterSlice,
-  registerOrganizationSlice,
+  registerInternalEventSlice, // NEU
 } from "./slices";
 
 export class Container {
@@ -62,7 +62,7 @@ export function setupContainer(): Container {
   registerStatsSlice(container);
   registerCreatorSlice(container);
   registerNewsletterSlice(container);
-  registerOrganizationSlice(container);
+  registerInternalEventSlice(container);
 
   return container;
 }

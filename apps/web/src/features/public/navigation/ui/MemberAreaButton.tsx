@@ -12,7 +12,7 @@ export const MemberAreaButton = () => {
         className="border-0 bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] text-white hover:opacity-90"
         asChild
       >
-        <Link to="/intern/login">
+        <Link to="/login">
           <Users className="mr-2 h-4 w-4" />
           Mitgliederbereich
         </Link>

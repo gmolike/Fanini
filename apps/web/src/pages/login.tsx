@@ -1,4 +1,4 @@
-// src/pages/intern/login.tsx
+// src/pages/login.tsx
 import { useState } from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/shared/shadcn/select';
 
-export const Route = createFileRoute('/intern/login')({
+export const Route = createFileRoute('/login')({
   component: LoginPage,
 });
 

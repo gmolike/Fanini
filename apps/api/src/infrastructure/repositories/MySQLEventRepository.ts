@@ -432,6 +432,25 @@ export const createMySQLEventRepository = (
     }));
   };
 
+  // Task Integration
+  const getTaskCount = async (eventId: string): Promise<number> => {
+    const result = await db.query<any[]>(
+      "SELECT COUNT(*) as count FROM tasks WHERE context_type = ? AND context_id = ? AND geloescht = FALSE",
+      ["event", eventId],
+    );
+    return Number(result[0]?.count) || 0;
+  };
+
+  const getCompletedTaskCount = async (eventId: string): Promise<number> => {
+    const result = await db.query<any[]>(
+      `SELECT COUNT(*) as count FROM tasks
+       WHERE context_type = ? AND context_id = ?
+       AND status = ? AND geloescht = FALSE`,
+      ["event", eventId, "erledigt"],
+    );
+    return Number(result[0]?.count) || 0;
+  };
+
   // getTaskStats - Aufgaben-Statistiken
   const getTaskStats = async (
     eventId: string,
@@ -439,19 +458,12 @@ export const createMySQLEventRepository = (
     total: number;
     completed: number;
   }> => {
-    const result = await db.query<any[]>(
-      `SELECT
-        COUNT(*) as total,
-        SUM(CASE WHEN status = 'erledigt' THEN 1 ELSE 0 END) as completed
-       FROM aufgaben
-       WHERE event_id = ?`,
-      [eventId],
-    );
+    const [total, completed] = await Promise.all([
+      getTaskCount(eventId),
+      getCompletedTaskCount(eventId),
+    ]);
 
-    return {
-      total: Number(result[0]?.total) || 0,
-      completed: Number(result[0]?.completed) || 0,
-    };
+    return { total, completed };
   };
 
   // getTasks - Aufgabenliste

@@ -58,6 +58,7 @@ const options = {
         name: "Protected API",
         tags: ["📅 Events", "👥 Members", "📄 Documents"],
       },
+      { name: "📋 Tasks", description: "Aufgabenverwaltung" },
     ],
     components: {
       securitySchemes: {
@@ -100,6 +101,123 @@ const options = {
             category: { type: "string" },
             fileUrl: { type: "string" },
             isPublic: { type: "boolean" },
+          },
+        },
+        Task: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            titel: { type: "string" },
+            beschreibung: { type: "string" },
+            context: {
+              type: "object",
+              properties: {
+                type: { type: "string", enum: ["event", "team", "general"] },
+                id: { type: "string", nullable: true },
+              },
+            },
+            verantwortlichId: { type: "string", nullable: true },
+            zugewiesenAn: {
+              type: "array",
+              items: { type: "string" },
+            },
+            status: {
+              type: "string",
+              enum: [
+                "offen",
+                "in_bearbeitung",
+                "review",
+                "erledigt",
+                "blockiert",
+              ],
+            },
+            prioritaet: {
+              type: "string",
+              enum: ["niedrig", "mittel", "hoch", "kritisch"],
+            },
+            frist: { type: "string", format: "date-time", nullable: true },
+            materialien: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  menge: { type: "number" },
+                  einheit: { type: "string" },
+                  beschreibung: { type: "string" },
+                  besorgt: { type: "boolean" },
+                },
+              },
+            },
+            istStandardaufgabe: { type: "boolean" },
+            kategorie: { type: "string", nullable: true },
+          },
+        },
+        CreateTask: {
+          type: "object",
+          required: ["titel", "context_type"],
+          properties: {
+            titel: { type: "string", minLength: 3, maxLength: 255 },
+            beschreibung: { type: "string" },
+            context_type: {
+              type: "string",
+              enum: ["event", "team", "general"],
+            },
+            context_id: { type: "string" },
+            verantwortlich_id: { type: "string" },
+            prioritaet: {
+              type: "string",
+              enum: ["niedrig", "mittel", "hoch", "kritisch"],
+            },
+            frist: { type: "string", format: "date-time" },
+            materialien: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  menge: { type: "number" },
+                  einheit: { type: "string" },
+                  beschreibung: { type: "string" },
+                },
+              },
+            },
+            abhaengig_von: {
+              type: "array",
+              items: { type: "string" },
+            },
+            kategorie: { type: "string" },
+          },
+        },
+        UpdateTask: {
+          type: "object",
+          properties: {
+            titel: { type: "string", minLength: 3, maxLength: 255 },
+            beschreibung: { type: "string" },
+            verantwortlich_id: { type: "string" },
+            prioritaet: {
+              type: "string",
+              enum: ["niedrig", "mittel", "hoch", "kritisch"],
+            },
+            frist: { type: "string", format: "date-time" },
+            materialien: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  menge: { type: "number" },
+                  einheit: { type: "string" },
+                  beschreibung: { type: "string" },
+                  besorgt: { type: "boolean" },
+                },
+              },
+            },
+            abhaengig_von: {
+              type: "array",
+              items: { type: "string" },
+            },
+            kategorie: { type: "string" },
           },
         },
       },

@@ -1,11 +1,11 @@
-// apps/api/src/application/use-cases/UploadEventPhotosUseCase.ts
-import { GoogleDriveService } from '@/infrastructure/services/GoogleDriveService';
-import { IEventRepository } from '@/domain/repositories/IEventRepository';
+import { GoogleDriveService } from "@/infrastructure/services/GoogleDriveService";
+import { IEventRepository } from "@/domain/repositories/IEventRepository";
+import { canEventBeEditedBy } from "@/domain/entities/Event";
 
 export class UploadEventPhotosUseCase {
   constructor(
-    private googleDriveService: GoogleDriveService,
-    private eventRepository: IEventRepository
+    private readonly googleDriveService: GoogleDriveService,
+    private readonly eventRepository: IEventRepository,
   ) {}
 
   async execute(params: {
@@ -16,26 +16,28 @@ export class UploadEventPhotosUseCase {
       buffer: Buffer;
     }>;
     userId: string;
-  }): Promise<Array<{
-    fileId: string;
-    url: string;
-    thumbnailUrl?: string;
-  }>> {
+  }): Promise<
+    Array<{
+      fileId: string;
+      url: string;
+      thumbnailUrl?: string;
+    }>
+  > {
     // Get event
     const event = await this.eventRepository.findById(params.eventId);
     if (!event) {
-      throw new Error('Event not found');
+      throw new Error("Event not found");
     }
 
-    // Check permissions
-    if (!event.canBeEditedBy(params.userId)) {
-      throw new Error('Unauthorized to upload photos for this event');
+    // Check permissions - verwende die importierte Funktion
+    if (!canEventBeEditedBy(event, params.userId)) {
+      throw new Error("Unauthorized to upload photos for this event");
     }
 
     // Create event folder structure
     const eventFolders = await this.googleDriveService.createEventFolder(
       event.date,
-      event.title
+      event.title,
     );
 
     // Upload photos
@@ -44,7 +46,6 @@ export class UploadEventPhotosUseCase {
       try {
         // Generate unique filename with timestamp
         const timestamp = Date.now();
-        const fileExt = photo.fileName.split('.').pop();
         const uniqueFileName = `${timestamp}_${photo.fileName}`;
 
         const result = await this.googleDriveService.uploadFile({
@@ -52,13 +53,13 @@ export class UploadEventPhotosUseCase {
           mimeType: photo.mimeType,
           fileContent: photo.buffer,
           folderId: eventFolders.subFolders.fotos,
-          isPublic: event.istOeffentlich // Use event's public status
+          isPublic: event.isPublic, // Verwende isPublic statt istOeffentlich
         });
 
         results.push({
           fileId: result.fileId,
           url: result.downloadLink,
-          thumbnailUrl: this.generateThumbnailUrl(result.fileId)
+          thumbnailUrl: this.generateThumbnailUrl(result.fileId),
         });
       } catch (error) {
         console.error(`Failed to upload photo ${photo.fileName}:`, error);
@@ -67,7 +68,7 @@ export class UploadEventPhotosUseCase {
     }
 
     if (results.length === 0) {
-      throw new Error('Failed to upload any photos');
+      throw new Error("Failed to upload any photos");
     }
 
     return results;

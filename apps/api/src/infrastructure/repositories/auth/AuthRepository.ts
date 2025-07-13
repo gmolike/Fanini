@@ -1,4 +1,3 @@
-// src/infrastructure/repositories/auth/AuthRepository.ts
 import { MySQLConnection } from "../MySQLConnection";
 
 export interface IAuthRepository {
@@ -8,12 +7,12 @@ export interface IAuthRepository {
 }
 
 export class AuthRepository implements IAuthRepository {
-  constructor(private db: MySQLConnection) {}
+  constructor(private readonly db: MySQLConnection) {}
 
   async findUserByEmail(email: string): Promise<any> {
     const rows = await this.db.query<any[]>(
       "SELECT * FROM mitglieder WHERE email = ?",
-      [email]
+      [email],
     );
     return rows[0] || null;
   }

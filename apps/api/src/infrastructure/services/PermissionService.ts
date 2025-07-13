@@ -1,6 +1,7 @@
 // apps/api/src/infrastructure/services/PermissionService.ts
 import { IPermissionService } from "@/domain/services/IPermissionService";
 import { Event, EventStatus } from "@/domain/entities/Event";
+import { Task, TaskStatus } from "@/domain/entities/Task";
 
 export class PermissionService implements IPermissionService {
   async canCreateEvent(userRole: string): Promise<boolean> {
@@ -135,6 +136,169 @@ export class PermissionService implements IPermissionService {
 
     // Team Event sieht eigene Events
     if (userRole === "TEAM_EVENT" && userId === event.createdBy) {
+      return true;
+    }
+
+    return false;
+  }
+  // Task Permissions
+  async canCreateTask(
+    userRole: string,
+    contextType: "event" | "team" | "general",
+  ): Promise<boolean> {
+    const permissions: Record<string, string[]> = {
+      event: ["ADMIN", "VORSTAND", "BEIRAT", "TEAM_EVENT"],
+      team: [
+        "ADMIN",
+        "VORSTAND",
+        "BEIRAT",
+        "TEAM_EVENT",
+        "TEAM_MEDIEN",
+        "TEAM_TECHNIK",
+        "TEAM_VEREIN",
+      ],
+      general: ["ADMIN", "VORSTAND", "BEIRAT"],
+    };
+
+    return permissions[contextType]?.includes(userRole) || false;
+  }
+
+  async canEditTask(
+    userRole: string,
+    userId: string,
+    task: Task,
+  ): Promise<boolean> {
+    // Admin und Vorstand können alles bearbeiten
+    if (["ADMIN", "VORSTAND"].includes(userRole)) {
+      return true;
+    }
+
+    // Beirat kann alle offenen Tasks bearbeiten
+    if (userRole === "BEIRAT" && task.status !== "erledigt") {
+      return true;
+    }
+
+    // Verantwortlicher und Zugewiesene können ihre Tasks bearbeiten
+    if (
+      task.verantwortlichId === userId ||
+      task.zugewiesenAn.includes(userId)
+    ) {
+      return task.status !== "erledigt";
+    }
+
+    // Ersteller kann eigene Tasks bearbeiten wenn noch offen
+    if (task.erstelltVon === userId && task.status === "offen") {
+      return true;
+    }
+
+    return false;
+  }
+
+  async canDeleteTask(
+    userRole: string,
+    userId: string,
+    task: Task,
+  ): Promise<boolean> {
+    if (userRole === "ADMIN") {
+      return true;
+    }
+
+    // Nur offene Tasks können gelöscht werden
+    if (task.status !== "offen") {
+      return false;
+    }
+
+    // Vorstand und Beirat können alle offenen Tasks löschen
+    if (["VORSTAND", "BEIRAT"].includes(userRole)) {
+      return true;
+    }
+
+    // Ersteller kann eigene Tasks löschen
+    return task.erstelltVon === userId;
+  }
+
+  async canChangeTaskStatus(
+    userRole: string,
+    userId: string,
+    task: Task,
+    newStatus: TaskStatus,
+  ): Promise<boolean> {
+    // Admin kann alle Status-Änderungen durchführen
+    if (userRole === "ADMIN") {
+      return true;
+    }
+
+    // Erledigung nur durch Zugewiesene oder Verantwortliche
+    if (newStatus === "erledigt") {
+      return (
+        task.verantwortlichId === userId || task.zugewiesenAn.includes(userId)
+      );
+    }
+
+    // Blockierung durch Vorstand, Beirat oder Beteiligte
+    if (newStatus === "blockiert") {
+      return (
+        ["VORSTAND", "BEIRAT"].includes(userRole) ||
+        task.verantwortlichId === userId ||
+        task.zugewiesenAn.includes(userId)
+      );
+    }
+
+    // Andere Status-Änderungen durch Beteiligte
+    return (
+      task.verantwortlichId === userId ||
+      task.zugewiesenAn.includes(userId) ||
+      task.erstelltVon === userId
+    );
+  }
+
+  async canAssignTask(
+    userRole: string,
+    userId: string,
+    task: Task,
+  ): Promise<boolean> {
+    // Admin, Vorstand und Beirat können immer zuweisen
+    if (["ADMIN", "VORSTAND", "BEIRAT"].includes(userRole)) {
+      return true;
+    }
+
+    // Verantwortlicher kann zuweisen
+    if (task.verantwortlichId === userId) {
+      return true;
+    }
+
+    // Team-Leiter können Team-Tasks zuweisen
+    if (task.context.type === "team" && userRole.startsWith("TEAM_")) {
+      // Hier würde geprüft ob die Person das richtige Team leitet
+      return true;
+    }
+
+    return false;
+  }
+
+  canViewTask(userRole: string, userId: string, task: Task): boolean {
+    // Admin, Vorstand und Beirat sehen alles
+    if (["ADMIN", "VORSTAND", "BEIRAT"].includes(userRole)) {
+      return true;
+    }
+
+    // Beteiligte sehen ihre Tasks
+    if (
+      task.verantwortlichId === userId ||
+      task.zugewiesenAn.includes(userId) ||
+      task.erstelltVon === userId
+    ) {
+      return true;
+    }
+
+    // Team-Mitglieder sehen Team-Tasks
+    if (task.context.type === "team" && userRole.startsWith("TEAM_")) {
+      // Hier würde geprüft ob die Person im richtigen Team ist
+      return true;
+    }
+
+    // General Tasks sind für alle Mitglieder sichtbar
+    if (task.context.type === "general") {
       return true;
     }
 

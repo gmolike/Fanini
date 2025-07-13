@@ -7,3 +7,4 @@ export { NewsletterController } from "./newsletter/NewsletterController";
 export { OrganizationController } from "./organization/OrganizationController";
 export { StatsController } from "./stats/StatsController";
 export { InternalEventController } from "./event/InternalEventController";
+export { TaskController } from "./task/TaskController";

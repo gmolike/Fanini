@@ -13,9 +13,10 @@ import { StatsPublicRouter } from "./public/StatsPublicRouter";
 // Protected Routers
 import { AuthRouter } from "./auth/AuthRouter";
 import { EventRouter } from "./event/EventRouter";
-import { InternalEventRouter } from "./event/InternalEventRouter"; // NEU
+import { InternalEventRouter } from "./event/InternalEventRouter";
 import { MemberRouter } from "./member/MemberRouter";
 import { DocumentRouter } from "./document/DocumentRouter";
+import { TaskRouter } from "./task/TaskRouter";
 
 export class MasterRouter {
   private readonly routers: BaseRouter[] = [];
@@ -34,9 +35,10 @@ export class MasterRouter {
       // Protected routes
       new AuthRouter(container),
       new EventRouter(container),
-      new InternalEventRouter(container), // NEU
+      new InternalEventRouter(container), 
       new MemberRouter(container),
       new DocumentRouter(container),
+      new TaskRouter(container),
     ];
   }
 

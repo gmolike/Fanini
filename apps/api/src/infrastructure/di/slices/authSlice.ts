@@ -1,4 +1,3 @@
-// src/infrastructure/di/slices/authSlice.ts
 import { Container } from "../container";
 import {
   LoginUseCase,

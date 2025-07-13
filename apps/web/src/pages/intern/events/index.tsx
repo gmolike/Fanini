@@ -1,19 +1,10 @@
+// src/pages/intern/events/index.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { Calendar, Clock, Filter, MapPin, Plus,Users } from 'lucide-react';
+import { Calendar, Clock, Filter, MapPin, Plus, Users } from 'lucide-react';
 
-import { Badge } from '@/shared/shadcn/badge';
-import { Button } from '@/shared/shadcn/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn/card';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/shadcn/dropdown-menu';
+import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/shared/shadcn';
 
-export const Route = createFileRoute('/intern/events')({
+export const Route = createFileRoute('/intern/events/')({
   component: EventsPage,
 });
 

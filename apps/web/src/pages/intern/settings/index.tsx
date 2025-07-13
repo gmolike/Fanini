@@ -1,9 +1,9 @@
-// frontend/src/routes/app/settings.tsx
+// src/pages/intern/settings/index.tsx
 import { createFileRoute } from '@tanstack/react-router';
 
 import { SettingsPanel } from '@/widgets/shared/settings';
 
-export const Route = createFileRoute('/intern/settings')({
+export const Route = createFileRoute('/intern/settings/')({
   component: SettingsPage,
 });
 

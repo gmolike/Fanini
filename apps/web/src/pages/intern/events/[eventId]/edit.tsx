@@ -5,7 +5,7 @@ import { Save, X } from 'lucide-react';
 import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
-export const Route = createFileRoute('/intern/events/$eventId/edit')({
+export const Route = createFileRoute('/intern/events/[eventId]/edit')({
   component: EditEventPage,
 });
 

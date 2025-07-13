@@ -2,15 +2,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Calendar as CalendarIcon, Grid3x3, List } from 'lucide-react';
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/shadcn';
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/events/calendar')({

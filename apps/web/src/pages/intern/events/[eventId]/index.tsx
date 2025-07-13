@@ -5,7 +5,7 @@ import { Calendar, Clock, Edit, MapPin, Users } from 'lucide-react';
 import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
-export const Route = createFileRoute('/intern/events/$eventId/')({
+export const Route = createFileRoute('/intern/events/[eventId]/')({
   component: EventDetailPage,
 });
 

@@ -1,4 +1,10 @@
-export const TechnikTeamRoute = createFileRoute('/intern/teams/technik')({
+// apps/web/src/pages/intern/teams/technik.tsx
+import { createFileRoute } from '@tanstack/react-router';
+import { Laptop } from 'lucide-react';
+
+import { TeamPage } from '../teams/index';
+
+export const Route = createFileRoute('/intern/teams/technik')({
   component: () => (
     <TeamPage
       teamId="technik"

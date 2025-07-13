@@ -1,4 +1,7 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 // src/pages/intern/_layout.tsx
+import { useEffect, useState } from 'react';
+
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   Bell,
@@ -13,10 +16,9 @@ import {
   Shield,
   Users,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
+import { Badge } from '@/shared/shadcn/badge';
 import { Button } from '@/shared/shadcn/button';
-import { ScrollArea } from '@/shared/shadcn/scroll-area';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,9 +27,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/shadcn/dropdown-menu';
-import { Badge } from '@/shared/shadcn/badge';
+import { ScrollArea } from '@/shared/shadcn/scroll-area';
 
-export const Route = createFileRoute('/intern')({
+export const Route = createFileRoute('/intern/_layout')({
   component: InternLayout,
 });
 
@@ -58,7 +60,7 @@ function InternLayout() {
   useEffect(() => {
     const authData = localStorage.getItem('fanini-auth');
     if (!authData) {
-      navigate({ to: '/intern/login' });
+      void navigate({ to: '/intern/login' });
       return;
     }
 
@@ -66,18 +68,18 @@ function InternLayout() {
       const parsed = JSON.parse(authData);
       if (new Date(parsed.expiresAt) < new Date()) {
         localStorage.removeItem('fanini-auth');
-        navigate({ to: '/intern/login' });
+        void navigate({ to: '/intern/login' });
         return;
       }
       setUser(parsed.user);
     } catch {
-      navigate({ to: '/intern/login' });
+      void navigate({ to: '/intern/login' });
     }
   }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem('fanini-auth');
-    navigate({ to: '/intern/login' });
+    void navigate({ to: '/intern/login' });
   };
 
   // Navigation items with role-based visibility
@@ -106,7 +108,7 @@ function InternLayout() {
   // Filter navigation based on user role
   const filteredNav = navigation.filter(item => {
     if (!item.requiredRole) return true;
-    return item.requiredRole.includes(user?.roleType || '');
+    return item.requiredRole.includes(user?.roleType ?? '');
   });
 
   // Don't render layout on login page
@@ -151,7 +153,7 @@ function InternLayout() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">{user.name}</p>
-              <Badge variant="outline" className={`text-xs ${roleColors[user.roleType]}`}>
+              <Badge variant="outline" className={'${roleColors[user.roleType]} text-xs'}>
                 {user.role}
               </Badge>
             </div>
@@ -179,11 +181,11 @@ function InternLayout() {
                 >
                   <Icon className="h-5 w-5" />
                   <span className="flex-1">{item.name}</span>
-                  {item.badge && (
+                  {item.badge ? (
                     <Badge variant="secondary" className="ml-auto h-5 px-1.5 text-xs">
                       {item.badge}
                     </Badge>
-                  )}
+                  ) : null}
                 </Link>
               );
             })}
@@ -211,7 +213,7 @@ function InternLayout() {
             {filteredNav.find(item => {
               if (router.location.pathname === '/intern') return item.href === '/intern';
               return item.href !== '/intern' && router.location.pathname.startsWith(item.href);
-            })?.name || 'Mitgliederbereich'}
+            })?.name ?? 'Mitgliederbereich'}
           </h1>
 
           <div className="flex items-center gap-4">

@@ -13,7 +13,7 @@ import {
 } from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
-export const Route = createFileRoute('/intern/events/$eventId/tasks')({
+export const Route = createFileRoute('/intern/events/[eventId]/tasks')({
   component: EventTasksPage,
 });
 

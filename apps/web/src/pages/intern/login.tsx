@@ -104,7 +104,7 @@ function LoginPage() {
     localStorage.setItem('fanini-auth', JSON.stringify(authData));
 
     // Navigate to dashboard
-    navigate({ to: '/intern' });
+    void navigate({ to: '/intern' });
   };
 
   return (

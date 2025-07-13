@@ -1,6 +1,6 @@
 // src/pages/intern/settings/teams.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { Shield, UserPlus, Users, Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon,Shield, UserPlus, Users } from 'lucide-react';
 
 import {
   Badge,

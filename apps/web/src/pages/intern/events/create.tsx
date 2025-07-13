@@ -1,16 +1,8 @@
 // src/pages/intern/events/create.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { ArrowRight, Calendar, FileText, MapPin, Users } from 'lucide-react';
+import { ArrowRight, Calendar, FileText, MapPin } from 'lucide-react';
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/shadcn';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/events/create')({

@@ -31,7 +31,7 @@ function DashboardPage() {
         {/* Welcome Section */}
         <div className="rounded-xl bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] p-8 text-white">
           <h1 className="mb-2 text-3xl font-bold">
-            Willkommen zurück, {user?.name || 'Mitglied'}!
+            Willkommen zurück, {Boolean(user?.name) || 'Mitglied'}!
           </h1>
           <p className="opacity-90">
             Hier ist deine persönliche Übersicht mit allen wichtigen Informationen.

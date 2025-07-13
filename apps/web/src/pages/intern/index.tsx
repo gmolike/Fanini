@@ -232,7 +232,7 @@ function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm">
-                    <span className="font-medium">Sarah Schmidt</span> hat dich zu{' '}
+                    <span className="font-medium">Sarah Schmidt</span> hat dich zu{" "}
                     <span className="font-medium">Team Event</span> hinzugefügt
                   </p>
                   <p className="text-muted-foreground text-xs">vor 2 Stunden</p>
@@ -244,7 +244,7 @@ function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm">
-                    <span className="font-medium">Tom Krause</span> hat die Aufgabe{' '}
+                    <span className="font-medium">Tom Krause</span> hat die Aufgabe{" "}
                     <span className="font-medium">"Location buchen"</span> abgeschlossen
                   </p>
                   <p className="text-muted-foreground text-xs">vor 4 Stunden</p>

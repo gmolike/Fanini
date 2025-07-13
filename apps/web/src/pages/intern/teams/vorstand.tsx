@@ -2,7 +2,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { Crown } from 'lucide-react';
 
-import { TeamPage } from '../teams/index';
+import { TeamPage } from './index';
 
 export const Route = createFileRoute('/intern/teams/vorstand')({
   component: () => (

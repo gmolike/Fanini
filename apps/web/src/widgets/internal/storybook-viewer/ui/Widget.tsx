@@ -12,8 +12,7 @@ import { Container, GlassCard } from '@/shared/ui';
  */
 export const StorybookViewer = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const storybookUrl = '/storybook-static/index.html';
-
+  const storybookUrl = import.meta.env.DEV ? 'http://localhost:6006' : '/storybook/index.html';
   return (
     <Container className={isFullscreen ? 'bg-background fixed inset-0 z-50' : 'py-8'}>
       <motion.div

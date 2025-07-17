@@ -121,6 +121,11 @@ export class MySQLAuthRepository implements IAuthRepository {
     );
   }
 
+  /**
+   * Entfernt eine Rolle von einem User
+   * @param userId - Die User ID
+   * @param roleId - Die Rollen ID
+   */
   async removeRole(userId: string, roleId: string): Promise<void> {
     await this.db.query(
       "DELETE FROM user_roles WHERE user_id = ? AND role_id = ?",

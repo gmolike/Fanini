@@ -1,17 +1,25 @@
-// infrastructure/di/slices/authSlice.ts
-import { Container } from "../container";
+// apps/api/src/infrastructure/di/slices/authSlice.ts
+import type { Container } from "../container";
 import { MySQLAuthRepository } from "@/infrastructure/repositories/MySQLAuthRepository";
 import { AuthController } from "@/presentation/controllers";
 import { AuthService } from "@/application/services/AuthService";
+import type {
+  LoginUseCase,
+  RefreshTokenUseCase,
+} from "@/application/use-cases/auth";
 
-export const registerAuthSlice = (container: Container) => {
+/**
+ * Registriert alle Auth-bezogenen Services
+ * @param container - DI Container
+ */
+export const registerAuthSlice = (container: Container): void => {
   // Repository
   container.register("AuthRepository", () => {
     const db = container.get("Database");
     return new MySQLAuthRepository(db);
   });
 
-  // Auth Service (NEU - wird von Use Cases verwendet)
+  // Auth Service
   container.register("AuthService", () => {
     const authRepo = container.get("AuthRepository");
 
@@ -27,26 +35,29 @@ export const registerAuthSlice = (container: Container) => {
   });
 
   // Use Cases
-  container.register("LoginUseCase", () => {
+  container.register("LoginUseCase", (): LoginUseCase => {
     const authService = container.get("AuthService");
     return {
-      execute: (params: { email: string; password: string }) =>
-        authService.login(params.email, params.password),
+      execute: (params) => authService.login(params.email, params.password),
     };
   });
 
-  container.register("RefreshTokenUseCase", () => {
+  container.register("RefreshTokenUseCase", (): RefreshTokenUseCase => {
     const authService = container.get("AuthService");
     return {
-      execute: (params: { refreshToken: string }) =>
-        authService.refreshToken(params.refreshToken),
+      execute: (params) => authService.refreshToken(params.refreshToken),
     };
   });
 
-  // Controller
+  // Controller mit AuthRepository
   container.register("AuthController", () => {
     const loginUseCase = container.get("LoginUseCase");
     const refreshTokenUseCase = container.get("RefreshTokenUseCase");
-    return new AuthController(loginUseCase, refreshTokenUseCase);
+    const authRepository = container.get("AuthRepository");
+    return new AuthController(
+      loginUseCase,
+      refreshTokenUseCase,
+      authRepository,
+    );
   });
 };

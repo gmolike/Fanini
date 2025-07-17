@@ -4,9 +4,21 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 import { randomBytes } from "crypto";
 import type { User, UserRole } from "@/domain/entities/User";
-import { IAuthRepository } from "@/domain/repositories/IAuthRepository";
+import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
 
-type LoginResult = {
+/**
+ * EasyVerein Konfiguration
+ */
+export type EasyVereinConfig = {
+  clientId: string;
+  clientSecret: string;
+  apiUrl: string;
+};
+
+/**
+ * Login-Ergebnis Type
+ */
+export type LoginResult = {
   success: boolean;
   accessToken?: string;
   refreshToken?: string;
@@ -20,12 +32,28 @@ type LoginResult = {
   error?: string;
 };
 
-type EasyVereinConfig = {
-  clientId: string;
-  clientSecret: string;
-  apiUrl: string;
+/**
+ * Token-Refresh-Ergebnis Type
+ */
+export type RefreshResult = {
+  success: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  error?: string;
 };
 
+/**
+ * Logout-Ergebnis Type
+ */
+export type LogoutResult = {
+  success: boolean;
+  error?: string;
+};
+
+/**
+ * Auth Service
+ * @description Behandelt Authentifizierung und Autorisierung
+ */
 export class AuthService {
   constructor(
     private authRepo: IAuthRepository,

@@ -4,6 +4,8 @@ import type {
   LoginUseCase,
   RefreshTokenUseCase,
 } from "@/application/use-cases/auth";
+import { AuthService } from "@/application/services/AuthService";
+import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -34,6 +36,7 @@ export class AuthController {
   constructor(
     private loginUseCase: LoginUseCase,
     private refreshTokenUseCase: RefreshTokenUseCase,
+    private authRepository?: IAuthRepository,
   ) {}
 
   /**
@@ -365,33 +368,26 @@ export class AuthController {
         // Body ist optional, Fehler ignorieren
       }
 
-      // AuthService für Logout nutzen
-      const authService =
-        new (require("@/application/services/AuthService").AuthService)(
-          this.loginUseCase.authRepository,
-          {
-            clientId: process.env.EASYVEREIN_CLIENT_ID!,
-            clientSecret: process.env.EASYVEREIN_CLIENT_SECRET!,
-            apiUrl:
-              process.env.EASYVEREIN_API_URL || "https://api.easyverein.com",
-          },
-          process.env.JWT_SECRET || "fanini-jwt-secret-2025",
-        );
+      // Wenn AuthRepository verfügbar ist, nutze es direkt
+      if (this.authRepository) {
+        if (refreshToken) {
+          await this.authRepository.revokeRefreshToken(refreshToken, userId);
+        } else {
+          await this.authRepository.revokeAllUserRefreshTokens(userId, userId);
+        }
 
-      const result = await authService.logout(userId, refreshToken);
-
-      if (!result.success) {
-        return Response.json(
-          { success: false, error: result.error || "Logout failed" },
-          { status: 500 },
-        );
+        return Response.json({
+          success: true,
+          message: refreshToken
+            ? "Token successfully revoked"
+            : "Logged out from all devices",
+        });
       }
 
+      // Fallback ohne Repository
       return Response.json({
         success: true,
-        message: refreshToken
-          ? "Token successfully revoked"
-          : "Logged out from all devices",
+        message: "Logged out (client-side only)",
       });
     } catch (error) {
       console.error("Logout error:", error);

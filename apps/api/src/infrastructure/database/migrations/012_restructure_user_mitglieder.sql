@@ -1,20 +1,133 @@
 -- apps/api/src/infrastructure/database/migrations/012_restructure_user_mitglieder.sql
 
--- Schritt 1: Neue Spalten zu users hinzufügen (falls noch nicht vorhanden)
-ALTER TABLE users
-  ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'MITGLIED' COMMENT 'Primary role for quick checks',
-  ADD COLUMN IF NOT EXISTS created_by VARCHAR(36),
-  ADD COLUMN IF NOT EXISTS metadata JSON COMMENT 'Zusätzliche flexible Daten',
-  ADD INDEX IF NOT EXISTS idx_auth_source (auth_source),
-  ADD INDEX IF NOT EXISTS idx_role (role);
+-- Schritt 1: Neue Spalten zu users hinzufügen (mit Fehlerbehandlung für existierende Spalten)
+-- Prüfe ob Spalte 'role' existiert
+SELECT COUNT(*) INTO @col_exists
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'users'
+AND COLUMN_NAME = 'role';
+
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE users ADD COLUMN role VARCHAR(50) DEFAULT ''MITGLIED'' COMMENT ''Primary role for quick checks''',
+    'SELECT ''Column role already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Prüfe ob Spalte 'created_by' existiert
+SELECT COUNT(*) INTO @col_exists
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'users'
+AND COLUMN_NAME = 'created_by';
+
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE users ADD COLUMN created_by VARCHAR(36)',
+    'SELECT ''Column created_by already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Prüfe ob Spalte 'metadata' existiert
+SELECT COUNT(*) INTO @col_exists
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'users'
+AND COLUMN_NAME = 'metadata';
+
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE users ADD COLUMN metadata JSON COMMENT ''Zusätzliche flexible Daten''',
+    'SELECT ''Column metadata already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Indices hinzufügen (mit Fehlerbehandlung)
+-- Index idx_auth_source
+SELECT COUNT(*) INTO @idx_exists
+FROM information_schema.STATISTICS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'users'
+AND INDEX_NAME = 'idx_auth_source';
+
+SET @sql = IF(@idx_exists = 0,
+    'ALTER TABLE users ADD INDEX idx_auth_source (auth_source)',
+    'SELECT ''Index idx_auth_source already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Index idx_role
+SELECT COUNT(*) INTO @idx_exists
+FROM information_schema.STATISTICS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'users'
+AND INDEX_NAME = 'idx_role';
+
+SET @sql = IF(@idx_exists = 0,
+    'ALTER TABLE users ADD INDEX idx_role (role)',
+    'SELECT ''Index idx_role already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- Schritt 2: Mitglieder Tabelle erweitern
-ALTER TABLE mitglieder
-  ADD COLUMN IF NOT EXISTS user_id VARCHAR(36) UNIQUE COMMENT 'Verknüpfung zu users Tabelle',
-  ADD COLUMN IF NOT EXISTS mitgliedsnummer VARCHAR(50),
-  ADD CONSTRAINT IF NOT EXISTS fk_mitglieder_user
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  ADD INDEX IF NOT EXISTS idx_user_id (user_id);
+-- Prüfe ob Spalte 'user_id' existiert
+SELECT COUNT(*) INTO @col_exists
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'mitglieder'
+AND COLUMN_NAME = 'user_id';
+
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE mitglieder ADD COLUMN user_id VARCHAR(36) UNIQUE COMMENT ''Verknüpfung zu users Tabelle''',
+    'SELECT ''Column user_id already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Prüfe ob Spalte 'mitgliedsnummer' existiert
+SELECT COUNT(*) INTO @col_exists
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'mitglieder'
+AND COLUMN_NAME = 'mitgliedsnummer';
+
+SET @sql = IF(@col_exists = 0,
+    'ALTER TABLE mitglieder ADD COLUMN mitgliedsnummer VARCHAR(50)',
+    'SELECT ''Column mitgliedsnummer already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Foreign Key Constraint (mit Fehlerbehandlung)
+SELECT COUNT(*) INTO @fk_exists
+FROM information_schema.TABLE_CONSTRAINTS
+WHERE CONSTRAINT_SCHEMA = DATABASE()
+AND TABLE_NAME = 'mitglieder'
+AND CONSTRAINT_NAME = 'fk_mitglieder_user';
+
+SET @sql = IF(@fk_exists = 0,
+    'ALTER TABLE mitglieder ADD CONSTRAINT fk_mitglieder_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE',
+    'SELECT ''Constraint fk_mitglieder_user already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Index idx_user_id
+SELECT COUNT(*) INTO @idx_exists
+FROM information_schema.STATISTICS
+WHERE TABLE_SCHEMA = DATABASE()
+AND TABLE_NAME = 'mitglieder'
+AND INDEX_NAME = 'idx_user_id';
+
+SET @sql = IF(@idx_exists = 0,
+    'ALTER TABLE mitglieder ADD INDEX idx_user_id (user_id)',
+    'SELECT ''Index idx_user_id already exists''');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- Schritt 3: Migration bestehender Mitglieder zu Users
 -- Nur ausführen wenn noch keine Verknüpfung existiert
@@ -90,7 +203,9 @@ LEFT JOIN roles r ON ur.role_id = r.id;
 -- Schritt 7: Stored Procedure für neues Mitglied
 DELIMITER $$
 
-CREATE PROCEDURE IF NOT EXISTS create_mitglied_with_user(
+DROP PROCEDURE IF EXISTS create_mitglied_with_user$$
+
+CREATE PROCEDURE create_mitglied_with_user(
   IN p_email VARCHAR(255),
   IN p_vorname VARCHAR(100),
   IN p_nachname VARCHAR(100),
@@ -140,8 +255,3 @@ BEGIN
 END$$
 
 DELIMITER ;
-
--- Schritt 8: Alte Spalten entfernen (VORSICHT! Nur nach erfolgreicher Migration)
--- Dies sollte in einer separaten Migration später ausgeführt werden
--- ALTER TABLE mitglieder DROP COLUMN email;
--- ALTER TABLE mitglieder DROP COLUMN letzter_login;

@@ -1,19 +1,8 @@
-import { IAuthRepository } from "@/infrastructure/repositories/auth/AuthRepository";
+// application/use-cases/auth/RefreshTokenUseCase.ts
+import { AuthService } from "@/application/services/AuthService";
 
-export class RefreshTokenUseCase {
-  constructor(private authRepository: IAuthRepository) {}
-
-  async execute(params: { refreshToken: string }): Promise<{
-    success: boolean;
-    token?: string;
-    refreshToken?: string;
-  }> {
-    // TODO: Implement actual refresh token logic
-    // Hier würde normalerweise die Validierung des refresh tokens stattfinden
-    return {
-      success: true,
-      token: "new-token",
-      refreshToken: "new-refresh-token",
-    };
-  }
-}
+export type RefreshTokenUseCase = {
+  execute: (params: {
+    refreshToken: string;
+  }) => ReturnType<AuthService["refreshToken"]>;
+};

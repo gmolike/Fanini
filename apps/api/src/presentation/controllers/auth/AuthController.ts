@@ -22,6 +22,10 @@ const refreshSchema = z.object({
   refreshToken: z.string(),
 });
 
+const logoutSchema = z.object({
+  refreshToken: z.string().optional(),
+});
+
 /**
  * Authentication Controller
  * @description Handles authentication and authorization
@@ -71,7 +75,7 @@ export class AuthController {
    *                 data:
    *                   type: object
    *                   properties:
-   *                     token:
+   *                     accessToken:
    *                       type: string
    *                       description: JWT Access Token
    *                     refreshToken:
@@ -88,8 +92,19 @@ export class AuthController {
    *                           type: string
    *                         nachname:
    *                           type: string
-   *                         rolle:
-   *                           type: string
+   *                         rollen:
+   *                           type: array
+   *                           items:
+   *                             type: object
+   *                             properties:
+   *                               id:
+   *                                 type: string
+   *                               name:
+   *                                 type: string
+   *                               berechtigungen:
+   *                                 type: array
+   *                                 items:
+   *                                   type: string
    *       400:
    *         description: Validierungsfehler
    *       401:
@@ -107,7 +122,7 @@ export class AuthController {
 
       if (!result.success) {
         return Response.json(
-          { success: false, error: "Invalid credentials" },
+          { success: false, error: result.error || "Invalid credentials" },
           { status: 401 },
         );
       }
@@ -115,7 +130,7 @@ export class AuthController {
       return Response.json({
         success: true,
         data: {
-          token: result.token,
+          accessToken: result.accessToken,
           refreshToken: result.refreshToken,
           user: result.user,
         },
@@ -250,7 +265,7 @@ export class AuthController {
    *                 data:
    *                   type: object
    *                   properties:
-   *                     token:
+   *                     accessToken:
    *                       type: string
    *                       description: Neuer JWT Access Token
    *                     refreshToken:
@@ -270,7 +285,7 @@ export class AuthController {
 
       if (!result.success) {
         return Response.json(
-          { success: false, error: "Invalid refresh token" },
+          { success: false, error: result.error || "Invalid refresh token" },
           { status: 401 },
         );
       }
@@ -278,7 +293,7 @@ export class AuthController {
       return Response.json({
         success: true,
         data: {
-          token: result.token,
+          accessToken: result.accessToken,
           refreshToken: result.refreshToken,
         },
       });
@@ -304,6 +319,15 @@ export class AuthController {
    *     tags: ["🔐 Auth"]
    *     security:
    *       - bearerAuth: []
+   *     requestBody:
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               refreshToken:
+   *                 type: string
+   *                 description: Optional - wenn angegeben, wird nur dieser Token widerrufen
    *     responses:
    *       200:
    *         description: Erfolgreich abgemeldet
@@ -322,12 +346,55 @@ export class AuthController {
    */
   async logout(req: Request): Promise<Response> {
     try {
-      // TODO: Invalidate refresh token in database
+      const userId = (req as any).userId;
+
+      if (!userId) {
+        return Response.json(
+          { success: false, error: "Unauthorized" },
+          { status: 401 },
+        );
+      }
+
+      // Optional: Refresh Token aus Body lesen
+      let refreshToken: string | undefined;
+      try {
+        const body = await req.json();
+        const validated = logoutSchema.parse(body);
+        refreshToken = validated.refreshToken;
+      } catch {
+        // Body ist optional, Fehler ignorieren
+      }
+
+      // AuthService für Logout nutzen
+      const authService =
+        new (require("@/application/services/AuthService").AuthService)(
+          this.loginUseCase.authRepository,
+          {
+            clientId: process.env.EASYVEREIN_CLIENT_ID!,
+            clientSecret: process.env.EASYVEREIN_CLIENT_SECRET!,
+            apiUrl:
+              process.env.EASYVEREIN_API_URL || "https://api.easyverein.com",
+          },
+          process.env.JWT_SECRET || "fanini-jwt-secret-2025",
+        );
+
+      const result = await authService.logout(userId, refreshToken);
+
+      if (!result.success) {
+        return Response.json(
+          { success: false, error: result.error || "Logout failed" },
+          { status: 500 },
+        );
+      }
+
       return Response.json({
         success: true,
-        message: "Logged out successfully",
+        message: refreshToken
+          ? "Token successfully revoked"
+          : "Logged out from all devices",
       });
     } catch (error) {
+      console.error("Logout error:", error);
       return Response.json(
         { success: false, error: "Logout failed" },
         { status: 500 },

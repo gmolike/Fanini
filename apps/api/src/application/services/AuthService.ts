@@ -2,6 +2,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import axios from "axios";
+import { randomBytes } from "crypto";
 import type { User, UserRole } from "@/domain/entities/User";
 import { IAuthRepository } from "@/domain/repositories/IAuthRepository";
 
@@ -83,13 +84,20 @@ export class AuthService {
         expiresIn: "24h",
       });
 
-      const refreshToken = jwt.sign(
-        { userId: user.id, type: "refresh" },
-        this.jwtSecret,
-        { expiresIn: "30d" },
-      );
+      // 6. Refresh Token erstellen und speichern
+      const refreshToken = this.generateRefreshToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 Tage
 
-      // 6. Login-Zeit aktualisieren
+      await this.authRepo.saveRefreshToken({
+        userId: user.id,
+        token: refreshToken,
+        expiresAt,
+        deviceInfo: "Web Browser", // TODO: Aus User-Agent extrahieren
+        ipAddress: "127.0.0.1", // TODO: Aus Request extrahieren
+      });
+
+      // 7. Login-Zeit aktualisieren
       await this.authRepo.updateLastLogin(user.id);
 
       return {
@@ -120,22 +128,32 @@ export class AuthService {
     error?: string;
   }> {
     try {
-      // Verify refresh token
-      const decoded = jwt.verify(refreshToken, this.jwtSecret) as any;
+      // 1. Refresh Token in DB suchen
+      const tokenData = await this.authRepo.findRefreshToken(refreshToken);
 
-      if (!decoded.userId || decoded.type !== "refresh") {
+      if (!tokenData) {
         return { success: false, error: "Ungültiger Refresh Token" };
       }
 
-      // Get user and roles
-      const user = await this.authRepo.findUserById(decoded.userId);
+      // 2. Prüfen ob Token abgelaufen
+      if (new Date() > tokenData.expiresAt) {
+        return { success: false, error: "Refresh Token abgelaufen" };
+      }
+
+      // 3. Prüfen ob Token widerrufen wurde
+      if (tokenData.revokedAt) {
+        return { success: false, error: "Refresh Token wurde widerrufen" };
+      }
+
+      // 4. User und Rollen laden
+      const user = await this.authRepo.findUserById(tokenData.userId);
       if (!user || !user.istAktiv) {
         return { success: false, error: "User nicht gefunden oder inaktiv" };
       }
 
       const roles = await this.authRepo.getUserRoles(user.id);
 
-      // Create new tokens
+      // 5. Neuen Access Token erstellen
       const tokenPayload = {
         userId: user.id,
         email: user.email,
@@ -148,11 +166,20 @@ export class AuthService {
         expiresIn: "24h",
       });
 
-      const newRefreshToken = jwt.sign(
-        { userId: user.id, type: "refresh" },
-        this.jwtSecret,
-        { expiresIn: "30d" },
-      );
+      // 6. Neuen Refresh Token erstellen
+      const newRefreshToken = this.generateRefreshToken();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30); // 30 Tage
+
+      // 7. Alten Token widerrufen
+      await this.authRepo.revokeRefreshToken(refreshToken, user.id);
+
+      // 8. Neuen Token speichern
+      await this.authRepo.saveRefreshToken({
+        userId: user.id,
+        token: newRefreshToken,
+        expiresAt,
+      });
 
       return {
         success: true,
@@ -162,6 +189,32 @@ export class AuthService {
     } catch (error) {
       console.error("Token refresh error:", error);
       return { success: false, error: "Token-Erneuerung fehlgeschlagen" };
+    }
+  }
+
+  /**
+   * Logout - Refresh Tokens widerrufen
+   */
+  async logout(
+    userId: string,
+    refreshToken?: string,
+  ): Promise<{
+    success: boolean;
+    error?: string;
+  }> {
+    try {
+      if (refreshToken) {
+        // Nur den spezifischen Token widerrufen
+        await this.authRepo.revokeRefreshToken(refreshToken, userId);
+      } else {
+        // Alle Tokens des Users widerrufen (Logout von allen Geräten)
+        await this.authRepo.revokeAllUserRefreshTokens(userId, userId);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error("Logout error:", error);
+      return { success: false, error: "Logout fehlgeschlagen" };
     }
   }
 
@@ -310,5 +363,12 @@ export class AuthService {
       console.error("Create local user error:", error);
       return { success: false, error: "User-Erstellung fehlgeschlagen" };
     }
+  }
+
+  /**
+   * Generiert einen sicheren Refresh Token
+   */
+  private generateRefreshToken(): string {
+    return randomBytes(32).toString("hex");
   }
 }

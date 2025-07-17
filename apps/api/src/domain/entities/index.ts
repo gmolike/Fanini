@@ -23,3 +23,4 @@ export {
 export { Settings } from "./Settings";
 export { Stats } from "./Stats";
 export { UploadLog, type UploadType, type UploadStatus } from "./UploadLog";
+export type { RoleName, User, UserRole } from "./User";

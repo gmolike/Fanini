@@ -1,16 +1,17 @@
+// infrastructure/di/slices/authSlice.ts
 import { Container } from "../container";
 import {
   LoginUseCase,
   RefreshTokenUseCase,
 } from "@/application/use-cases/auth";
-import { AuthRepository } from "@/infrastructure/repositories/auth/AuthRepository";
+import { MySQLAuthRepository } from "@/infrastructure/repositories/MySQLAuthRepository";
 import { AuthController } from "@/presentation/controllers";
 
 export const registerAuthSlice = (container: Container) => {
-  // Repository
+  // Repository mit korrektem Interface
   container.register("AuthRepository", () => {
     const db = container.get("Database");
-    return new AuthRepository(db);
+    return new MySQLAuthRepository(db);
   });
 
   // Use Cases

@@ -10,14 +10,20 @@
     "lint": "eslint src --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .next dist",
-    "db:migrate": "tsx src/infrastructure/database/migrate.ts",
-    "db:seed": "tsx src/infrastructure/database/seed.ts"
+    "db:drop": "docker exec fanini-mysql-1 mysql -u root -prootpassword -e \"DROP DATABASE IF EXISTS fanini_db; CREATE DATABASE fanini_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\"",
+    "db:migrate": "node scripts/migrate-docker.cjs",
+    "db:seed:auth": "node scripts/seed-auth-docker.cjs",
+    "db:reset": "npm run db:drop && npm run db:migrate && npm run db:seed:auth"
   },
   "dependencies": {
     "@faninitiative/shared": "workspace:*",
     "@google-cloud/local-auth": "^3.0.1",
     "@scalar/api-reference-react": "^0.7.30",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.5",
+    "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "fs": "0.0.1-security",
     "google-auth-library": "^10.1.0",

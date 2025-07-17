@@ -48,12 +48,28 @@ const convertFieldToColumn = <TData extends Record<string, unknown>>(
     onDelete?: (row: TData) => void;
   }
 ): ColumnDef<TData> => {
+  // Defaults für alle Felder außer 'actions'
+  const isActionColumn = field.id === 'actions';
+
+  const defaults = {
+    sortable: !isActionColumn, // true für alle außer actions
+    searchable: false,
+    filterable: false,
+    toggleable: true,
+    defaultVisible: true,
+  };
+
+  const fieldWithDefaults = {
+    ...defaults,
+    ...field,
+  };
+
   const baseColumn = {
     id: field.id,
-    enableSorting: field.sortable !== false,
-    enableGlobalFilter: field.searchable !== false,
-    enableColumnFilter: field.filterable ?? false,
-    header: createHeader<TData>(label, field.sortable),
+    enableSorting: fieldWithDefaults.sortable,
+    enableGlobalFilter: fieldWithDefaults.searchable,
+    enableColumnFilter: fieldWithDefaults.filterable,
+    header: createHeader<TData>(label, fieldWithDefaults.sortable),
     size: typeof field.width === 'number' ? field.width : undefined,
   };
 

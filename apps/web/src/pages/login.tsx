@@ -1,110 +1,69 @@
-// src/pages/login.tsx
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
+// apps/web/src/pages/login.tsx
+// eslint-disable-next-line simple-import-sort/imports
 import { useState } from 'react';
 
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { LogIn, Shield, Users } from 'lucide-react';
+import { AlertCircle, LogIn, Shield } from 'lucide-react';
 
-import { Button } from '@/shared/shadcn/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn/card';
-import { Checkbox } from '@/shared/shadcn/checkbox';
-import { Input } from '@/shared/shadcn/input';
-import { Label } from '@/shared/shadcn/label';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/shared/shadcn/select';
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Input,
+  Label,
+} from '@/shared/shadcn';
+import { loginWithCredentials } from '@/features/auth';
 
 export const Route = createFileRoute('/login')({
   component: LoginPage,
 });
 
-type TestUser = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  roleType: 'admin' | 'vorstand' | 'beirat' | 'team' | 'member';
-  teams?: string[];
-};
-
-const TEST_USERS: TestUser[] = [
-  {
-    id: 'admin-1',
-    name: 'Admin User',
-    email: 'admin@fanini.test',
-    role: 'Administrator',
-    roleType: 'admin',
-  },
-  {
-    id: 'vorstand-1',
-    name: 'Max Mustermann',
-    email: 'vorstand@fanini.test',
-    role: 'Vorstand',
-    roleType: 'vorstand',
-  },
-  {
-    id: 'beirat-1',
-    name: 'Sarah Schmidt',
-    email: 'beirat@fanini.test',
-    role: 'Beirat',
-    roleType: 'beirat',
-  },
-  {
-    id: 'team-event-1',
-    name: 'Tom Krause',
-    email: 'team.event@fanini.test',
-    role: 'Team Event',
-    roleType: 'team',
-    teams: ['event'],
-  },
-  {
-    id: 'team-medien-1',
-    name: 'Anna Meyer',
-    email: 'team.medien@fanini.test',
-    role: 'Team Medien',
-    roleType: 'team',
-    teams: ['medien'],
-  },
-  {
-    id: 'member-1',
-    name: 'Lisa Fischer',
-    email: 'member@fanini.test',
-    role: 'Mitglied',
-    roleType: 'member',
-  },
-];
-
 function LoginPage() {
   const navigate = useNavigate();
-  const [selectedUser, setSelectedUser] = useState<string>('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setIsLoading(true);
 
-    if (!selectedUser) return;
+    try {
+      const response = (await loginWithCredentials({ email, password })) as {
+        accessToken: string;
+        refreshToken?: string;
+        user: {
+          rollen: { name: string }[];
+          [key: string]: unknown;
+        };
+      };
 
-    const user = TEST_USERS.find(u => u.id === selectedUser);
-    if (!user) return;
+      // Token speichern
+      localStorage.setItem('fanini-token', response.accessToken);
+      if (rememberMe && response.refreshToken) {
+        localStorage.setItem('fanini-refresh', response.refreshToken);
+      }
 
-    // Store mock auth in localStorage
-    const authData = {
-      user,
-      token: `mock-token-${user.id}`,
-      expiresAt: rememberMe
-        ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
-        : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
-    };
+      // User Daten speichern
+      localStorage.setItem('fanini-user', JSON.stringify(response.user));
 
-    localStorage.setItem('fanini-auth', JSON.stringify(authData));
+      // Redirect basierend auf Rolle
 
-    // Navigate to dashboard
-    void navigate({ to: '/intern' });
+      void navigate({ to: '/intern' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Login fehlgeschlagen');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -132,60 +91,51 @@ function LoginPage() {
               <Shield className="h-8 w-8 text-white" />
             </motion.div>
             <CardTitle className="text-2xl font-bold">Mitgliederbereich</CardTitle>
-            <CardDescription>Faninitiative Spandau e.V. - Interner Bereich</CardDescription>
+            <p className="text-muted-foreground">Faninitiative Spandau e.V. - Interner Bereich</p>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              {/* Test User Selection */}
+              {/* Error Alert */}
+              {error ? (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <span>{error}</span>
+                </Alert>
+              ) : null}
+
+              {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="user">Test-Benutzer wählen</Label>
-                <Select value={selectedUser} onValueChange={setSelectedUser}>
-                  <SelectTrigger id="user">
-                    <SelectValue placeholder="Wähle einen Test-Benutzer..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TEST_USERS.map(user => (
-                      <SelectItem key={user.id} value={user.id}>
-                        <div className="flex items-center gap-2">
-                          {user.roleType === 'admin' && (
-                            <Shield className="h-4 w-4 text-purple-600" />
-                          )}
-                          {user.roleType === 'vorstand' && (
-                            <Shield className="h-4 w-4 text-amber-600" />
-                          )}
-                          {user.roleType === 'beirat' && (
-                            <Shield className="h-4 w-4 text-blue-600" />
-                          )}
-                          {user.roleType === 'team' && <Users className="h-4 w-4 text-green-600" />}
-                          <div>
-                            <div className="font-medium">{user.name}</div>
-                            <div className="text-muted-foreground text-xs">
-                              {user.role} - {user.email}
-                            </div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="email">E-Mail</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="deine@email.de"
+                  value={email}
+                  onChange={e => {
+                    setEmail(e.target.value);
+                  }}
+                  required
+                  autoComplete="email"
+                  disabled={isLoading}
+                />
               </div>
 
-              {/* Mock Password Field */}
+              {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password">Passwort (Mock)</Label>
+                <Label htmlFor="password">Passwort</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Beliebiges Passwort..."
+                  placeholder="Dein Passwort"
                   value={password}
                   onChange={e => {
                     setPassword(e.target.value);
                   }}
+                  required
+                  autoComplete="current-password"
+                  disabled={isLoading}
                 />
-                <p className="text-muted-foreground text-xs">
-                  In Phase 1 wird jedes Passwort akzeptiert
-                </p>
               </div>
 
               {/* Remember Me */}
@@ -194,10 +144,11 @@ function LoginPage() {
                   id="remember"
                   checked={rememberMe}
                   onCheckedChange={checked => {
-                    setRememberMe(checked as boolean);
+                    setRememberMe(!!checked);
                   }}
+                  disabled={isLoading}
                 />
-                <Label htmlFor="remember" className="cursor-pointer text-sm font-normal">
+                <Label htmlFor="remember" className="cursor-pointer">
                   Angemeldet bleiben
                 </Label>
               </div>
@@ -206,27 +157,52 @@ function LoginPage() {
               <Button
                 type="submit"
                 className="w-full bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] hover:opacity-90"
-                disabled={!selectedUser}
+                disabled={isLoading}
               >
-                <LogIn className="mr-2 h-4 w-4" />
-                Anmelden
+                {isLoading ? (
+                  <>Anmelden...</>
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Anmelden
+                  </>
+                )}
               </Button>
             </form>
 
-            {/* Info Box */}
-            <div className="mt-6 rounded-lg bg-blue-50 p-4 text-sm dark:bg-blue-950">
-              <p className="mb-1 font-medium text-blue-900 dark:text-blue-100">
-                🧪 Test-Modus (Phase 1)
-              </p>
-              <p className="text-blue-700 dark:text-blue-300">
-                Dies ist eine Mock-Authentifizierung für Entwicklungszwecke. Die
-                EasyVerein-Integration folgt in Phase 2.
-              </p>
+            {/* Info Boxes */}
+            <div className="mt-6 space-y-3">
+              {/* EasyVerein Info */}
+              <div className="rounded-lg bg-blue-50 p-4 text-sm dark:bg-blue-950">
+                <p className="font-medium text-blue-900 dark:text-blue-100">🔐 EasyVerein Login</p>
+                <p className="mt-1 text-blue-700 dark:text-blue-300">
+                  Verwende deine EasyVerein Zugangsdaten für die Anmeldung.
+                </p>
+              </div>
+
+              {/* Dev Info - nur in Development */}
+              {process.env['NODE_ENV'] === 'development' && (
+                <div className="rounded-lg bg-amber-50 p-4 text-sm dark:bg-amber-950">
+                  <p className="font-medium text-amber-900 dark:text-amber-100">
+                    🧪 Test-Account (Dev)
+                  </p>
+                  <p className="mt-1 font-mono text-xs text-amber-700 dark:text-amber-300">
+                    admin@fanini-spandau.de
+                    <br />
+                    FaniniAdmin2025!Secure#123
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Back to Public */}
             <div className="mt-4 text-center">
-              <Button variant="link" onClick={() => navigate({ to: '/' })} className="text-sm">
+              <Button
+                variant="link"
+                onClick={() => void navigate({ to: '/' })}
+                className="text-sm"
+                disabled={isLoading}
+              >
                 Zurück zur öffentlichen Seite
               </Button>
             </div>

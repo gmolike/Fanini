@@ -45,42 +45,6 @@ export const typescriptConfig = {
     '@typescript-eslint/prefer-nullish-coalescing': 'error',
     '@typescript-eslint/prefer-optional-chain': 'error',
 
-    // Naming Conventions
-    '@typescript-eslint/naming-convention': [
-      'error',
-      {
-        selector: 'typeLike',
-        format: ['PascalCase'],
-      },
-      {
-        selector: 'function',
-        format: ['PascalCase', 'camelCase'],
-        leadingUnderscore: 'allow',
-      },
-      {
-        selector: 'variable',
-        format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
-        leadingUnderscore: 'allow',
-      },
-      {
-        selector: 'parameter',
-        format: ['camelCase', 'PascalCase'],
-        leadingUnderscore: 'allow',
-      },
-      {
-        selector: 'memberLike',
-        format: ['camelCase', 'PascalCase'],
-        leadingUnderscore: 'allow',
-      },
-      {
-        selector: 'objectLiteralProperty',
-        format: null,
-        filter: {
-          regex: '^(\\d+|[A-Z_]+)$',
-          match: true,
-        },
-      },
-    ],
     '@typescript-eslint/strict-boolean-expressions': [
       'error',
       {

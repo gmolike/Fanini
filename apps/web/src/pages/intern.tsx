@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 // apps/web/src/pages/_intern.tsx
 import { useEffect, useState } from 'react';
 
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import { Bell, LogOut, Menu, Settings, Users } from 'lucide-react';
 
+import { AuthGuard } from '@/features/auth';
 import { type AuthUser, Sidebar } from '@/features/intern/sidebar';
 
 import { Button } from '@/shared/shadcn/button';
@@ -20,9 +20,12 @@ import { Sheet, SheetContent } from '@/shared/shadcn/sheet';
 import { ThemeToggle } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern')({
-  component: InternLayout,
+  component: () => (
+    <AuthGuard>
+      <InternLayout />
+    </AuthGuard>
+  ),
 });
-
 const getPageTitle = (pathname: string): string => {
   const titles: Record<string, string> = {
     '/intern': 'Dashboard',
@@ -62,27 +65,28 @@ function InternLayout() {
 
   // Check auth on mount
   useEffect(() => {
-    const authData = localStorage.getItem('fanini-auth');
-    if (!authData) {
+    const token = localStorage.getItem('fanini-token');
+    const userStr = localStorage.getItem('fanini-user');
+
+    if (!token || !userStr) {
       void navigate({ to: '/login' });
       return;
     }
 
     try {
-      const parsed = JSON.parse(authData) as { expiresAt: string; user: AuthUser };
-      if (new Date(parsed.expiresAt) < new Date()) {
-        localStorage.removeItem('fanini-auth');
-        void navigate({ to: '/login' });
-        return;
-      }
-      setUser(parsed.user);
+      const userData = JSON.parse(userStr) as AuthUser;
+      setUser(userData);
     } catch {
+      localStorage.removeItem('fanini-token');
+      localStorage.removeItem('fanini-user');
       void navigate({ to: '/login' });
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem('fanini-auth');
+    localStorage.removeItem('fanini-token');
+    localStorage.removeItem('fanini-refresh');
+    localStorage.removeItem('fanini-user');
     void navigate({ to: '/login' });
   };
 
@@ -95,10 +99,7 @@ function InternLayout() {
     return null; // Loading state
   }
 
-  const userInitials = user.name
-    .split(' ')
-    .map(n => n[0])
-    .join('');
+  const userInitials = user.name;
 
   const currentPageTitle = getPageTitle(router.location.pathname);
 

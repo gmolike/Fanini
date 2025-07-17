@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 // frontend/src/form/actionButton/model/useController.ts
 import { useCallback, useMemo, useState } from 'react';
 import { type FieldPath, type FieldValues, useFormContext, useWatch } from 'react-hook-form';

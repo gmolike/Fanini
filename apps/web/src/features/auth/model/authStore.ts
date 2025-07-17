@@ -15,14 +15,14 @@ type AuthState = {
  * Globaler Auth Store
  * Verwaltet User-Session und Token
  */
-export const useAuthStore = create<AuthState>((set: (state: Partial<AuthState>) => void) => ({
+export const useAuthStore = create<AuthState>(set => ({
   user: null,
   isLoading: true,
 
   checkAuth: () => {
     try {
-      const token = localStorage.getItem('fanini-token');
-      const userStr = localStorage.getItem('fanini-user');
+      const token = typeof window !== 'undefined' ? localStorage.getItem('fanini-token') : null;
+      const userStr = typeof window !== 'undefined' ? localStorage.getItem('fanini-user') : null;
 
       if (!token || !userStr) {
         set({ user: null, isLoading: false });
@@ -32,31 +32,28 @@ export const useAuthStore = create<AuthState>((set: (state: Partial<AuthState>) 
       // Parse user data
       const user = JSON.parse(userStr) as AuthUser;
       set({ user, isLoading: false });
-    } catch (error: unknown) {
-      // Log the error for debugging
-      if (error instanceof Error) {
-        console.error('Error during checkAuth:', error.message);
-      } else if (typeof error === 'string') {
-        console.error('Unknown error during checkAuth:', error);
-      } else {
-        console.error('Unknown error during checkAuth:', JSON.stringify(error));
-      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
       // Clear invalid data
-      localStorage.removeItem('fanini-token');
-      localStorage.removeItem('fanini-user');
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('fanini-token');
+        localStorage.removeItem('fanini-user');
+      }
       set({ user: null, isLoading: false });
     }
   },
 
-  setUser: (user: AuthUser | null) => {
+  setUser: user => {
     set({ user });
   },
 
   logout: () => {
-    localStorage.removeItem('fanini-token');
-    localStorage.removeItem('fanini-refresh');
-    localStorage.removeItem('fanini-user');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('fanini-token');
+      localStorage.removeItem('fanini-refresh');
+      localStorage.removeItem('fanini-user');
+      window.location.href = '/login';
+    }
     set({ user: null });
-    window.location.href = '/login';
   },
 }));

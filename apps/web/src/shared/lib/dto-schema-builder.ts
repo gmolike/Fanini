@@ -25,7 +25,7 @@ export class DTOSchemaBuilder<
     const label = this.labels[key];
     return (
       z
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+         
         .string({ required_error: `${label} ist erforderlich` })
         .min(minLength, `${label} muss mindestens ${String(minLength)} Zeichen haben`)
     );
@@ -42,7 +42,7 @@ export class DTOSchemaBuilder<
     options?: { minLength?: number; maxLength?: number }
   ) {
     const label = this.labels[key];
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
     let schema = z.string({ required_error: `${label} ist erforderlich` });
 
     if (options?.minLength) {
@@ -71,7 +71,7 @@ export class DTOSchemaBuilder<
     const label = this.labels[key];
     return (
       z
-        // eslint-disable-next-line @typescript-eslint/naming-convention
+         
         .string({ required_error: `${label} ist erforderlich` })
         .min(1, `${label} ist erforderlich`)
         .email(`${label} muss eine gültige E-Mail-Adresse sein`)
@@ -100,9 +100,9 @@ export class DTOSchemaBuilder<
   ) {
     const label = this.labels[key];
     let schema = z.number({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+       
       required_error: `${label} ist erforderlich`,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+       
       invalid_type_error: `${label} muss eine Zahl sein`,
     });
 
@@ -137,7 +137,7 @@ export class DTOSchemaBuilder<
   ) {
     const label = this.labels[key];
     let schema = z.number({
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+       
       invalid_type_error: `${label} muss eine Zahl sein`,
     });
 

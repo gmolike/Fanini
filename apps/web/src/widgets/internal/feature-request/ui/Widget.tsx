@@ -63,7 +63,7 @@ const mockFeatures: Feature[] = [
 const statusConfig = {
   proposed: { label: 'Vorgeschlagen', color: 'bg-gray-500', icon: Circle },
   planned: { label: 'Geplant', color: 'bg-blue-500', icon: Clock },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+   
   'in-progress': { label: 'In Arbeit', color: 'bg-yellow-500', icon: AlertCircle },
   completed: { label: 'Fertig', color: 'bg-green-500', icon: CheckCircle2 },
   rejected: { label: 'Abgelehnt', color: 'bg-red-500', icon: Circle },

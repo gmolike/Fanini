@@ -1,5 +1,5 @@
 /* eslint-disable sonarjs/no-duplicate-string */
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 import { motion } from 'framer-motion';
 import { FileCode, Folder, Package } from 'lucide-react';
 

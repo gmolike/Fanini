@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 // Basis API Konfiguration
 export const apiConfig = {
   baseUrl: (import.meta.env['VITE_API_BASE_URL'] as string | undefined) ?? '/api',

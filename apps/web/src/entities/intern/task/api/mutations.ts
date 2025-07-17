@@ -1,6 +1,5 @@
 // entities/intern/task/api/mutations.ts
-import { createRemoteMutation } from '@/shared/api';
-import { queryClient } from '@/shared/lib/query-client';
+import { createRemoteMutation, queryClient } from '@/shared/api';
 
 import {
   addTaskCommentSchema,
@@ -25,7 +24,7 @@ export const useCreateTask = createRemoteMutation<CreateTaskRequest>({
   schema: createTaskSchema,
   onSuccess: () => {
     // Invalidate all task lists
-    queryClient.invalidateQueries({ queryKey: ['tasks'] });
+    void queryClient.invalidateQueries({ queryKey: ['tasks'] });
   },
 });
 

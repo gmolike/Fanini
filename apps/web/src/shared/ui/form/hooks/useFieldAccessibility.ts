@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 import { useId } from 'react';
 import { type Control, type FieldPath, type FieldValues, useFormState } from 'react-hook-form';
 

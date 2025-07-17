@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 // entities/public/organization/model/types.ts
 export type GremiumType =
   | 'vorstand'

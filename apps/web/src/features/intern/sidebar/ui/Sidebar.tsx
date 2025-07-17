@@ -39,11 +39,7 @@ const Logo = () => {
  * @returns User info section with avatar and role badge
  */
 const UserInfo = ({ user }: { user: AuthUser }) => {
-  const initials = user.name
-    .split(' ')
-    .map(n => n[0])
-    .join('');
-
+  const initials = user.name;
   return (
     <div className="border-b p-4">
       <div className="flex items-center gap-3">

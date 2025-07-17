@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 import { colors } from '../tokens/colors';
 import { spacing } from '../tokens/spacing';
 

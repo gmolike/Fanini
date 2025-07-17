@@ -21,11 +21,9 @@ export class Container {
 
   register(name: string, factory: () => any): void {
     this.factories.set(name, factory);
-    console.log(`✅ Registered: ${name}`);
   }
 
   get(name: string): any {
-    console.log(`🔍 Getting service: ${name}`);
     if (!this.services.has(name)) {
       const factory = this.factories.get(name);
       if (!factory) {

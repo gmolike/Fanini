@@ -183,7 +183,7 @@ type StatusItemProps = {
 const StatusItem = ({ label, status, count }: StatusItemProps) => {
   const statusConfig = {
     complete: { color: 'text-green-500', icon: CheckCircle2, text: 'Fertig' },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
     'in-progress': { color: 'text-yellow-500', icon: Code2, text: 'In Arbeit' },
     partial: { color: 'text-orange-500', icon: GitBranch, text: 'Teilweise' },
   } as const;

@@ -45,9 +45,7 @@ export const LoginForm = () => {
       }
 
       // Redirect basierend auf Rolle
-      const hauptrolle = data.user.rollen[0]?.name;
-      const redirectPath = hauptrolle === 'MITGLIED' ? '/intern' : '/intern/dashboard';
-      window.location.href = redirectPath;
+      window.location.href = '/intern';
     },
   });
 

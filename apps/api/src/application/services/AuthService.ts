@@ -67,21 +67,36 @@ export class AuthService {
    */
   async login(email: string, password: string): Promise<LoginResult> {
     try {
+      console.log(`🔐 Login attempt for: ${email}`);
+
       // 1. Prüfe ob lokaler User existiert
       let user = await this.authRepo.findUserByEmail(email);
+      console.log(`👤 User found: ${user ? "Yes" : "No"}`);
+
+      if (user) {
+        console.log(`📋 User details:`, {
+          id: user.id,
+          email: user.email,
+          authSource: user.authSource,
+          hasPassword: !!user.passwordHash,
+        });
+      }
 
       if (user && user.authSource === "local") {
         // Lokaler User - Passwort prüfen
         if (!user.passwordHash) {
+          console.log("❌ No password hash stored");
           return { success: false, error: "Kein Passwort gesetzt" };
         }
 
         const isValid = await bcrypt.compare(password, user.passwordHash);
+        console.log(`🔑 Password valid: ${isValid}`);
 
         if (!isValid) {
           return { success: false, error: "Ungültige Anmeldedaten" };
         }
       } else {
+        console.log("🌐 Trying EasyVerein auth...");
         // 2. Versuche EasyVerein Login
         const easyVereinUser = await this.authenticateWithEasyVerein(
           email,

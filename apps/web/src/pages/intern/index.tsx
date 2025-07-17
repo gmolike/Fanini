@@ -11,19 +11,30 @@ import {
   Zap,
 } from 'lucide-react';
 
-import { Badge } from '@/shared/shadcn/badge';
-import { Button } from '@/shared/shadcn/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn/card';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/')({
   component: DashboardPage,
 });
 
+type User = {
+  name?: string;
+  // add other properties as needed
+};
+
 function DashboardPage() {
   // Mock user data from localStorage
-  const authData = localStorage.getItem('fanini-auth');
-  const user = authData ? JSON.parse(authData).user : null;
+  const userStr = localStorage.getItem('fanini-user');
+  const user: User | null = userStr ? (JSON.parse(userStr) as User) : null;
 
   return (
     <Container className="py-8">
@@ -232,7 +243,7 @@ function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm">
-                    <span className="font-medium">Sarah Schmidt</span> hat dich zu{" "}
+                    <span className="font-medium">Sarah Schmidt</span> hat dich zu{' '}
                     <span className="font-medium">Team Event</span> hinzugefügt
                   </p>
                   <p className="text-muted-foreground text-xs">vor 2 Stunden</p>
@@ -244,7 +255,7 @@ function DashboardPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm">
-                    <span className="font-medium">Tom Krause</span> hat die Aufgabe{" "}
+                    <span className="font-medium">Tom Krause</span> hat die Aufgabe{' '}
                     <span className="font-medium">"Location buchen"</span> abgeschlossen
                   </p>
                   <p className="text-muted-foreground text-xs">vor 4 Stunden</p>

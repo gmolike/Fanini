@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 // features/public/event-detail/ui/History.tsx
 import { motion } from 'framer-motion';
 import { CheckCircle, Info, Megaphone, Ticket } from 'lucide-react';

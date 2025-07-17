@@ -1,5 +1,5 @@
 // frontend/src/entities/public/newsletter/model/types.ts
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 export type NewsletterStatus = 'draft' | 'published' | 'archived';
 
 export type ArticleCategory =

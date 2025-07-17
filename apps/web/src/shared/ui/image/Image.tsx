@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/naming-convention */
+ 
 // frontend/src/shared/ui/image/Image.tsx
 import { useState } from 'react';
 

@@ -7,13 +7,13 @@ export class EventPublicRouter extends BaseRouter {
 
     this.addRoute({
       method: "GET",
-      path: "/api/public/event/list",
+      path: "/api/public/events",
       handler: controller.getPublicEventList.bind(controller),
     });
 
     this.addRoute({
       method: "GET",
-      path: "/api/public/event/:eventId",
+      path: "/api/public/events/:eventId",
       handler: controller.getPublicEventDetail.bind(controller),
     });
   }

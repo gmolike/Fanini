@@ -5,7 +5,6 @@ export { MasterRouter } from "./MasterRouter";
 export { AuthRouter } from "./auth/AuthRouter";
 
 // Event
-export { EventRouter } from "./event/EventRouter";
 export { InternalEventRouter } from "./event/InternalEventRouter";
 
 // Member

@@ -12,7 +12,6 @@ import { StatsPublicRouter } from "./public/StatsPublicRouter";
 
 // Protected Routers
 import { AuthRouter } from "./auth/AuthRouter";
-import { EventRouter } from "./event/EventRouter";
 import { InternalEventRouter } from "./event/InternalEventRouter";
 import { MemberRouter } from "./member/MemberRouter";
 import { DocumentRouter } from "./document/DocumentRouter";
@@ -34,8 +33,7 @@ export class MasterRouter {
 
       // Protected routes
       new AuthRouter(container),
-      new EventRouter(container),
-      new InternalEventRouter(container), 
+      new InternalEventRouter(container),
       new MemberRouter(container),
       new DocumentRouter(container),
       new TaskRouter(container),

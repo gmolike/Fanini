@@ -259,9 +259,43 @@ export class AuthService {
     nachname: string;
     mitgliedsnummer?: string;
   } | null> {
+    // Development Mode Check
+    if (
+      process.env.NODE_ENV === "development" &&
+      !this.easyVereinConfig.clientId
+    ) {
+      console.warn("⚠️ EasyVerein not configured - skipping authentication");
+      return null;
+    }
+
     try {
-      // OAuth Token Request
-      const tokenResponse = await axios.post(
+      // 1. Request OAuth Token
+      const tokenData = await this.requestEasyVereinToken(email, password);
+      if (!tokenData) return null;
+
+      // 2. Fetch User Data
+      const userData = await this.fetchEasyVereinUserData(
+        tokenData.access_token,
+      );
+      if (!userData) return null;
+
+      // 3. Map to our format
+      return this.mapEasyVereinUser(userData);
+    } catch (error: any) {
+      this.handleEasyVereinError(error);
+      return null;
+    }
+  }
+
+  /**
+   * Request OAuth Token from EasyVerein
+   */
+  private async requestEasyVereinToken(
+    email: string,
+    password: string,
+  ): Promise<{ access_token: string } | null> {
+    try {
+      const response = await axios.post(
         `${this.easyVereinConfig.apiUrl}/oauth/token`,
         new URLSearchParams({
           grant_type: "password",
@@ -275,38 +309,99 @@ export class AuthService {
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
           },
+          timeout: 10000, // 10 seconds timeout
         },
       );
 
-      const { access_token } = tokenResponse.data;
+      return response.data;
+    } catch (error: any) {
+      // Spezifische Fehlerbehandlung für Token-Request
+      if (error.response?.status === 401) {
+        console.log("EasyVerein: Invalid credentials");
+      } else if (error.code === "ENOTFOUND") {
+        console.error("EasyVerein: Service not reachable (DNS)");
+      } else if (error.code === "ECONNREFUSED") {
+        console.error("EasyVerein: Connection refused");
+      }
+      throw error;
+    }
+  }
 
-      // Get User Info
-      const userResponse = await axios.get(
+  /**
+   * Fetch User Data from EasyVerein
+   */
+  private async fetchEasyVereinUserData(
+    accessToken: string,
+  ): Promise<any | null> {
+    try {
+      const response = await axios.get(
         `${this.easyVereinConfig.apiUrl}/v2.0/member/me`,
         {
           headers: {
-            Authorization: `Bearer ${access_token}`,
+            Authorization: `Bearer ${accessToken}`,
             Accept: "application/json",
           },
+          timeout: 10000,
         },
       );
 
-      const userData = userResponse.data;
-
-      return {
-        easyVereinId: userData.id.toString(),
-        email: userData.email || userData.emailAddress,
-        vorname: userData.firstName || userData.contactDetails?.firstName,
-        nachname: userData.lastName || userData.contactDetails?.lastName,
-        mitgliedsnummer: userData.membershipNumber,
-      };
+      return response.data;
     } catch (error: any) {
-      console.error("EasyVerein auth failed:", {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-      });
-      return null;
+      console.error(
+        "Failed to fetch EasyVerein user data:",
+        error.response?.status,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Map EasyVerein User Data to our format
+   */
+  private mapEasyVereinUser(userData: any): {
+    easyVereinId: string;
+    email: string;
+    vorname: string;
+    nachname: string;
+    mitgliedsnummer?: string;
+  } {
+    return {
+      easyVereinId: String(userData.id),
+      email: userData.email || userData.emailAddress || "",
+      vorname:
+        userData.firstName || userData.contactDetails?.firstName || "Unbekannt",
+      nachname:
+        userData.lastName || userData.contactDetails?.lastName || "Unbekannt",
+      mitgliedsnummer: userData.membershipNumber,
+    };
+  }
+
+  /**
+   * Handle EasyVerein Errors with specific logging
+   */
+  private handleEasyVereinError(error: any): void {
+    const errorInfo = {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      data: error.response?.data,
+    };
+
+    // Development-spezifische Meldungen
+    if (process.env.NODE_ENV === "development") {
+      console.log("🔧 EasyVerein Error (Development Mode):", errorInfo);
+
+      if (error.code === "ENOTFOUND") {
+        console.log(
+          "💡 Tipp: EasyVerein ist in der Entwicklung nicht erreichbar.",
+        );
+        console.log(
+          "   Nutze den lokalen Admin-Account oder konfiguriere einen VPN/Proxy.",
+        );
+      }
+    } else {
+      // Production Error Logging
+      console.error("EasyVerein authentication failed:", errorInfo);
     }
   }
 

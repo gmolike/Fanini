@@ -8,7 +8,7 @@ export class OrganizationPublicRouter extends BaseRouter {
     this.addRoute({
       method: "GET",
       path: "/api/public/organization/structure",
-      handler: controller.getPublicStructure.bind(controller)
+      handler: controller.getPublicInfo.bind(controller)
     });
 
     this.addRoute({

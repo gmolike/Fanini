@@ -1,2 +1,2 @@
-export { LoginUseCase } from "./LoginUseCase";
-export { RefreshTokenUseCase } from "./RefreshTokenUseCase";
+export type { LoginUseCase } from "./LoginUseCase";
+export type { RefreshTokenUseCase } from "./RefreshTokenUseCase";

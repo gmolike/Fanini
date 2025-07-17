@@ -7,3 +7,4 @@ export { registerCreatorSlice } from "./creatorSlice";
 export { registerNewsletterSlice } from "./newsletterSlice";
 export { registerInternalEventSlice } from "./internalEventSlice";
 export { registerTaskSlice } from "./taskSlice";
+export { registerOrganizationSlice } from "./organizationSlice";

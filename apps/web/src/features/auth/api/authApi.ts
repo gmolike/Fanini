@@ -1,7 +1,7 @@
 // apps/web/src/features/auth/api/authApi.ts
 import type { AuthResponse, LoginCredentials } from '../model/types';
 
-const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001/api';
+const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3000/api';
 
 /**
  * Authentifizierung mit Backend

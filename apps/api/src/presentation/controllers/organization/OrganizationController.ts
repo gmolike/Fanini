@@ -10,11 +10,15 @@ export class OrganizationController {
    *       200:
    *         description: Organisationsstruktur
    */
-  async getPublicStructure(req: Request): Promise<Response> {
+  async getPublicInfo(req: Request): Promise<Response> {
     return Response.json({
       success: true,
-      data: {},
-      message: "Organization feature coming soon",
+      data: {
+        name: "Faninitiative Spandau e.V.",
+        founded: "2025",
+        members: 42,
+        description: "Fanverein der Eintracht Spandau",
+      },
     });
   }
 

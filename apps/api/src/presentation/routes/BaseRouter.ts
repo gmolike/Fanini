@@ -1,4 +1,4 @@
-// src/presentation/routes/BaseRouter.ts
+// apps/api/src/presentation/routes/BaseRouter.ts
 import { Container } from "@/infrastructure/di/container";
 
 export type RouteConfig = {
@@ -13,14 +13,45 @@ export type RouteConfig = {
 export abstract class BaseRouter {
   protected routes: RouteConfig[] = [];
 
+  // CORS Headers definieren
+  protected corsHeaders = {
+    'Access-Control-Allow-Origin': process.env.FRONTEND_URL || 'http://localhost:5173',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+
   constructor(protected container: Container) {
     this.setupRoutes();
+    this.setupCorsRoutes(); // Automatisch OPTIONS Routes hinzufügen
   }
 
   abstract setupRoutes(): void;
 
   protected addRoute(config: RouteConfig) {
     this.routes.push(config);
+  }
+
+  // Automatisch OPTIONS Routes für alle definierten Pfade hinzufügen
+  private setupCorsRoutes(): void {
+    const uniquePaths = new Set<string>();
+
+    // Sammle alle unique Pfade
+    this.routes.forEach(route => {
+      uniquePaths.add(route.path);
+    });
+
+    // Füge OPTIONS Handler für jeden Pfad hinzu
+    uniquePaths.forEach(path => {
+      this.routes.push({
+        method: 'OPTIONS',
+        path,
+        handler: async (req: Request) => new Response(null, {
+          status: 200,
+          headers: this.corsHeaders
+        }),
+      });
+    });
   }
 
   async handle(req: Request): Promise<Response | null> {
@@ -44,16 +75,39 @@ export abstract class BaseRouter {
               const middleware = route.middlewares![index++];
               return middleware(req, next);
             }
-            return route.handler(req);
+            return this.addCorsHeaders(await route.handler(req));
           };
           return next();
         }
 
-        return route.handler(req);
+        return this.addCorsHeaders(await route.handler(req));
       }
     }
 
     return null;
+  }
+
+  // Helper-Methode um CORS Headers zu allen Responses hinzuzufügen
+  private async addCorsHeaders(response: Response): Promise<Response> {
+    // Clone response mit neuen Headers
+    const headers = new Headers(response.headers);
+
+    Object.entries(this.corsHeaders).forEach(([key, value]) => {
+      headers.set(key, value);
+    });
+
+    // Stelle sicher, dass Content-Type gesetzt ist
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+
+    const body = await response.text();
+
+    return new Response(body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers,
+    });
   }
 
   private matchPath(

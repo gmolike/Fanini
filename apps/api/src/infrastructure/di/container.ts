@@ -12,6 +12,7 @@ import {
   registerNewsletterSlice,
   registerInternalEventSlice,
   registerTaskSlice,
+  registerOrganizationSlice,
 } from "./slices";
 
 export class Container {
@@ -65,6 +66,7 @@ export function setupContainer(): Container {
   registerNewsletterSlice(container);
   registerInternalEventSlice(container);
   registerTaskSlice(container);
+  registerOrganizationSlice(container);
 
   return container;
 }

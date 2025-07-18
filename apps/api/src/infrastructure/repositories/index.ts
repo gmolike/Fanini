@@ -5,3 +5,5 @@ export { MySQLStatsRepository } from "./MySQLStatsRepository";
 export { MySQLDocumentRepository } from "./MySQLDocumentRepository";
 export { MySQLTaskRepository } from "./MySQLTaskRepository";
 export { MySQLAuthRepository } from "./MySQLAuthRepository";
+export { MySQLApprovalRepository } from "./MySQLApprovalRepository";
+export { MySQLPermissionRepository } from "./MySQLPermissionRepository";

@@ -1,6 +1,7 @@
 // apps/web/src/features/intern/member/list/ui/ListToolbar.tsx
 import { useEffect, useState } from 'react';
 
+import { useNavigate } from '@tanstack/react-router';
 import { Download, Filter, Search, UserPlus } from 'lucide-react';
 
 import {
@@ -25,7 +26,6 @@ type ListToolbarProps = {
   filters: MemberListFilters;
   onFilterChange: <K extends keyof MemberListFilters>(key: K, value: MemberListFilters[K]) => void;
   onReset: () => void;
-  onCreateClick: () => void;
   onExportClick?: () => void;
   canExport: boolean;
   isFiltered: boolean;
@@ -35,12 +35,15 @@ export const ListToolbar = ({
   filters,
   onFilterChange,
   onReset,
-  onCreateClick,
   onExportClick,
   canExport,
   isFiltered,
 }: ListToolbarProps) => {
   const [searchValue, setSearchValue] = useState(filters.search ?? '');
+  const navigate = useNavigate();
+  const handleCreateClick = () => {
+    void navigate({ to: '/intern/member/create' });
+  };
 
   // Handle search changes with debounce
   useEffect(() => {
@@ -77,7 +80,7 @@ export const ListToolbar = ({
               Exportieren
             </Button>
           ) : null}
-          <Button onClick={onCreateClick} size="sm">
+          <Button onClick={handleCreateClick} size="sm">
             <UserPlus className="mr-2 h-4 w-4" />
             Lokales Mitglied anlegen
           </Button>

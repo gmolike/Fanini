@@ -1,9 +1,5 @@
 // apps/web/src/features/intern/member/list/ui/ListContent.tsx
-import { useState } from 'react';
-
 import { toast } from 'sonner';
-
-import { CreateMemberDialog } from '@/features/intern/member/create';
 
 import { useMemberListState } from '../lib/useMemberListState';
 
@@ -17,8 +13,6 @@ import { ListToolbar } from './ListToolbar';
  * @description Hauptkomponente für die Mitgliederliste mit allen Features
  */
 export const ListContent = () => {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-
   const {
     filters,
     selectedMembers,
@@ -45,9 +39,6 @@ export const ListContent = () => {
         filters={filters}
         onFilterChange={updateFilter}
         onReset={resetFilters}
-        onCreateClick={() => {
-          setCreateDialogOpen(true);
-        }}
         onExportClick={canExportMembers ? handleExport : undefined}
         canExport={canExportMembers}
         isFiltered={isFiltered}
@@ -71,8 +62,6 @@ export const ListContent = () => {
         selectedMembers={selectedMembers}
         onMemberToggle={toggleMemberSelection}
       />
-
-      <CreateMemberDialog open={createDialogOpen} onOpenChange={setCreateDialogOpen} />
     </div>
   );
 };

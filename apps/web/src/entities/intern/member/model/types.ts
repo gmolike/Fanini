@@ -50,8 +50,7 @@ export type BulkActionPayload = {
 export type UserPermissions = z.infer<typeof userPermissionsSchema>;
 export type CreateMemberFormData = z.infer<typeof createMemberSchema>;
 
-export type MemberType = 'creator' | 'sponsor' | 'partner';
-
+export type MemberType = 'creator' | 'sponsor' | 'partner' | 'member';
 export type PasswordOption = 'none' | 'generate' | 'manual';
 
 export type CreateLocalMemberRequest = {

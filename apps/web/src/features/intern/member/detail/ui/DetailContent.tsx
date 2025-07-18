@@ -1,9 +1,6 @@
 // apps/web/src/features/intern/member/detail/ui/DetailContent.tsx
-import { useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
-
-import { EditDialog } from '@/features/intern/member/edit/ui/EditDialog';
 
 import {
   canEditMember,
@@ -27,7 +24,6 @@ type DetailContentProps = {
 
 export const DetailContent = ({ memberId }: DetailContentProps) => {
   const navigate = useNavigate();
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const {
     data: memberData,
@@ -61,45 +57,33 @@ export const DetailContent = ({ memberId }: DetailContentProps) => {
   const canResetPassword = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole);
   const canToggleStatus = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole);
   const canDelete = userRole === 'ADMIN' || userRole === 'VORSTAND';
+  const handleEdit = () => {
+    void navigate({
+      to: '/intern/member/edit/$memberId',
+      params: { memberId: member.id },
+    });
+  };
 
   return (
-    <>
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Left Column */}
-        <div className="space-y-6">
-          <InfoCard member={member} canViewSensitiveData={canViewHigh} />
-          <ContactCard member={member} canViewSensitiveData={canViewHigh} />
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-6">
-          <RolesCard member={member} canManageRoles={canManageRoles} userRole={userRole} />
-
-          <ActionsCard
-            member={member}
-            canResetPassword={canResetPassword}
-            canToggleStatus={canToggleStatus}
-            canDelete={canDelete}
-            needsApproval={requiresApproval}
-            onEdit={
-              canEdit
-                ? () => {
-                    setEditDialogOpen(true);
-                  }
-                : undefined
-            }
-          />
-        </div>
+    <div className="grid gap-6 lg:grid-cols-2">
+      {/* Left Column */}
+      <div className="space-y-6">
+        <InfoCard member={member} canViewSensitiveData={canViewHigh} />
+        <ContactCard member={member} canViewSensitiveData={canViewHigh} />
       </div>
 
-      {canEdit ? (
-        <EditDialog
-          open={editDialogOpen}
-          onOpenChange={setEditDialogOpen}
+      {/* Right Column */}
+      <div className="space-y-6">
+        <RolesCard member={member} canManageRoles={canManageRoles} userRole={userRole} />
+        <ActionsCard
           member={member}
+          canResetPassword={canResetPassword}
+          canToggleStatus={canToggleStatus}
+          canDelete={canDelete}
           needsApproval={requiresApproval}
+          onEdit={canEdit ? handleEdit : undefined}
         />
-      ) : null}
-    </>
+      </div>
+    </div>
   );
 };

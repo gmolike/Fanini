@@ -1,5 +1,5 @@
 // src/pages/intern/creator/portfolio.tsx
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { Grid3x3, ImagePlus, Link2, Save } from 'lucide-react';
 
 import {

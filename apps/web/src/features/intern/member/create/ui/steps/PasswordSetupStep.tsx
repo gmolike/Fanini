@@ -3,6 +3,8 @@ import { useState } from 'react';
 
 import { Eye, EyeOff } from 'lucide-react';
 
+import type { CreateMemberFormData } from '@/entities/intern/member';
+
 import {
   Alert,
   AlertDescription,
@@ -17,7 +19,6 @@ import { PasswordGenerator } from '../components/PasswordGenerator';
 import { PasswordStrengthIndicator } from '../components/PasswordStrengthIndicator';
 
 import type { UseFormReturn } from 'react-hook-form';
-import type { CreateMemberFormData } from '@/entities/intern/member';
 
 type PasswordSetupStepProps = {
   form: UseFormReturn<CreateMemberFormData>;

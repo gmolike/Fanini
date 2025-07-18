@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { MemberListContent } from '@/features/intern/member-list';
+import { MemberListContent } from '@/features/intern/member';
 
 import { Container, PageHeader } from '@/shared/ui';
 

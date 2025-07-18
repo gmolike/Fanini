@@ -90,7 +90,7 @@ export const MobileNavigation = ({ items, currentPath, onItemClick }: MobileNavi
           className="w-full border-0 bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] text-white hover:opacity-90"
           onClick={onItemClick}
         >
-          <Link to="/app">
+          <Link to="/intern">
             <Users className="mr-2 h-4 w-4" />
             Mitgliederbereich
           </Link>

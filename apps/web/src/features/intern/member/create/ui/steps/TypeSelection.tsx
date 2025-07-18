@@ -1,10 +1,11 @@
 // apps/web/src/features/intern/member-create/ui/steps/MemberTypeSelection.tsx
 import { Building2, Handshake, Palette } from 'lucide-react';
 
+import type { CreateMemberFormData } from '@/entities/intern/member';
+
 import { Button, Label, RadioGroup, RadioGroupItem } from '@/shared/shadcn';
 
 import type { UseFormReturn } from 'react-hook-form';
-import type { CreateMemberFormData } from '@/entities/intern/member';
 
 type TypeSelectionProps = {
   form: UseFormReturn<CreateMemberFormData>;

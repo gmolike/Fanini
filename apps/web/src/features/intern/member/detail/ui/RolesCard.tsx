@@ -1,9 +1,13 @@
+// apps/web/src/features/intern/member/detail/ui/RolesCard.tsx
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from 'react';
 
 import { Plus, Shield, Trash2 } from 'lucide-react';
 
 import {
   type AssignRoleRequest,
+  getRoleLabel,
   type MemberDetail,
   type MemberRole,
   ROLE_CONFIG,
@@ -27,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/shared/shadcn';
-import { EnumBadge } from '@/shared/ui';
+import { ConfirmDialog, EnumBadge } from '@/shared/ui';
 import { FormSelect, FormTextArea, useForm } from '@/shared/ui/form';
 
 type RolesCardProps = {
@@ -38,6 +42,8 @@ type RolesCardProps = {
 
 export const RolesCard = ({ member, canManageRoles, userRole }: RolesCardProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmRemoveOpen, setConfirmRemoveOpen] = useState(false);
+  const [roleToRemove, setRoleToRemove] = useState<MemberRole | null>(null);
 
   const assignRoleMutation = useAssignRole();
   const removeRoleMutation = useRemoveRole();
@@ -78,19 +84,21 @@ export const RolesCard = ({ member, canManageRoles, userRole }: RolesCardProps) 
     form.reset();
   };
 
-  const handleRemoveRole = async (roleToRemove: MemberRole) => {
-    const roleLabel = ROLE_CONFIG[roleToRemove].label;
-    if (confirm(`Möchten Sie die Rolle "${roleLabel}" wirklich entfernen?`)) {
-      await removeRoleMutation.mutateAsync({
-        memberId: member.id,
-        roleId: roleToRemove,
-      });
-    }
+  const handleRemoveRole = async () => {
+    if (!roleToRemove) return;
+
+    await removeRoleMutation.mutateAsync({
+      memberId: member.id,
+      roleId: roleToRemove,
+    });
+
+    setConfirmRemoveOpen(false);
+    setRoleToRemove(null);
   };
 
   const roleOptions = availableRoles.map(value => ({
     value,
-    label: ROLE_CONFIG[value].label,
+    label: getRoleLabel(value),
   }));
 
   return (
@@ -119,14 +127,17 @@ export const RolesCard = ({ member, canManageRoles, userRole }: RolesCardProps) 
                     <div className="flex items-center gap-3">
                       <EnumBadge value={role} config={ROLE_CONFIG} />
                       <span className="text-muted-foreground text-sm">
-                        Hierarchie: {ROLE_CONFIG[role].label}
+                        Hierarchie: {getRoleLabel(role)}
                       </span>
                     </div>
                     {canManageRoles && role !== 'MITGLIED' ? (
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => void handleRemoveRole(role)}
+                        onClick={() => {
+                          setRoleToRemove(role);
+                          setConfirmRemoveOpen(true);
+                        }}
                         disabled={removeRoleMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -197,6 +208,18 @@ export const RolesCard = ({ member, canManageRoles, userRole }: RolesCardProps) 
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmRemoveOpen}
+        onOpenChange={setConfirmRemoveOpen}
+        title="Rolle entfernen"
+        description={`Möchten Sie die Rolle "${roleToRemove ? getRoleLabel(roleToRemove) : ''}" wirklich entfernen?`}
+        confirmText="Entfernen"
+        cancelText="Abbrechen"
+        variant="destructive"
+        onConfirm={() => void handleRemoveRole()}
+        isLoading={removeRoleMutation.isPending}
+      />
     </>
   );
 };

@@ -1,5 +1,6 @@
 // apps/web/src/features/intern/member-create/ui/steps/MemberDataStep.tsx
 import type { CreateMemberFormData } from '@/entities/intern/member';
+
 import { Button } from '@/shared/shadcn';
 import { FormInput } from '@/shared/ui/form';
 

@@ -5,6 +5,7 @@ import type {
   memberFilterSchema,
   memberListItemSchema,
   updateMemberSchema,
+  userPermissionsSchema,
 } from '@/entities/intern/member/model/schemas';
 
 import type z from 'zod';
@@ -46,6 +47,7 @@ export type BulkActionPayload = {
   };
 };
 
+export type UserPermissions = z.infer<typeof userPermissionsSchema>;
 export type CreateMemberFormData = z.infer<typeof createMemberSchema>;
 
 export type MemberType = 'creator' | 'sponsor' | 'partner';

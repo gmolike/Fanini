@@ -1,6 +1,7 @@
-import { ROLE_CONFIG } from '../model/constants';
+// apps/web/src/entities/intern/member/lib/filters.ts
+import { ROLE_OPTIONS } from '../model/constants';
 
-import type { MemberListFilters, MemberRole } from '../model/types';
+import type { MemberListFilters } from '../model/types';
 
 /**
  * Erstellt die Default-Filter für die Member Liste
@@ -49,27 +50,4 @@ export const formatFiltersForApi = (filters: MemberListFilters) => {
 /**
  * Verfügbare Rollen-Filter Optionen
  */
-export const getRoleFilterOptions = () => {
-  // ROLE_CONFIG ist eine EnumVariantConfig, wir müssen anders darauf zugreifen
-  const roles: MemberRole[] = [
-    'ADMIN',
-    'VORSTAND',
-    'BEIRAT',
-    'KASSENPRUFER',
-    'TEAM_EVENT',
-    'TEAM_TECHNIK',
-    'TEAM_MEDIEN',
-    'TEAM_VEREIN',
-    'MITGLIED',
-  ];
-
-  return roles.map(role => {
-    const config = ROLE_CONFIG[role as keyof typeof ROLE_CONFIG];
-    const label =
-      typeof config === 'object' && 'label' in config ? (config as { label: string }).label : role;
-    return {
-      value: role,
-      label,
-    };
-  });
-};
+export const getRoleFilterOptions = () => ROLE_OPTIONS;

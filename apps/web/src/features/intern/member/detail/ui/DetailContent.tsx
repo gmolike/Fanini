@@ -1,3 +1,4 @@
+// apps/web/src/features/intern/member/detail/ui/DetailContent.tsx
 import { useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
@@ -11,8 +12,9 @@ import {
   type MemberRole,
   needsApproval,
   useMemberDetail,
-  useUserPermissions,
 } from '@/entities/intern/member';
+
+import { useSafePermissions } from '../hooks/useSafePermissions';
 
 import { ActionsCard } from './ActionsCard';
 import { ContactCard } from './ContactCard';
@@ -27,14 +29,18 @@ export const DetailContent = ({ memberId }: DetailContentProps) => {
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
-  const { data: memberData, isLoading, error } = useMemberDetail({ memberId });
-  const { data: permissions } = useUserPermissions();
+  const {
+    data: memberData,
+    isLoading: memberLoading,
+    error: memberError,
+  } = useMemberDetail({ memberId });
+  const { userRole, userId: currentUserId, isLoading: permissionsLoading } = useSafePermissions();
 
-  if (isLoading) {
+  if (memberLoading || permissionsLoading) {
     return <div>Mitgliederdaten werden geladen...</div>;
   }
 
-  if (error || !memberData?.data) {
+  if (memberError || !memberData?.data) {
     void navigate({ to: '/intern/member/list' });
     return null;
   }
@@ -45,18 +51,15 @@ export const DetailContent = ({ memberId }: DetailContentProps) => {
     rolle: memberData.data.rolle as MemberRole[],
   };
 
-  const userRole = permissions?.role;
-  const currentUserId = permissions?.userId ?? '';
-
-  // Permission checks
+  // Permission checks - userRole ist jetzt immer definiert durch useSafePermissions
   const canViewHigh = canViewSensitiveData(userRole, 'high');
-  // canViewCritical entfernt - wird nicht genutzt
   const canEdit = canEditMember(userRole, member.id, currentUserId);
   const requiresApproval = needsApproval(userRole);
 
-  const canManageRoles = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole ?? '');
-  const canResetPassword = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole ?? '');
-  const canToggleStatus = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole ?? '');
+  // Role-based permissions
+  const canManageRoles = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole);
+  const canResetPassword = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole);
+  const canToggleStatus = ['ADMIN', 'VORSTAND', 'BEIRAT'].includes(userRole);
   const canDelete = userRole === 'ADMIN' || userRole === 'VORSTAND';
 
   return (
@@ -70,11 +73,7 @@ export const DetailContent = ({ memberId }: DetailContentProps) => {
 
         {/* Right Column */}
         <div className="space-y-6">
-          <RolesCard
-            member={member}
-            canManageRoles={canManageRoles}
-            userRole={userRole ?? 'MITGLIED'}
-          />
+          <RolesCard member={member} canManageRoles={canManageRoles} userRole={userRole} />
 
           <ActionsCard
             member={member}

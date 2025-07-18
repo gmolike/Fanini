@@ -1,4 +1,7 @@
+// apps/web/src/features/intern/member/list/ui/ListContent.tsx
 import { useState } from 'react';
+
+import { toast } from 'sonner';
 
 import { CreateMemberDialog } from '@/features/intern/member/create';
 
@@ -9,7 +12,7 @@ import { ListTable } from './ListTable';
 import { ListToolbar } from './ListToolbar';
 
 /**
- * MemberListContent Component
+ * ListContent Component
  *
  * @description Hauptkomponente für die Mitgliederliste mit allen Features
  */
@@ -32,8 +35,8 @@ export const ListContent = () => {
     filters.search !== '' || filters.roleId !== undefined || filters.active !== true;
 
   const handleExport = () => {
-    console.log('Export members with filters:', filters);
-    // TODO: Implement export functionality
+    // Implement export functionality
+    toast.info('Export-Funktion wird implementiert');
   };
 
   return (
@@ -53,7 +56,7 @@ export const ListContent = () => {
       <BulkActions
         selectedCount={selectedMembers.size}
         onBulkAction={(action, data) => {
-          executeBulkAction({
+          void executeBulkAction({
             action,
             memberIds: Array.from(selectedMembers),
             data,

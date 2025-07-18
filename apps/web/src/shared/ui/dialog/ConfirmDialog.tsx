@@ -1,4 +1,4 @@
-// shared/ui/dialog/ConfirmDialog.tsx
+// apps/web/src/shared/ui/dialog/ConfirmDialog.tsx
 import {
   AlertDialog,
   AlertDialogAction,
@@ -51,7 +51,9 @@ export const ConfirmDialog = ({
             onClick={onConfirm}
             disabled={isLoading}
             className={
-              variant === 'destructive' ? 'bg-destructive text-destructive-foreground' : ''
+              variant === 'destructive'
+                ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                : ''
             }
           >
             {isLoading ? 'Wird verarbeitet...' : confirmText}

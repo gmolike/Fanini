@@ -1,13 +1,16 @@
+// apps/web/src/features/intern/member/list/ui/ListToolbar.tsx
+import { useEffect } from 'react';
+
 import { Download, Filter, Search, UserPlus } from 'lucide-react';
 
 import {
-  getRoleFilterOptions,
+  getRoleLabel,
   type MemberListFilters,
-  ROLE_CONFIG,
+  type MemberRole,
+  ROLE_OPTIONS,
 } from '@/entities/intern/member';
 
 import { Badge, Button } from '@/shared/shadcn';
-import { debounce } from '@/shared/ui/dataTable';
 import { FormInput, FormSelect, useForm } from '@/shared/ui/form';
 
 type ListToolbarProps = {
@@ -33,27 +36,35 @@ export const ListToolbar = ({
     defaultValues: {
       search: filters.search ?? '',
       status: filters.active?.toString() ?? 'all',
-      role: filters.roleId ?? 'all',
+      role: filters.roleId ?? ('all' as string),
     },
   });
 
-  const debouncedSearch = debounce((value: string) => {
-    onFilterChange('search', value);
-  }, 300);
-
-  // Verwende watch und register anstatt onChange
+  // Watch form values
   const searchValue = form.watch('search');
   const statusValue = form.watch('status');
   const roleValue = form.watch('role');
 
-  // Register fields
-  form.register('search');
+  // Handle search changes with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onFilterChange('search', searchValue);
+    }, 300);
 
-  // Use effect for debounced search
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    form.setValue('search', e.target.value);
-    debouncedSearch(e.target.value);
-  };
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchValue, onFilterChange]);
+
+  // Handle status changes
+  useEffect(() => {
+    onFilterChange('active', statusValue === 'all' ? undefined : statusValue === 'true');
+  }, [statusValue, onFilterChange]);
+
+  // Handle role changes
+  useEffect(() => {
+    onFilterChange('roleId', roleValue === 'all' ? undefined : (roleValue as MemberRole));
+  }, [roleValue, onFilterChange]);
 
   return (
     <div className="space-y-4">
@@ -66,17 +77,17 @@ export const ListToolbar = ({
             placeholder="Name oder E-Mail suchen..."
             startIcon={Search}
             showReset={false}
-            // Nutze onValueChange statt onChange
-            onValueChange={value => { debouncedSearch(value); }}
           />
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          {canExport ? <Button variant="outline" size="sm" onClick={onExportClick} disabled={!onExportClick}>
+          {canExport ? (
+            <Button variant="outline" size="sm" onClick={onExportClick} disabled={!onExportClick}>
               <Download className="mr-2 h-4 w-4" />
               Exportieren
-            </Button> : null}
+            </Button>
+          ) : null}
           <Button onClick={onCreateClick} size="sm">
             <UserPlus className="mr-2 h-4 w-4" />
             Lokales Mitglied anlegen
@@ -101,9 +112,6 @@ export const ListToolbar = ({
               { value: 'true', label: 'Aktiv' },
               { value: 'false', label: 'Inaktiv' },
             ]}
-            onValueChange={value => {
-              onFilterChange('active', value === 'all' ? undefined : value === 'true');
-            }}
             showReset={false}
           />
         </div>
@@ -113,28 +121,31 @@ export const ListToolbar = ({
           <FormSelect
             control={form.control}
             name="role"
-            options={[{ value: 'all', label: 'Alle Rollen' }, ...getRoleFilterOptions()]}
-            onValueChange={value => {
-              onFilterChange('roleId', value === 'all' ? undefined : (value));
-            }}
+            options={[{ value: 'all', label: 'Alle Rollen' }, ...ROLE_OPTIONS]}
             showReset={false}
           />
         </div>
 
-        {isFiltered ? <Button variant="ghost" size="sm" onClick={onReset} className="h-8 px-2 lg:px-3">
+        {isFiltered ? (
+          <Button variant="ghost" size="sm" onClick={onReset} className="h-8 px-2 lg:px-3">
             Filter zurücksetzen
-          </Button> : null}
+          </Button>
+        ) : null}
 
         {/* Active Filter Display */}
-        {filters.roleId ? <Badge variant="secondary" className="gap-1">
-            Rolle: {ROLE_CONFIG[filters.roleId].label}
+        {filters.roleId ? (
+          <Badge variant="secondary" className="gap-1">
+            Rolle: {getRoleLabel(filters.roleId)}
             <button
-              onClick={() => { onFilterChange('roleId', undefined); }}
+              onClick={() => {
+                onFilterChange('roleId', undefined);
+              }}
               className="hover:text-foreground ml-1"
             >
               ×
             </button>
-          </Badge> : null}
+          </Badge>
+        ) : null}
       </div>
     </div>
   );

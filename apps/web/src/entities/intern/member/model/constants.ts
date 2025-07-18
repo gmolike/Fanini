@@ -1,5 +1,12 @@
 import { createEnumVariantConfig } from '@/shared/ui';
 
+const SichtbarkeitEnum = {
+  alle: 'alle',
+  mitglieder: 'mitglieder',
+  vorstand: 'vorstand',
+  niemand: 'niemand',
+} as const;
+
 // Definiere die Enum-Objekte für die Config
 const MemberRoleEnum = {
   ADMIN: 'ADMIN',
@@ -11,13 +18,6 @@ const MemberRoleEnum = {
   TEAM_MEDIEN: 'TEAM_MEDIEN',
   TEAM_VEREIN: 'TEAM_VEREIN',
   MITGLIED: 'MITGLIED',
-} as const;
-
-const SichtbarkeitEnum = {
-  alle: 'alle',
-  mitglieder: 'mitglieder',
-  vorstand: 'vorstand',
-  niemand: 'niemand',
 } as const;
 
 // Role Configuration mit createEnumVariantConfig
@@ -59,6 +59,18 @@ export const ROLE_CONFIG = createEnumVariantConfig(MemberRoleEnum, {
     variant: 'outline',
   },
 });
+
+// Helper function to get role label
+export const getRoleLabel = (role: keyof typeof MemberRoleEnum): string => {
+  const config = ROLE_CONFIG[role];
+  return config ? config.label : role;
+};
+
+// Export role options as constant
+export const ROLE_OPTIONS = Object.entries(MemberRoleEnum).map(([key, value]) => ({
+  value,
+  label: getRoleLabel(value),
+}));
 
 // Sichtbarkeit Configuration
 export const SICHTBARKEIT_CONFIG = createEnumVariantConfig(SichtbarkeitEnum, {

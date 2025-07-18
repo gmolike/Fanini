@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useParams } from '@tanstack/react-router';
 import { ArrowLeft } from 'lucide-react';
 
-import { MemberDetailContent } from '@/features/intern/member-detail';
+import { MemberDetailContent } from '@/features/intern/member';
 
 import { Container, PageHeader } from '@/shared/ui';
 

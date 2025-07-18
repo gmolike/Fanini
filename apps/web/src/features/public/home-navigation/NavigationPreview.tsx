@@ -150,7 +150,7 @@ export const NavigationPreview = () => {
           className="mt-12 text-center"
         >
           <FloatingCard>
-            <Link to="/app">
+            <Link to="/intern">
               <GlassCard className="group inline-flex cursor-pointer items-center gap-4 p-8 transition-all hover:scale-105">
                 <div className="rounded-full bg-gradient-to-r from-[var(--color-fanini-blue)] to-[var(--color-fanini-red)] p-3">
                   <Shield className="h-8 w-8 text-white" />

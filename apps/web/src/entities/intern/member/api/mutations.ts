@@ -1,6 +1,17 @@
 import { createRemoteMutation, queryClient } from '@/shared/api';
 
-import type { AssignRoleRequest, UpdateMemberRequest } from '../model/types';
+import type {
+  AssignRoleRequest,
+  CreateLocalMemberRequest,
+  CreateLocalMemberResponse,
+  SetPasswordRequest,
+  SetPasswordResponse,
+  UpdateMemberRequest,
+} from '../model/types';
+
+// ============================================
+// MEMBER MUTATIONS
+// ============================================
 
 // Update Member
 export const useUpdateMember = createRemoteMutation<UpdateMemberRequest>({
@@ -11,8 +22,6 @@ export const useUpdateMember = createRemoteMutation<UpdateMemberRequest>({
   method: 'PUT',
   onSuccess: (response, variables) => {
     const vars = variables as unknown as UpdateMemberRequest & { memberId: string };
-
-    // Explizite Type-Prüfung für ESLint strict-boolean-expressions
     if (
       typeof response === 'object' &&
       'needsApproval' in response &&
@@ -20,7 +29,6 @@ export const useUpdateMember = createRemoteMutation<UpdateMemberRequest>({
     ) {
       console.info('TODO: Show notification - Changes require approval');
     }
-
     void queryClient.invalidateQueries({ queryKey: ['members', 'detail', vars.memberId] });
     void queryClient.invalidateQueries({ queryKey: ['members', 'list'] });
   },
@@ -36,6 +44,10 @@ export const useUpdateMyProfile = createRemoteMutation<UpdateMemberRequest>({
   },
 });
 
+// ============================================
+// ROLE MUTATIONS
+// ============================================
+
 // Assign Role
 export const useAssignRole = createRemoteMutation<AssignRoleRequest>({
   endpoint: variables => {
@@ -45,8 +57,6 @@ export const useAssignRole = createRemoteMutation<AssignRoleRequest>({
   method: 'POST',
   onSuccess: (response, variables) => {
     const vars = variables as unknown as AssignRoleRequest & { memberId: string };
-
-    // Explizite Type-Prüfung für ESLint strict-boolean-expressions
     if (
       typeof response === 'object' &&
       'needsApproval' in response &&
@@ -54,7 +64,6 @@ export const useAssignRole = createRemoteMutation<AssignRoleRequest>({
     ) {
       console.info('TODO: Show notification - Role assignment requires approval');
     }
-
     void queryClient.invalidateQueries({ queryKey: ['members', 'detail', vars.memberId] });
     void queryClient.invalidateQueries({ queryKey: ['members', 'list'] });
   },
@@ -70,7 +79,6 @@ export const useRemoveRole = createRemoteMutation<
   },
   method: 'DELETE',
   onSuccess: (response, variables) => {
-    // Explizite Type-Prüfung für ESLint strict-boolean-expressions
     if (
       typeof response === 'object' &&
       'needsApproval' in response &&
@@ -78,11 +86,14 @@ export const useRemoveRole = createRemoteMutation<
     ) {
       console.info('TODO: Show notification - Role removal requires approval');
     }
-
     void queryClient.invalidateQueries({ queryKey: ['members', 'detail', variables.memberId] });
     void queryClient.invalidateQueries({ queryKey: ['members', 'list'] });
   },
 });
+
+// ============================================
+// STATUS MUTATIONS
+// ============================================
 
 // Toggle Member Status
 export const useToggleMemberStatus = createRemoteMutation<
@@ -98,5 +109,32 @@ export const useToggleMemberStatus = createRemoteMutation<
     const vars = variables as { memberId: string; istAktiv: boolean };
     void queryClient.invalidateQueries({ queryKey: ['members', 'detail', vars.memberId] });
     void queryClient.invalidateQueries({ queryKey: ['members', 'list'] });
+  },
+});
+
+// ============================================
+// CREATE & PASSWORD MUTATIONS
+// ============================================
+
+// Create Local Member
+export const useCreateLocalMember = createRemoteMutation<
+  CreateLocalMemberRequest,
+  CreateLocalMemberResponse
+>({
+  endpoint: '/api/members/local',
+  method: 'POST',
+  onSuccess: () => {
+    void queryClient.invalidateQueries({ queryKey: ['members'] });
+  },
+});
+
+// Set Member Password
+export const useSetMemberPassword = createRemoteMutation<SetPasswordResponse, SetPasswordRequest>({
+  endpoint: (variables: SetPasswordRequest) => `/api/members/${variables.memberId}/password`,
+  method: 'PUT',
+  onSuccess: (_, variables) => {
+    void queryClient.invalidateQueries({
+      queryKey: ['members', 'detail', variables.memberId],
+    });
   },
 });

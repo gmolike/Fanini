@@ -5,6 +5,7 @@ export * from './charts';
 export * from './container';
 export * from './data-display';
 export * from './dataTable';
+export * from './dialog/ConfirmDialog';
 export * from './display';
 export * from './document';
 export * from './enum';

@@ -34,7 +34,7 @@ export const fsdConfig = {
           },
           {
             from: 'widgets',
-            allow: ['features', 'entities', 'shared'], // ← Hier ist features erlaubt!
+            allow: ['features', 'entities', 'shared'],
           },
           {
             from: 'features',

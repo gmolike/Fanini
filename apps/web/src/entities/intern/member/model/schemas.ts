@@ -1,8 +1,11 @@
+/* eslint-disable sonarjs/no-duplicate-string */
 import { z } from 'zod';
 
 import { createResponseSchema } from '@/shared/api/schemas/common';
 
-// Type-safe enum tuples
+// ============================================
+// ENUMS
+// ============================================
 export const memberRoleEnum = [
   'ADMIN',
   'VORSTAND',
@@ -16,8 +19,34 @@ export const memberRoleEnum = [
 ] as const;
 
 export const sensitivityLevelEnum = ['none', 'low', 'medium', 'high', 'critical'] as const;
+export const sichtbarkeitEnum = ['alle', 'mitglieder', 'vorstand', 'niemand'] as const;
+export const memberTypeEnum = ['creator', 'sponsor', 'partner'] as const;
+export const passwordOptionEnum = ['none', 'generate', 'manual'] as const;
 
-// Base Member Schema (shared fields)
+// ============================================
+// SHARED SUB-SCHEMAS
+// ============================================
+const adresseSchema = z.object({
+  strasse: z.string().min(3, 'Mindestens 3 Zeichen'),
+  hausnummer: z.string().min(1, 'Hausnummer erforderlich'),
+  plz: z.string().regex(/^\d{5}$/, 'PLZ muss 5 Ziffern haben'),
+  stadt: z.string().min(2, 'Mindestens 2 Zeichen'),
+});
+
+const notfallkontaktSchema = z.object({
+  name: z.string().min(3, 'Mindestens 3 Zeichen'),
+  telefon: z.string().regex(/^[\d\s\-+()]+$/, 'Ungültiges Telefonformat'),
+});
+
+const sichtbarkeitSchema = z.object({
+  email: z.enum(sichtbarkeitEnum),
+  telefon: z.enum(sichtbarkeitEnum),
+  profil: z.enum(sichtbarkeitEnum),
+});
+
+// ============================================
+// BASE MEMBER SCHEMAS
+// ============================================
 const baseMemberSchema = z.object({
   id: z.string(),
   vorname: z.string(),
@@ -29,51 +58,45 @@ const baseMemberSchema = z.object({
   profilbild: z.string().optional(),
 });
 
-// Member List Item Schema (permission-aware)
+// Member List Item Schema
 export const memberListItemSchema = baseMemberSchema.extend({
-  // Optional fields based on permissions
   telefon: z.string().optional(),
   geburtsdatum: z.string().optional(),
   rolle: z.array(z.enum(memberRoleEnum)).default(['MITGLIED']),
   letzteAktivitaet: z.string().optional(),
-  // Display helpers
   vollstaendigerName: z.string().optional(),
 });
 
-// Member Detail Schema (full data with permissions)
+// Member Detail Schema
 export const memberDetailSchema = memberListItemSchema.extend({
-  // Medium sensitivity
-  adresse: z
-    .object({
-      strasse: z.string(),
-      hausnummer: z.string(),
-      plz: z.string(),
-      stadt: z.string(),
-    })
-    .optional(),
-  // High sensitivity
-  notfallkontakt: z
-    .object({
-      name: z.string(),
-      telefon: z.string(),
-    })
-    .optional(),
-  // Critical sensitivity
+  adresse: adresseSchema.optional(),
+  notfallkontakt: notfallkontaktSchema.optional(),
   iban: z.string().optional(),
-  // Metadata
   hatVertraulichkeitserklaerung: z.boolean(),
-  sichtbarkeit: z
-    .object({
-      email: z.enum(['alle', 'mitglieder', 'vorstand', 'niemand']),
-      telefon: z.enum(['alle', 'mitglieder', 'vorstand', 'niemand']),
-      profil: z.enum(['alle', 'mitglieder', 'vorstand', 'niemand']),
-    })
-    .optional(),
+  sichtbarkeit: sichtbarkeitSchema.optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-// Update Member Request Schema
+// ============================================
+// REQUEST SCHEMAS - CREATE
+// ============================================
+export const createMemberSchema = z.object({
+  memberType: z.enum(memberTypeEnum),
+  vorname: z.string().min(2, 'Mindestens 2 Zeichen'),
+  nachname: z.string().min(2, 'Mindestens 2 Zeichen'),
+  email: z.string().email('Ungültige E-Mail-Adresse'),
+  telefon: z.string().optional(),
+  kuenstlername: z.string().optional(),
+  portfolio: z.string().optional(),
+  passwordOption: z.enum(passwordOptionEnum),
+  password: z.string().optional(),
+  sendCredentials: z.boolean(),
+});
+
+// ============================================
+// REQUEST SCHEMAS - UPDATE
+// ============================================
 export const updateMemberSchema = z.object({
   vorname: z.string().min(2).max(100).optional(),
   nachname: z.string().min(2).max(100).optional(),
@@ -85,34 +108,51 @@ export const updateMemberSchema = z.object({
   mitgliedsnummer: z.string().optional(),
   istAktiv: z.boolean().optional(),
   geburtsdatum: z.string().optional(),
-  adresse: z
-    .object({
-      strasse: z.string().min(3),
-      hausnummer: z.string(),
-      plz: z.string().regex(/^\d{5}$/),
-      stadt: z.string().min(2),
-    })
-    .optional(),
+  adresse: adresseSchema.optional(),
   iban: z
     .string()
     .regex(/^[A-Z]{2}\d{2}[A-Z0-9]+$/)
     .optional(),
-  notfallkontakt: z
-    .object({
-      name: z.string().min(3),
-      telefon: z.string().regex(/^[\d\s\-+()]+$/),
-    })
-    .optional(),
+  notfallkontakt: notfallkontaktSchema.optional(),
 });
 
-// Assign Role Schema
+// ============================================
+// REQUEST SCHEMAS - EDIT FORMS
+// ============================================
+export const editBasicInfoSchema = z.object({
+  vorname: z.string().min(2, 'Mindestens 2 Zeichen'),
+  nachname: z.string().min(2, 'Mindestens 2 Zeichen'),
+  email: z.string().email('Ungültige E-Mail-Adresse'),
+  mitgliedsnummer: z.string().min(1, 'Mitgliedsnummer erforderlich'),
+  geburtsdatum: z.string().optional(),
+  istAktiv: z.boolean(),
+});
+
+export const editContactSchema = z.object({
+  telefon: z
+    .string()
+    .regex(/^[\d\s\-+()]*$/, 'Ungültiges Telefonformat')
+    .optional(),
+  adresse: adresseSchema.optional(),
+  notfallkontakt: notfallkontaktSchema.optional(),
+  sichtbarkeit: sichtbarkeitSchema,
+});
+
+// ============================================
+// REQUEST SCHEMAS - OTHER
+// ============================================
 export const assignRoleSchema = z.object({
   rolle: z.enum(memberRoleEnum),
   gueltigBis: z.string().optional(),
   begruendung: z.string().min(10),
 });
 
-// Filter Schema
+export const setPasswordSchema = z.object({
+  generateTemporary: z.boolean().optional(),
+  password: z.string().optional(),
+  sendEmail: z.boolean().optional(),
+});
+
 export const memberFilterSchema = z.object({
   active: z.boolean().optional(),
   search: z.string().optional(),
@@ -121,7 +161,9 @@ export const memberFilterSchema = z.object({
   limit: z.number().min(1).max(100).default(20),
 });
 
-// Response Schemas
+// ============================================
+// RESPONSE SCHEMAS
+// ============================================
 export const memberListResponseSchema = createResponseSchema(z.array(memberListItemSchema)).extend({
   meta: z.object({
     total: z.number(),
@@ -134,7 +176,6 @@ export const memberListResponseSchema = createResponseSchema(z.array(memberListI
 
 export const memberDetailResponseSchema = createResponseSchema(memberDetailSchema);
 
-// Permission Schema
 export const userPermissionsSchema = z.object({
   userId: z.string(),
   role: z.enum(memberRoleEnum),
@@ -146,4 +187,26 @@ export const userPermissionsSchema = z.object({
       sensitivityLevel: z.enum(sensitivityLevelEnum),
     }),
   }),
+});
+
+export const createLocalMemberResponseSchema = z.object({
+  success: z.boolean(),
+  data: z
+    .object({
+      memberId: z.string(),
+      userId: z.string(),
+      temporaryPassword: z.string().optional(),
+    })
+    .optional(),
+  error: z.string().optional(),
+});
+
+export const setPasswordResponseSchema = z.object({
+  success: z.boolean(),
+  data: z
+    .object({
+      temporaryPassword: z.string().optional(),
+    })
+    .optional(),
+  error: z.string().optional(),
 });

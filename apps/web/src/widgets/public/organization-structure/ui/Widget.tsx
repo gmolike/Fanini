@@ -90,7 +90,7 @@ export const OrganizationStructureWidget = () => {
                     nodes={orgChartNodes}
                     expandable
                     onNodeClick={_node => {
-                      // TODO: Implement node click handler
+                      console.log('Node clicked:', _node);
                     }}
                   />
                 </GlassCard>

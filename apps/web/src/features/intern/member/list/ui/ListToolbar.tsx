@@ -1,5 +1,5 @@
 // apps/web/src/features/intern/member/list/ui/ListToolbar.tsx
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Download, Filter, Search, UserPlus } from 'lucide-react';
 
@@ -10,8 +10,16 @@ import {
   ROLE_OPTIONS,
 } from '@/entities/intern/member';
 
-import { Badge, Button } from '@/shared/shadcn';
-import { FormInput, FormSelect, useForm } from '@/shared/ui/form';
+import {
+  Badge,
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/shadcn';
 
 type ListToolbarProps = {
   filters: MemberListFilters;
@@ -32,18 +40,7 @@ export const ListToolbar = ({
   canExport,
   isFiltered,
 }: ListToolbarProps) => {
-  const form = useForm({
-    defaultValues: {
-      search: filters.search ?? '',
-      status: filters.active?.toString() ?? 'all',
-      role: filters.roleId ?? ('all' as string),
-    },
-  });
-
-  // Watch form values
-  const searchValue = form.watch('search');
-  const statusValue = form.watch('status');
-  const roleValue = form.watch('role');
+  const [searchValue, setSearchValue] = useState(filters.search ?? '');
 
   // Handle search changes with debounce
   useEffect(() => {
@@ -56,27 +53,19 @@ export const ListToolbar = ({
     };
   }, [searchValue, onFilterChange]);
 
-  // Handle status changes
-  useEffect(() => {
-    onFilterChange('active', statusValue === 'all' ? undefined : statusValue === 'true');
-  }, [statusValue, onFilterChange]);
-
-  // Handle role changes
-  useEffect(() => {
-    onFilterChange('roleId', roleValue === 'all' ? undefined : (roleValue as MemberRole));
-  }, [roleValue, onFilterChange]);
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         {/* Search */}
-        <div className="max-w-sm flex-1">
-          <FormInput
-            control={form.control}
-            name="search"
+        <div className="relative max-w-sm flex-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            value={searchValue}
+            onChange={e => {
+              setSearchValue(e.target.value);
+            }}
             placeholder="Name oder E-Mail suchen..."
-            startIcon={Search}
-            showReset={false}
+            className="pl-10"
           />
         </div>
 
@@ -103,28 +92,41 @@ export const ListToolbar = ({
         </div>
 
         {/* Status Filter */}
-        <div className="w-32">
-          <FormSelect
-            control={form.control}
-            name="status"
-            options={[
-              { value: 'all', label: 'Alle' },
-              { value: 'true', label: 'Aktiv' },
-              { value: 'false', label: 'Inaktiv' },
-            ]}
-            showReset={false}
-          />
-        </div>
+        <Select
+          value={filters.active === undefined ? 'all' : filters.active.toString()}
+          onValueChange={value => {
+            onFilterChange('active', value === 'all' ? undefined : value === 'true');
+          }}
+        >
+          <SelectTrigger className="w-32">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle</SelectItem>
+            <SelectItem value="true">Aktiv</SelectItem>
+            <SelectItem value="false">Inaktiv</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Role Filter */}
-        <div className="w-40">
-          <FormSelect
-            control={form.control}
-            name="role"
-            options={[{ value: 'all', label: 'Alle Rollen' }, ...ROLE_OPTIONS]}
-            showReset={false}
-          />
-        </div>
+        <Select
+          value={filters.roleId ?? 'all'}
+          onValueChange={value => {
+            onFilterChange('roleId', value === 'all' ? undefined : (value as MemberRole));
+          }}
+        >
+          <SelectTrigger className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Alle Rollen</SelectItem>
+            {ROLE_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
         {isFiltered ? (
           <Button variant="ghost" size="sm" onClick={onReset} className="h-8 px-2 lg:px-3">

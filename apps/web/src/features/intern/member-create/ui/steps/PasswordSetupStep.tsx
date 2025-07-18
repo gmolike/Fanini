@@ -11,13 +11,16 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from '@/shared/shadcn';
-import { FormCheckbox, FormInput, type UseFormReturn } from '@/shared/ui/form';
+import { FormCheckbox, FormInput } from '@/shared/ui/form';
 
 import { PasswordGenerator } from '../components/PasswordGenerator';
 import { PasswordStrengthIndicator } from '../components/PasswordStrengthIndicator';
 
+import type { CreateMemberFormData } from '../../model/types';
+import type { UseFormReturn } from 'react-hook-form';
+
 type PasswordSetupStepProps = {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<CreateMemberFormData>;
   onSubmit: () => void;
   onBack: () => void;
   isSubmitting: boolean;
@@ -25,7 +28,6 @@ type PasswordSetupStepProps = {
 
 /**
  * PasswordSetupStep Component
- *
  * @description Schritt 3: Passwort-Einstellungen
  */
 export const PasswordSetupStep = ({
@@ -37,6 +39,10 @@ export const PasswordSetupStep = ({
   const [showPassword, setShowPassword] = useState(false);
   const passwordOption = form.watch('passwordOption');
   const password = form.watch('password');
+
+  const handleIconClick = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <div className="space-y-6">
@@ -50,7 +56,7 @@ export const PasswordSetupStep = ({
       <RadioGroup
         value={passwordOption}
         onValueChange={value => {
-          form.setValue('passwordOption', value);
+          form.setValue('passwordOption', value as CreateMemberFormData['passwordOption']);
         }}
         className="space-y-3"
       >
@@ -93,20 +99,29 @@ export const PasswordSetupStep = ({
 
       {passwordOption === 'manual' && (
         <div className="space-y-4">
-          <FormInput
-            control={form.control}
-            name="password"
-            label="Passwort"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Mindestens 8 Zeichen"
-            required
-            endIcon={showPassword ? EyeOff : Eye}
-            onEndIconClick={() => {
-              setShowPassword(!showPassword);
-            }}
-          />
+          <div className="relative">
+            <FormInput
+              control={form.control}
+              name="password"
+              label="Passwort"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Mindestens 8 Zeichen"
+              required
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="absolute top-8 right-2"
+              onClick={handleIconClick}
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </Button>
+          </div>
 
-          {password ? <PasswordStrengthIndicator password={password} /> : null}
+          {typeof password === 'string' && password.length > 0 && (
+            <PasswordStrengthIndicator password={password} />
+          )}
 
           <Alert>
             <AlertDescription>

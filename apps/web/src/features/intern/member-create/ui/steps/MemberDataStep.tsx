@@ -1,17 +1,19 @@
 // apps/web/src/features/intern/member-create/ui/steps/MemberDataStep.tsx
 import { Button } from '@/shared/shadcn';
-import { FormInput, type UseFormReturn } from '@/shared/ui/form';
+import { FormInput } from '@/shared/ui/form';
+
+import type { CreateMemberFormData } from '../../model/types';
+import type { UseFormReturn } from 'react-hook-form';
 
 type MemberDataStepProps = {
-  form: UseFormReturn<any>;
-  memberType: 'creator' | 'sponsor' | 'partner';
+  form: UseFormReturn<CreateMemberFormData>;
+  memberType: CreateMemberFormData['memberType'];
   onNext: () => void;
   onBack: () => void;
 };
 
 /**
  * MemberDataStep Component
- *
  * @description Schritt 2: Eingabe der Mitgliedsdaten
  */
 export const MemberDataStep = ({ form, memberType, onNext, onBack }: MemberDataStepProps) => {

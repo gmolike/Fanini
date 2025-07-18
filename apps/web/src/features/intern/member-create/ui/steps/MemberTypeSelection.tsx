@@ -2,10 +2,12 @@
 import { Building2, Handshake, Palette } from 'lucide-react';
 
 import { Button, Label, RadioGroup, RadioGroupItem } from '@/shared/shadcn';
-import type { UseFormReturn } from '@/shared/ui/form';
+
+import type { CreateMemberFormData } from '../../model/types';
+import type { UseFormReturn } from 'react-hook-form';
 
 type MemberTypeSelectionProps = {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<CreateMemberFormData>;
   onNext: () => void;
 };
 
@@ -28,11 +30,10 @@ const memberTypes = [
     description: 'Kooperationspartner und Organisationen',
     icon: Handshake,
   },
-];
+] as const;
 
 /**
  * MemberTypeSelection Component
- *
  * @description Schritt 1: Auswahl des Mitgliedstyps
  */
 export const MemberTypeSelection = ({ form, onNext }: MemberTypeSelectionProps) => {
@@ -50,7 +51,7 @@ export const MemberTypeSelection = ({ form, onNext }: MemberTypeSelectionProps) 
       <RadioGroup
         value={memberType}
         onValueChange={value => {
-          form.setValue('memberType', value);
+          form.setValue('memberType', value as CreateMemberFormData['memberType']);
         }}
         className="grid gap-4"
       >

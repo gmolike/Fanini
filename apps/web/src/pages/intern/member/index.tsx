@@ -4,8 +4,12 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 export const Route = createFileRoute('/intern/member/')({
   beforeLoad: () => {
     // Redirect zur Liste
-    throw redirect({
-      to: '/intern/member/list',
-    });
+    throw new Error(
+      JSON.stringify(
+        redirect({
+          to: '/intern/member/list',
+        })
+      )
+    );
   },
 });

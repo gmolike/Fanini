@@ -1,18 +1,20 @@
 // apps/web/src/features/intern/member-password/ui/SetPasswordDialog.tsx
 import { useState } from 'react';
 
-import { Mail,RefreshCw } from 'lucide-react';
+import { Mail, RefreshCw } from 'lucide-react';
 
 import { useSetMemberPassword } from '@/features/intern/member-create';
 
 import {
+  Alert,
+  AlertDescription,
+  Button,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/shared/shadcn';
-import { Alert, AlertDescription,Button, LoadingState } from '@/shared/ui';
 
 type SetPasswordDialogProps = {
   open: boolean;
@@ -23,7 +25,6 @@ type SetPasswordDialogProps = {
 
 /**
  * SetPasswordDialog Component
- *
  * @description Dialog zum Zurücksetzen von Passwörtern
  */
 export const SetPasswordDialog = ({
@@ -38,14 +39,18 @@ export const SetPasswordDialog = ({
   const mutation = useSetMemberPassword();
 
   const handleGeneratePassword = async () => {
-    const result = await mutation.mutateAsync({
-      memberId,
-      generateTemporary: true,
-      sendEmail,
-    });
+    try {
+      const result = await mutation.mutateAsync({
+        memberId,
+        generateTemporary: true,
+        sendEmail,
+      });
 
-    if (result.data?.temporaryPassword) {
-      setGeneratedPassword(result.data.temporaryPassword);
+      if (result.success && result.data?.temporaryPassword) {
+        setGeneratedPassword(result.data.temporaryPassword);
+      }
+    } catch (error) {
+      console.error('Error generating password:', error);
     }
   };
 
@@ -72,7 +77,7 @@ export const SetPasswordDialog = ({
                   type="checkbox"
                   id="sendEmail"
                   checked={sendEmail}
-                  onChange={e => { setSendEmail(e.target.checked); }}
+                  onChange={(e) => { setSendEmail(e.target.checked); }}
                   className="rounded"
                 />
                 <label htmlFor="sendEmail" className="text-sm">
@@ -85,15 +90,15 @@ export const SetPasswordDialog = ({
                 <Button variant="outline" onClick={() => { onOpenChange(false); }}>
                   Abbrechen
                 </Button>
-                <Button onClick={handleGeneratePassword} loading={mutation.isPending}>
+                <Button onClick={() => void handleGeneratePassword()} disabled={mutation.isPending}>
                   <RefreshCw className="mr-2 h-4 w-4" />
-                  Passwort generieren
+                  {mutation.isPending ? 'Wird generiert...' : 'Passwort generieren'}
                 </Button>
               </div>
             </>
           ) : (
             <>
-              <Alert variant="success">
+              <Alert>
                 <AlertDescription>
                   Temporäres Passwort wurde erfolgreich generiert:
                 </AlertDescription>

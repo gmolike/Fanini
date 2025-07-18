@@ -1,22 +1,21 @@
 // apps/web/src/features/intern/member-create/api/mutations.ts
-import { z } from 'zod';
-
 import { createRemoteMutation, queryClient } from '@/shared/api';
 
-const createLocalMemberSchema = z.object({
-  vorname: z.string().min(2),
-  nachname: z.string().min(2),
-  email: z.string().email(),
-  telefon: z.string().optional(),
-  memberType: z.enum(['creator', 'sponsor', 'partner']),
-  passwordOption: z.enum(['none', 'generate', 'manual']),
-  password: z.string().optional(),
-  kuenstlername: z.string().optional(),
-  portfolio: z.string().url().optional(),
-  sendCredentials: z.boolean(),
-});
+import type { UseMutationResult } from '@tanstack/react-query';
 
-type CreateLocalMemberRequest = z.infer<typeof createLocalMemberSchema>;
+// Request Types
+type CreateLocalMemberRequest = {
+  vorname: string;
+  nachname: string;
+  email: string;
+  telefon?: string;
+  memberType: 'creator' | 'sponsor' | 'partner';
+  passwordOption: 'none' | 'generate' | 'manual';
+  password?: string;
+  kuenstlername?: string;
+  portfolio?: string;
+  sendCredentials: boolean;
+};
 
 type CreateLocalMemberResponse = {
   success: boolean;
@@ -31,20 +30,25 @@ type CreateLocalMemberResponse = {
 /**
  * Create Local Member Mutation
  */
-export const useCreateLocalMember = createRemoteMutation;
-(CreateLocalMemberRequest,
-  CreateLocalMemberResponse >
-    {
-      endpoint: '/api/members/local',
-      method: 'POST',
-      onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: ['members'] });
-      },
-    });
+const mutation = createRemoteMutation<CreateLocalMemberRequest, CreateLocalMemberResponse>({
+  endpoint: '/api/members/local',
+  method: 'POST',
+  onSuccess: () => {
+    void queryClient.invalidateQueries({ queryKey: ['members'] });
+  },
+});
 
-/**
- * Set Member Password Mutation
- */
+export const useCreateLocalMember = (): UseMutationResult<
+  CreateLocalMemberResponse,
+  Error,
+  CreateLocalMemberRequest
+> => {
+  return mutation as unknown as UseMutationResult<
+    CreateLocalMemberResponse,
+    Error,
+    CreateLocalMemberRequest
+  >;
+};
 type SetPasswordRequest = {
   memberId: string;
   generateTemporary?: boolean;
@@ -60,15 +64,12 @@ type SetPasswordResponse = {
   error?: string;
 };
 
-export const useSetMemberPassword = createRemoteMutation;
-(SetPasswordRequest,
-  SetPasswordResponse >
-    {
-      endpoint: variables => `/api/members/${variables.memberId}/password`,
-      method: 'PUT',
-      onSuccess: (_, variables) => {
-        void queryClient.invalidateQueries({
-          queryKey: ['members', 'detail', variables.memberId],
-        });
-      },
+export const useSetMemberPassword = createRemoteMutation<SetPasswordResponse, SetPasswordRequest>({
+  endpoint: (variables: SetPasswordRequest) => `/api/members/${variables.memberId}/password`,
+  method: 'PUT',
+  onSuccess: (_, variables) => {
+    void queryClient.invalidateQueries({
+      queryKey: ['members', 'detail', variables.memberId],
     });
+  },
+});

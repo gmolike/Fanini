@@ -1,24 +1,16 @@
 // apps/web/src/pages/intern/member/detail.$memberId.tsx
-import { createFileRoute } from '@tanstack/react-router';
-import { Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useParams } from '@tanstack/react-router';
 import { ArrowLeft, User } from 'lucide-react';
 
-import {
-  Button,
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Container,
-  PageHeader,
-} from '@/shared/ui';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
+import { Button, Container, PageHeader } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/member/detail/$memberId')({
   component: MemberDetailPage,
 });
 
 function MemberDetailPage() {
-  const { memberId } = Route.useParams();
+  const { memberId } = useParams({ from: '/intern/member/detail/$memberId' });
 
   return (
     <Container className="py-8">

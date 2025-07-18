@@ -2,8 +2,7 @@
 import { useMemo } from 'react';
 
 import { cn } from '@/shared/lib';
-
-import { validatePassword } from '../../lib/password-utils';
+import { validatePassword } from '@/shared/lib/password';
 
 type PasswordStrengthIndicatorProps = {
   password: string;

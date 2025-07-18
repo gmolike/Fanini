@@ -2,7 +2,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { LayoutDashboard } from 'lucide-react';
 
-import { Card, CardDescription,CardHeader, CardTitle, Container, PageHeader } from '@/shared/ui';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
+import { Container, PageHeader } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/member/dashboard')({
   component: MemberDashboardPage,

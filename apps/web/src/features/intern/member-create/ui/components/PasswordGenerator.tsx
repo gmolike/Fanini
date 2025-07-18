@@ -3,18 +3,18 @@ import { useState } from 'react';
 
 import { Check, Copy, RefreshCw } from 'lucide-react';
 
+import { generateTemporaryPassword } from '@/shared/lib/password';
 import { Alert, AlertDescription, Button } from '@/shared/shadcn';
-import type { UseFormReturn } from '@/shared/ui/form';
 
-import { generateTemporaryPassword } from '../../lib/password-utils';
+import type { CreateMemberFormData } from '../../model/types';
+import type { UseFormReturn } from 'react-hook-form';
 
 type PasswordGeneratorProps = {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<CreateMemberFormData>;
 };
 
 /**
  * PasswordGenerator Component
- *
  * @description Zeigt generierte temporäre Passwörter an
  */
 export const PasswordGenerator = ({ form }: PasswordGeneratorProps) => {

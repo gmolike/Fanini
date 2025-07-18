@@ -6,15 +6,8 @@ import { Plus, Users } from 'lucide-react';
 
 import { CreateMemberDialog } from '@/features/intern/member-create';
 
-import {
-  Button,
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Container,
-  PageHeader,
-} from '@/shared/ui';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
+import { Button, Container, PageHeader } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/member/list')({
   component: MemberListPage,
@@ -30,7 +23,11 @@ function MemberListPage() {
           title="Mitglieder verwalten"
           description="Alle Vereinsmitglieder im Überblick"
           actions={
-            <Button onClick={() => { setCreateDialogOpen(true); }}>
+            <Button
+              onClick={() => {
+                setCreateDialogOpen(true);
+              }}
+            >
               <Plus className="mr-2 h-4 w-4" />
               Lokales Mitglied anlegen
             </Button>

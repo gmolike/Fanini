@@ -56,6 +56,12 @@ export const useDataTable = <TData extends TableDataConstraint>(
     disabledColumns,
   } = props;
 
+  // Effective columns MUSS VOR columnVisibility definiert werden
+  const effectiveSelectableColumns = useMemo(
+    () => selectableColumns ?? tableDefinition.fields.map(field => field.id),
+    [selectableColumns, tableDefinition.fields]
+  );
+
   // State
   const [sorting, setSorting] = useState<DataTableState['sorting']>([]);
   const [columnFilters, setColumnFilters] = useState<DataTableState['columnFilters']>([]);
@@ -63,12 +69,6 @@ export const useDataTable = <TData extends TableDataConstraint>(
   const [isExpanded, setIsExpanded] = useState(!expandable);
   const [columnVisibility, setColumnVisibility] = useState(() =>
     getColumnVisibility(tableDefinition, effectiveSelectableColumns)
-  );
-
-  // Effective columns
-  const effectiveSelectableColumns = useMemo(
-    () => selectableColumns ?? tableDefinition.fields.map(field => field.id),
-    [selectableColumns, tableDefinition.fields]
   );
 
   // Convert to TanStack columns

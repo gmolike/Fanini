@@ -1,3 +1,4 @@
+// apps/web/src/entities/intern/member/lib/tableDefinitions.ts
 import type { MemberListItem } from '@/entities/intern/member';
 
 import { createTableDefinition, DateCell } from '@/shared/ui/dataTable';
@@ -24,54 +25,56 @@ const memberLabels: Record<keyof MemberListItem | 'actions', string> = {
   actions: 'Aktionen',
 };
 
-export const memberTableDefinition = createTableDefinition<MemberListItem>({
-  labels: memberLabels,
-  fields: [
-    {
-      id: 'vollstaendigerName',
-      cell: MemberNameCell,
-      searchable: true,
-      toggleable: false,
-      accessor: row => `${row.vorname} ${row.nachname}`,
-    },
-    {
-      id: 'email',
-      searchable: true,
-    },
-    {
-      id: 'telefon',
-      defaultVisible: false,
-    },
-    {
-      id: 'rolle',
-      cell: MemberRoleCell,
-      filterable: true,
-    },
-    {
-      id: 'istAktiv',
-      cell: MemberStatusCell,
-      filterable: true,
-      width: 100,
-    },
-    {
-      id: 'mitgliedsnummer',
-      defaultVisible: false,
-      searchable: true,
-    },
-    {
-      id: 'mitgliedSeit',
-      cell: DateCell,
-      width: 120,
-    },
-    {
-      id: 'letzteAktivitaet',
-      cell: DateCell,
-      defaultVisible: false,
-    },
-    {
-      id: 'actions',
-      width: 100,
-      sortable: false,
-    },
-  ],
-});
+// Als Funktion exportieren um Initialisierungsprobleme zu vermeiden
+export const getMemberTableDefinition = () =>
+  createTableDefinition<MemberListItem>({
+    labels: memberLabels,
+    fields: [
+      {
+        id: 'vollstaendigerName',
+        cell: MemberNameCell,
+        searchable: true,
+        toggleable: false,
+        accessor: row => `${row.vorname} ${row.nachname}`,
+      },
+      {
+        id: 'email',
+        searchable: true,
+      },
+      {
+        id: 'telefon',
+        defaultVisible: false,
+      },
+      {
+        id: 'rolle',
+        cell: MemberRoleCell,
+        filterable: true,
+      },
+      {
+        id: 'istAktiv',
+        cell: MemberStatusCell,
+        filterable: true,
+        width: 100,
+      },
+      {
+        id: 'mitgliedsnummer',
+        defaultVisible: false,
+        searchable: true,
+      },
+      {
+        id: 'mitgliedSeit',
+        cell: DateCell,
+        width: 120,
+      },
+      {
+        id: 'letzteAktivitaet',
+        cell: DateCell,
+        defaultVisible: false,
+      },
+      {
+        id: 'actions',
+        width: 100,
+        sortable: false,
+      },
+    ],
+  });

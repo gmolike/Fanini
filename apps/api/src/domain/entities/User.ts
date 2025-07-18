@@ -21,6 +21,8 @@ export type User = {
   easyVereinId?: string;
   /** Passwort-Hash (nur für lokale User) */
   passwordHash?: string;
+  /** Primäre Rolle für Quick-Checks */
+  role?: RoleName;
   /** Aktiv-Status */
   istAktiv: boolean;
   /** Erstellungsdatum */
@@ -29,6 +31,8 @@ export type User = {
   aktualisiertAm: Date;
   /** Letzter Login (optional) */
   letzterLogin?: Date;
+  /** Metadata für flexible Daten */
+  metadata?: Record<string, any>;
 };
 
 /**
@@ -51,6 +55,7 @@ export type RoleName =
   | "ADMIN"
   | "VORSTAND"
   | "BEIRAT"
+  | "KASSENPRUFER"
   | "TEAM_EVENT"
   | "TEAM_MEDIEN"
   | "TEAM_TECHNIK"

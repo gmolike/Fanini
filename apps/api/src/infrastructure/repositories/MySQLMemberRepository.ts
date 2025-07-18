@@ -4,6 +4,63 @@ import { MySQLConnection } from "./MySQLConnection";
 
 export class MySQLMemberRepository implements IMemberRepository {
   constructor(private db: MySQLConnection) {}
+  async create(data: {
+    user_id: string;
+    vorname: string;
+    nachname: string;
+    email: string;
+    telefon?: string;
+    member_type: "easyverein" | "creator" | "sponsor" | "partner";
+    mitglied_seit: Date;
+    ist_aktiv: boolean;
+  }): Promise<any> {
+    const id = `mbr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    await this.db.query(
+      `INSERT INTO mitglieder
+       (id, user_id, vorname, nachname, email, telefon, member_type, mitglied_seit, ist_aktiv)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.user_id,
+        data.vorname,
+        data.nachname,
+        data.email,
+        data.telefon || null,
+        data.member_type,
+        data.mitglied_seit,
+        data.ist_aktiv,
+      ],
+    );
+
+    return { id, ...data };
+  }
+
+  async createCreatorProfile(data: {
+    member_id: string;
+    kuenstlername: string;
+    portfolio_link?: string;
+    ist_aktiv: boolean;
+    aktiv_seit: Date;
+  }): Promise<any> {
+    const id = `crt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+    await this.db.query(
+      `INSERT INTO creators
+       (id, member_id, artist_name, portfolio, is_active, active_since)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.member_id,
+        data.kuenstlername,
+        data.portfolio_link || null,
+        data.ist_aktiv,
+        data.aktiv_seit,
+      ],
+    );
+
+    return { id, ...data };
+  }
 
   async findAll(filters?: {
     active?: boolean;

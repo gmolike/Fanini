@@ -148,7 +148,7 @@ export function TeamPage({
   icon: Icon,
   color,
   features,
-}: TeamPageProps) {
+}: Readonly<TeamPageProps>) {
   return (
     <Container className="py-8">
       <div className="space-y-6">
@@ -173,8 +173,8 @@ export function TeamPage({
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-start gap-3">
+              {features.map(feature => (
+                <div key={feature} className="flex items-start gap-3">
                   <div className={`rounded-full bg-gradient-to-r ${color} p-1`}>
                     <div className="h-2 w-2 rounded-full bg-white" />
                   </div>

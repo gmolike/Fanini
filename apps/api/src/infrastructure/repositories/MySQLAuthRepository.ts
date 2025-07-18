@@ -219,4 +219,31 @@ export class MySQLAuthRepository implements IAuthRepository {
   private camelToSnake(str: string): string {
     return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
   }
+  async logPasswordAction(params: {
+    user_id: string;
+    action: "set" | "change" | "reset" | "expire";
+    performed_by: string;
+    expires_at?: Date;
+    temporary: boolean;
+    ip_address?: string;
+    user_agent?: string;
+  }): Promise<void> {
+    const id = `pwh_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+
+    await this.db.query(
+      `INSERT INTO password_history
+       (id, user_id, action, performed_by, expires_at, temporary, ip_address, user_agent)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        params.user_id,
+        params.action,
+        params.performed_by,
+        params.expires_at || null,
+        params.temporary,
+        params.ip_address || null,
+        params.user_agent || null,
+      ],
+    );
+  }
 }

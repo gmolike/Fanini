@@ -29,6 +29,9 @@ export const navigationItems: NavItem[] = [
     icon: PlusCircle,
     requiredRole: ['admin', 'vorstand', 'beirat'],
   },
+  { name: 'Mitglieder Übersicht', href: '/intern/member/list', icon: Crown },
+  { name: 'Mitglieder Dashboard', href: '/intern/member/dashboard', icon: Crown },
+
   { name: 'Verein', href: '/intern/club', icon: Crown },
 
   // Dev Section - nur für Admins sichtbar
@@ -41,19 +44,16 @@ export const navigationItems: NavItem[] = [
     name: 'Storybook',
     href: '/intern/dev/storybook',
     icon: BookOpen,
-    requiredRole: ['admin'],
   },
   {
     name: 'Features',
     href: '/intern/dev/features',
     icon: Rocket,
-    requiredRole: ['admin'],
   },
   {
     name: 'Roadmap',
     href: '/intern/dev/roadmap',
     icon: GitBranch,
-    requiredRole: ['admin'],
   },
 
   {

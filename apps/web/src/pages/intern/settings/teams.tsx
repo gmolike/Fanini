@@ -1,16 +1,8 @@
 // src/pages/intern/settings/teams.tsx
 import { createFileRoute } from '@tanstack/react-router';
-import { Settings as SettingsIcon,Shield, UserPlus, Users } from 'lucide-react';
+import { Settings as SettingsIcon, Shield, UserPlus, Users } from 'lucide-react';
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/shadcn';
+import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/shadcn';
 import { Container } from '@/shared/ui';
 
 export const Route = createFileRoute('/intern/settings/teams')({

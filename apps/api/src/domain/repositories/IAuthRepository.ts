@@ -114,4 +114,18 @@ export interface IAuthRepository {
    * @param revokedBy - ID des widerrufenden Users
    */
   revokeAllUserRefreshTokens(userId: string, revokedBy: string): Promise<void>;
+  
+  /**
+   * Loggt eine Password-Aktion
+   * @param params - Die Log-Parameter
+   */
+  logPasswordAction(params: {
+    user_id: string;
+    action: "set" | "change" | "reset" | "expire";
+    performed_by: string;
+    expires_at?: Date;
+    temporary: boolean;
+    ip_address?: string;
+    user_agent?: string;
+  }): Promise<void>;
 }

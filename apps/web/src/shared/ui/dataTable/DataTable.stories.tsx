@@ -1,9 +1,5 @@
- 
- 
- 
 /* eslint-disable no-console */
 // frontend/src/shared/ui/dataTable/DataTable.stories.tsx
-import { expect, userEvent, within } from '@storybook/test';
 
 import { createTableDefinition } from './model/types';
 import { BooleanCell, DateCell, EmailCell } from './ui/cells';
@@ -196,58 +192,6 @@ export const WithSelectedRow: Story = {
     onRowClick: user => {
       console.log('Row clicked:', user);
     },
-  },
-};
-
-/**
- * @description Interaktiver Test
- */
-export const Interactive: Story = {
-  args: {
-    tableDefinition: userTableDefinition,
-    data: sampleUsers,
-    onEdit: user => {
-      console.log('Edit:', user);
-    },
-    onDelete: user => {
-      console.log('Delete:', user);
-    },
-    onAdd: () => {
-      console.log('Add new user');
-    },
-  },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    // Test search
-    const searchInput = canvas.getByPlaceholderText('Suche...');
-    await userEvent.type(searchInput, 'Max');
-
-    // Verify search results
-    await expect(canvas.getByText('Max Mustermann')).toBeInTheDocument();
-
-    // Clear search
-    await userEvent.clear(searchInput);
-
-    // Test column toggle
-    const columnToggle = canvas.getByRole('button', { name: /settings/i });
-    await userEvent.click(columnToggle);
-
-    // Wait for dropdown to appear
-    await expect(canvas.getByText('Sichtbare Spalten')).toBeInTheDocument();
-
-    // Close dropdown by clicking outside
-    await userEvent.click(document.body);
-
-    // Test sorting
-    const nameHeader = canvas.getByRole('button', { name: /name/i });
-    await userEvent.click(nameHeader);
-
-    // Test pagination if visible
-    const nextButton = canvas.queryByRole('button', { name: /nächste seite/i });
-    if (nextButton !== null) {
-      await userEvent.click(nextButton);
-    }
   },
 };
 

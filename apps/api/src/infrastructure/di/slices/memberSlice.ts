@@ -1,7 +1,9 @@
 // src/infrastructure/di/slices/memberSlice.ts
 import { Container } from "../container";
 import {
+  createCreateLocalMemberUseCase,
   createGetMembersWithPermissionUseCase,
+  createSetUserPasswordUseCase,
   GetMembersUseCase,
   UpdateMemberUseCase,
 } from "@/application/use-cases/member";
@@ -11,6 +13,9 @@ import { createMemberDataFilterService } from "@/application/services/MemberData
 import { createUpdateMemberWithApprovalUseCase } from "@/application/use-cases/member/UpdateMemberWithApprovalUseCase";
 import { createApprovalRepository } from "@/infrastructure/repositories/MySQLApprovalRepository";
 import { ProtectedMemberController } from "@/presentation/controllers/member/ProtectedMemberController";
+import { createPasswordService } from "@/domain/services/PasswordService";
+import { createTransactionManager } from "@/infrastructure/database/TransactionManager";
+import { LocalMemberController } from "@/presentation/controllers/member/LocalMemberController";
 
 export const registerMemberSlice = (container: Container) => {
   container.register("MemberRepository", () => {
@@ -72,5 +77,41 @@ export const registerMemberSlice = (container: Container) => {
       getMembersWithPermission,
       updateMemberWithApproval,
     );
+  });
+  container.register("TransactionManager", () => {
+    const db = container.get("Database");
+    return createTransactionManager(db);
+  });
+
+  container.register("PasswordService", () => {
+    return createPasswordService();
+  });
+
+  container.register("CreateLocalMemberUseCase", () => {
+    const authRepo = container.get("AuthRepository");
+    const memberRepo = container.get("MemberRepository");
+    const passwordService = container.get("PasswordService");
+    const transactionManager = container.get("TransactionManager");
+
+    return createCreateLocalMemberUseCase(
+      authRepo,
+      memberRepo,
+      passwordService,
+      transactionManager,
+    );
+  });
+
+  container.register("SetUserPasswordUseCase", () => {
+    const authRepo = container.get("AuthRepository");
+    const passwordService = container.get("PasswordService");
+
+    return createSetUserPasswordUseCase(authRepo, passwordService);
+  });
+
+  container.register("LocalMemberController", () => {
+    const createLocalMember = container.get("CreateLocalMemberUseCase");
+    const setUserPassword = container.get("SetUserPasswordUseCase");
+
+    return new LocalMemberController(createLocalMember, setUserPassword);
   });
 };

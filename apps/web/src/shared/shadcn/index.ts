@@ -24,6 +24,7 @@ export * from './label';
 export * from './LoadingSpinner';
 export * from './popover';
 export * from './progress';
+export * from './radio-group';
 export * from './resizable';
 export * from './scroll-area';
 export * from './select';

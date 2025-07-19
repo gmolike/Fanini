@@ -26,8 +26,8 @@ const setPasswordSchema = z.object({
 
 export class LocalMemberController {
   constructor(
-    private createLocalMemberUseCase: CreateLocalMemberUseCase,
-    private setUserPasswordUseCase: SetUserPasswordUseCase,
+    private readonly createLocalMemberUseCase: CreateLocalMemberUseCase,
+    private readonly setUserPasswordUseCase: SetUserPasswordUseCase,
   ) {}
 
   /**

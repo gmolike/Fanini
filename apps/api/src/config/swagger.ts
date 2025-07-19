@@ -1,7 +1,6 @@
-// src/config/swagger.ts
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const swaggerJsdoc = require("swagger-jsdoc");
+// apps/api/src/config/swagger.ts
+import swaggerJsdoc from "swagger-jsdoc";
+import type { OpenAPIV3 } from "openapi-types";
 
 const options = {
   definition: {
@@ -37,28 +36,6 @@ const options = {
       { name: "📅 Events", description: "Event-Management (geschützt)" },
       { name: "👥 Members", description: "Mitgliederverwaltung" },
       { name: "📄 Documents", description: "Dokumentenverwaltung (geschützt)" },
-    ],
-    "x-tagGroups": [
-      {
-        name: "Public API",
-        tags: [
-          "🌐 Public Events",
-          "🌐 Public Creators",
-          "🌐 Public Documents",
-          "🌐 Public Newsletter",
-          "🌐 Public Organization",
-          "🌐 Public Stats",
-        ],
-      },
-      {
-        name: "Authentication",
-        tags: ["🔐 Auth"],
-      },
-      {
-        name: "Protected API",
-        tags: ["📅 Events", "👥 Members", "📄 Documents"],
-      },
-      { name: "📋 Tasks", description: "Aufgabenverwaltung" },
     ],
     components: {
       securitySchemes: {
@@ -224,10 +201,11 @@ const options = {
     },
   },
   apis: [
-    "./src/presentation/controllers/**/*.ts", // UPDATED!
-    "./src/presentation/routes/**/*.ts", // UPDATED!
-    "./app/api/documents/upload/route.ts", // Special route
+    "./src/presentation/controllers/**/*.ts",
+    "./src/presentation/routes/**/*.ts",
+    "./app/api/documents/upload/route.ts",
   ],
 };
 
-export const swaggerSpec = swaggerJsdoc(options);
+// Type assertion für swagger-jsdoc
+export const swaggerSpec = swaggerJsdoc(options) as OpenAPIV3.Document;

@@ -1,4 +1,7 @@
+// apps/web/src/entities/intern/member/api/mutations.ts
 import { createRemoteMutation, queryClient } from '@/shared/api';
+
+import { MEMBER_ENDPOINTS } from './endpoints';
 
 import type {
   AssignRoleRequest,
@@ -17,7 +20,7 @@ import type {
 export const useUpdateMember = createRemoteMutation<UpdateMemberRequest>({
   endpoint: variables => {
     const vars = variables as unknown as UpdateMemberRequest & { memberId: string };
-    return `/api/members/${vars.memberId}`;
+    return MEMBER_ENDPOINTS.detail(vars.memberId);
   },
   method: 'PUT',
   onSuccess: (response, variables) => {
@@ -36,7 +39,7 @@ export const useUpdateMember = createRemoteMutation<UpdateMemberRequest>({
 
 // Update My Profile
 export const useUpdateMyProfile = createRemoteMutation<UpdateMemberRequest>({
-  endpoint: '/api/members/me',
+  endpoint: MEMBER_ENDPOINTS.updateMe,
   method: 'PUT',
   onSuccess: () => {
     void queryClient.invalidateQueries({ queryKey: ['members', 'my-profile'] });
@@ -52,7 +55,7 @@ export const useUpdateMyProfile = createRemoteMutation<UpdateMemberRequest>({
 export const useAssignRole = createRemoteMutation<AssignRoleRequest>({
   endpoint: variables => {
     const vars = variables as unknown as AssignRoleRequest & { memberId: string };
-    return `/api/members/${vars.memberId}/roles`;
+    return MEMBER_ENDPOINTS.roles(vars.memberId);
   },
   method: 'POST',
   onSuccess: (response, variables) => {
@@ -75,7 +78,7 @@ export const useRemoveRole = createRemoteMutation<
   { memberId: string; roleId: string }
 >({
   endpoint: variables => {
-    return `/api/members/${variables.memberId}/roles/${variables.roleId}`;
+    return MEMBER_ENDPOINTS.role(variables.memberId, variables.roleId);
   },
   method: 'DELETE',
   onSuccess: (response, variables) => {
@@ -102,7 +105,7 @@ export const useToggleMemberStatus = createRemoteMutation<
 >({
   endpoint: (variables: unknown) => {
     const vars = variables as { memberId: string; istAktiv: boolean };
-    return `/api/members/${vars.memberId}/status`;
+    return MEMBER_ENDPOINTS.status(vars.memberId);
   },
   method: 'PATCH',
   onSuccess: (_, variables) => {
@@ -121,7 +124,7 @@ export const useCreateLocalMember = createRemoteMutation<
   CreateLocalMemberRequest,
   CreateLocalMemberResponse
 >({
-  endpoint: '/api/members/local',
+  endpoint: MEMBER_ENDPOINTS.local,
   method: 'POST',
   onSuccess: () => {
     void queryClient.invalidateQueries({ queryKey: ['members'] });
@@ -130,7 +133,7 @@ export const useCreateLocalMember = createRemoteMutation<
 
 // Set Member Password
 export const useSetMemberPassword = createRemoteMutation<SetPasswordResponse, SetPasswordRequest>({
-  endpoint: (variables: SetPasswordRequest) => `/api/members/${variables.memberId}/password`,
+  endpoint: (variables: SetPasswordRequest) => MEMBER_ENDPOINTS.password(variables.memberId),
   method: 'PUT',
   onSuccess: (_, variables) => {
     void queryClient.invalidateQueries({

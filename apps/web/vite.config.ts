@@ -94,7 +94,7 @@ export default defineConfig(({ mode, command }: ConfigEnv) => {
       port: 5173,
       strictPort: true,
       host: true,
-      open: !isTest && !isBuildingStorybook, // Nicht im Test-Modus oder Storybook öffnen
+      open: !isTest && !isBuildingStorybook,
       cors: true,
       hmr: {
         overlay: true,
@@ -102,10 +102,28 @@ export default defineConfig(({ mode, command }: ConfigEnv) => {
         host: 'localhost',
       },
       fs: {
-        allow: ['..'], // Erlaubt Zugriff auf Dateien außerhalb des Projektverzeichnisses
+        allow: ['..'],
       },
-      // Proxy für EasyVerein API
+      // Proxy für APIs
       proxy: {
+        '/api': {
+          target: 'http://localhost:3000',
+          changeOrigin: true,
+          secure: false,
+          // Optional: Logging für Debugging
+          configure: (proxy, _options) => {
+            proxy.on('error', (err, _req, _res) => {
+              console.log('proxy error', err);
+            });
+            proxy.on('proxyReq', (proxyReq, req, _res) => {
+              console.log('Sending Request to the Target:', req.method, req.url);
+            });
+            proxy.on('proxyRes', (proxyRes, req, _res) => {
+              console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+            });
+          },
+        },
+        // Bestehender Proxy für EasyVerein
         '/api/easyverein': {
           target: env['VITE_EASYVEREIN_API_URL'] ?? 'https://api.easyverein.com',
           changeOrigin: true,

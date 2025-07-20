@@ -94,7 +94,9 @@ export const ActionsCard = ({
             <Button
               variant={member.istAktiv ? 'destructive' : 'outline'}
               className="w-full"
-              onClick={() => { setConfirmDialogOpen(true); }}
+              onClick={() => {
+                setConfirmDialogOpen(true);
+              }}
               disabled={toggleStatusMutation.isPending}
             >
               <UserX className="mr-2 h-4 w-4" />
@@ -126,13 +128,19 @@ export const ActionsCard = ({
       />
 
       {/* Custom confirmation dialog */}
-      {confirmDialogOpen ? <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+      {confirmDialogOpen ? (
+        <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
           <div className="w-full max-w-sm rounded bg-white p-6 shadow-lg">
             <div className="mb-4">
               Möchten Sie das Mitglied wirklich {member.istAktiv ? 'deaktivieren' : 'aktivieren'}?
             </div>
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => { setConfirmDialogOpen(false); }}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setConfirmDialogOpen(false);
+                }}
+              >
                 Abbrechen
               </Button>
               <Button
@@ -144,7 +152,8 @@ export const ActionsCard = ({
               </Button>
             </div>
           </div>
-        </div> : null}
+        </div>
+      ) : null}
     </>
   );
 };

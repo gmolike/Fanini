@@ -1,15 +1,15 @@
-﻿// frontend/src/shared/api/index.ts
+﻿// apps/web/src/shared/api/index.ts
 // Client exports
-export * from './client';
+export { apiClient, ApiClientError, type ApiError, type RequestOptions } from './client/apiClient';
 
+// Config exports
+export { API_CONFIG } from './config/constants';
+export { queryClient } from './config/queryClient';
 
 // Query/Mutation utilities
-export * from './queries';
-
-
-
-// Re-export commonly used items
-export { apiClient } from './client/apiClient';
 export { createRemoteMutation } from './mutations';
-// Config exports (queryClient bleibt wo es ist)
-export { queryClient } from './config/queryClient';
+export { createRemoteQuery, createSimpleRemoteQuery } from './queries';
+
+// Types
+export type { RemoteMutationConfig } from './mutations';
+export type { RemoteQueryConfig } from './queries';

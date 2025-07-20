@@ -210,3 +210,89 @@ export const setPasswordResponseSchema = z.object({
     .optional(),
   error: z.string().optional(),
 });
+
+// ============================================
+// FORM SCHEMAS - Für UI Forms
+// ============================================
+
+// Basis Member Form Schema
+export const memberFormSchema = z
+  .discriminatedUnion('mode', [
+    // Create Mode
+    z.object({
+      mode: z.literal('create'),
+      memberType: z.enum(['member', 'creator', 'sponsor', 'partner']),
+      passwordOption: z.enum(['none', 'generate', 'manual']),
+      sendCredentials: z.boolean().default(false), // Nicht mehr optional!
+      vorname: z.string().min(1, 'Vorname ist erforderlich'),
+      nachname: z.string().min(1, 'Nachname ist erforderlich'),
+      email: z.string().email('Ungültige E-Mail-Adresse'),
+      telefon: z.string().optional(),
+      kuenstlername: z.string().optional(),
+      portfolio: z.string().url('Ungültige URL').optional().or(z.literal('')), // Erlaubt leeren String
+      password: z.string().min(8, 'Mindestens 8 Zeichen').optional(),
+    }),
+    // Edit Mode
+    z.object({
+      mode: z.literal('edit'),
+      vorname: z.string().min(1, 'Vorname ist erforderlich'),
+      nachname: z.string().min(1, 'Nachname ist erforderlich'),
+      email: z.string().email('Ungültige E-Mail-Adresse'),
+      telefon: z.string().optional(),
+      geburtsdatum: z.string().optional(),
+      mitgliedsnummer: z.string().min(1, 'Mitgliedsnummer erforderlich'),
+      istAktiv: z.boolean().default(true),
+      adresse: adresseSchema.optional(),
+      sichtbarkeit: sichtbarkeitSchema,
+      notfallkontakt: notfallkontaktSchema.optional(),
+      iban: z
+        .string()
+        .regex(/^[A-Z]{2}\d{2}[A-Z0-9]+$/, 'Ungültige IBAN')
+        .optional(),
+    }),
+  ])
+  .refine(
+    data => {
+      // Validierung für Create Mode
+      if (data.mode === 'create') {
+        if (data.memberType === 'creator' && !data.kuenstlername) {
+          return false;
+        }
+        if (data.passwordOption === 'manual' && !data.password) {
+          return false;
+        }
+      }
+      return true;
+    },
+    {
+      message: 'Bitte alle Pflichtfelder ausfüllen',
+    }
+  );
+
+// Separate Sub-Schemas für Form-Sections
+export const memberBasicInfoSchema = z.object({
+  vorname: z.string().min(1, 'Vorname ist erforderlich'),
+  nachname: z.string().min(1, 'Nachname ist erforderlich'),
+  email: z.string().email('Ungültige E-Mail-Adresse'),
+  mitgliedsnummer: z.string().optional(),
+  geburtsdatum: z.string().optional(),
+  istAktiv: z.boolean().optional(),
+});
+
+export const memberContactSchema = z.object({
+  telefon: z.string().optional(),
+  adresse: adresseSchema.optional(),
+  notfallkontakt: notfallkontaktSchema.optional(),
+  sichtbarkeit: sichtbarkeitSchema,
+});
+
+export const memberCreatorSchema = z.object({
+  kuenstlername: z.string().min(1, 'Künstlername erforderlich'),
+  portfolio: z.string().url('Ungültige URL').optional(),
+});
+
+export const memberLoginSchema = z.object({
+  passwordOption: z.enum(['none', 'generate', 'manual']),
+  password: z.string().min(8, 'Mindestens 8 Zeichen').optional(),
+  sendCredentials: z.boolean().default(false),
+});

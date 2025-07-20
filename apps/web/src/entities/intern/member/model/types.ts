@@ -116,3 +116,61 @@ export type MemberActionsCardProps = {
   needsApproval: boolean;
   onEdit?: () => void;
 };
+
+export type MemberFormMode = 'create' | 'edit';
+
+export type MemberFormCreateData = {
+  mode: 'create';
+  memberType: 'member' | 'creator' | 'sponsor' | 'partner';
+  passwordOption: PasswordOption;
+  sendCredentials: boolean;
+  vorname: string;
+  nachname: string;
+  email: string;
+  telefon?: string;
+  kuenstlername?: string;
+  portfolio?: string;
+  password?: string;
+};
+
+export type MemberFormEditData = {
+  mode: 'edit';
+  vorname: string;
+  nachname: string;
+  email: string;
+  telefon?: string;
+  geburtsdatum?: string;
+  mitgliedsnummer: string;
+  istAktiv: boolean;
+  adresse?: {
+    strasse: string;
+    hausnummer: string;
+    plz: string;
+    stadt: string;
+  };
+  sichtbarkeit: {
+    email: Sichtbarkeit;
+    telefon: Sichtbarkeit;
+    profil: Sichtbarkeit;
+  };
+  notfallkontakt?: {
+    name: string;
+    telefon: string;
+  };
+  iban?: string;
+};
+
+export type MemberFormData = MemberFormCreateData | MemberFormEditData;
+
+// Options für FormSelect
+export type MemberTypeOption = {
+  value: 'member' | 'creator' | 'sponsor' | 'partner';
+  label: string;
+  description: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+export type SichtbarkeitOption = {
+  value: Sichtbarkeit;
+  label: string;
+};

@@ -3,13 +3,13 @@ import { type Control, Controller, useWatch } from 'react-hook-form';
 
 import { Eye, EyeOff, RefreshCw } from 'lucide-react';
 
-import type { MemberFormCreateData } from '@/entities/intern/member';
+import type { MemberFormData } from '@/entities/intern/member';
 
 import { Button, Label, RadioGroup, RadioGroupItem } from '@/shared/shadcn';
 import { FormCheckbox, FormInput } from '@/shared/ui/form';
 
 type LoginSectionProps = {
-  control: Control<MemberFormCreateData>;
+  control: Control<MemberFormData>; // Verwende MemberFormData
   generatedPassword?: string;
   onGeneratePassword: () => void;
 };

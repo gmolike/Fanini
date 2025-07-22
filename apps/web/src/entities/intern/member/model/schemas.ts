@@ -217,44 +217,37 @@ export const setPasswordResponseSchema = z.object({
 
 // Basis Member Form Schema
 export const memberFormSchema = z
-  .discriminatedUnion('mode', [
-    // Create Mode
-    z.object({
-      mode: z.literal('create'),
-      memberType: z.enum(['member', 'creator', 'sponsor', 'partner']),
-      passwordOption: z.enum(['none', 'generate', 'manual']),
-      sendCredentials: z.boolean().default(false), // Nicht mehr optional!
-      vorname: z.string().min(1, 'Vorname ist erforderlich'),
-      nachname: z.string().min(1, 'Nachname ist erforderlich'),
-      email: z.string().email('Ungültige E-Mail-Adresse'),
-      telefon: z.string().optional(),
-      kuenstlername: z.string().optional(),
-      portfolio: z.string().url('Ungültige URL').optional().or(z.literal('')), // Erlaubt leeren String
-      password: z.string().min(8, 'Mindestens 8 Zeichen').optional(),
-    }),
-    // Edit Mode
-    z.object({
-      mode: z.literal('edit'),
-      vorname: z.string().min(1, 'Vorname ist erforderlich'),
-      nachname: z.string().min(1, 'Nachname ist erforderlich'),
-      email: z.string().email('Ungültige E-Mail-Adresse'),
-      telefon: z.string().optional(),
-      geburtsdatum: z.string().optional(),
-      mitgliedsnummer: z.string().min(1, 'Mitgliedsnummer erforderlich'),
-      istAktiv: z.boolean().default(true),
-      adresse: adresseSchema.optional(),
-      sichtbarkeit: sichtbarkeitSchema,
-      notfallkontakt: notfallkontaktSchema.optional(),
-      iban: z
-        .string()
-        .regex(/^[A-Z]{2}\d{2}[A-Z0-9]+$/, 'Ungültige IBAN')
-        .optional(),
-    }),
-  ])
+  .object({
+    // Common fields
+    vorname: z.string().min(1, 'Vorname ist erforderlich'),
+    nachname: z.string().min(1, 'Nachname ist erforderlich'),
+    email: z.string().email('Ungültige E-Mail-Adresse'),
+    telefon: z.string().optional(),
+
+    // Create mode fields (optional für edit mode)
+    memberType: z.enum(['member', 'creator', 'sponsor', 'partner']).optional(),
+    passwordOption: z.enum(['none', 'generate', 'manual']).optional(),
+    sendCredentials: z.boolean().optional(),
+    kuenstlername: z.string().optional(),
+    portfolio: z.string().url('Ungültige URL').optional().or(z.literal('')),
+    password: z.string().min(8, 'Mindestens 8 Zeichen').optional(),
+
+    // Edit mode fields
+    geburtsdatum: z.string().optional(),
+    mitgliedsnummer: z.string().optional(),
+    istAktiv: z.boolean().optional(),
+    adresse: adresseSchema.optional(),
+    sichtbarkeit: sichtbarkeitSchema.optional(),
+    notfallkontakt: notfallkontaktSchema.optional(),
+    iban: z
+      .string()
+      .regex(/^[A-Z]{2}\d{2}[A-Z0-9]+$/, 'Ungültige IBAN')
+      .optional(),
+  })
   .refine(
     data => {
       // Validierung für Create Mode
-      if (data.mode === 'create') {
+      if (data.memberType) {
         if (data.memberType === 'creator' && !data.kuenstlername) {
           return false;
         }

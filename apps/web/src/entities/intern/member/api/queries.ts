@@ -2,7 +2,7 @@ import { createRemoteQuery, createSimpleRemoteQuery } from '@/shared/api';
 
 import { userPermissionsSchema } from '../model/schemas';
 
-import type { MemberFilter, MemberRole, UserPermissions } from '../model/types';
+import type { MemberFilter, UserPermissions } from '../model/types';
 
 // Angepasste Response Types für die Queries
 type MemberListQueryResponse = {

@@ -11,6 +11,7 @@ import {
   type MemberDetail,
   type MemberFormData,
   memberFormSchema,
+  type UpdateMemberRequest,
   useCreateLocalMember,
   type UserPermissions,
   useUpdateMember,
@@ -71,14 +72,13 @@ export const MemberForm = ({
     defaultValues:
       mode === 'edit' && initialData
         ? {
-            mode: 'edit',
             vorname: initialData.vorname,
             nachname: initialData.nachname,
             email: initialData.email,
-            telefon: initialData.telefon ?? '',
-            geburtsdatum: initialData.geburtsdatum ?? '',
-            mitgliedsnummer: initialData.mitgliedsnummer ?? '',
-            istAktiv: initialData.istAktiv ?? true,
+            telefon: initialData.telefon,
+            geburtsdatum: initialData.geburtsdatum,
+            mitgliedsnummer: initialData.mitgliedsnummer,
+            istAktiv: initialData.istAktiv,
             adresse: initialData.adresse ?? {
               strasse: '',
               hausnummer: '',
@@ -94,8 +94,7 @@ export const MemberForm = ({
             iban: initialData.iban,
           }
         : {
-            mode: 'create',
-            memberType: undefined as any, // Will be set by user
+            memberType: undefined,
             passwordOption: 'generate',
             sendCredentials: false,
             vorname: '',
@@ -109,7 +108,6 @@ export const MemberForm = ({
   });
 
   const memberType = mode === 'create' ? form.watch('memberType') : undefined;
-  const passwordOption = mode === 'create' ? form.watch('passwordOption') : undefined;
 
   const handleGeneratePassword = () => {
     const password = generateTemporaryPassword();
@@ -119,29 +117,30 @@ export const MemberForm = ({
 
   const handleSubmit = async (data: MemberFormData) => {
     try {
-      if (data.mode === 'create') {
-        // Transform für API
+      if (mode === 'create') {
+        if (!data.memberType) {
+          form.setError('memberType', { message: 'Bitte wähle einen Mitgliedstyp' });
+          return;
+        }
+
         const apiData: CreateLocalMemberRequest = {
           vorname: data.vorname,
           nachname: data.nachname,
           email: data.email,
           telefon: data.telefon,
           memberType: data.memberType,
-          passwordOption: data.passwordOption,
+          passwordOption: data.passwordOption ?? 'generate',
           password: data.password,
-          kuenstlername: data.memberType === 'creator' ? data.kuenstlername : undefined,
-          portfolio: data.memberType === 'creator' ? data.portfolio : undefined,
-          sendCredentials: data.sendCredentials,
+          kuenstlername: data.kuenstlername,
+          portfolio: data.portfolio,
+          sendCredentials: data.sendCredentials ?? false,
         };
 
-        const result = await createMutation.mutateAsync(apiData);
-
-        if (result.success) {
-          toast.success('Mitglied wurde erfolgreich angelegt');
-          onSuccess();
-        }
-      } else if (data.mode === 'edit' && initialData) {
-        await updateMutation.mutateAsync({
+        await createMutation.mutateAsync(apiData);
+        toast.success('Mitglied wurde erfolgreich angelegt');
+        onSuccess();
+      } else if (initialData) {
+        const updateData: UpdateMemberRequest & { memberId: string } = {
           memberId: initialData.id,
           vorname: data.vorname,
           nachname: data.nachname,
@@ -153,7 +152,9 @@ export const MemberForm = ({
           adresse: data.adresse,
           notfallkontakt: data.notfallkontakt,
           iban: data.iban,
-        });
+        };
+
+        await updateMutation.mutateAsync(updateData);
 
         if (needsApproval) {
           toast.info('Ihre Änderungen wurden zur Genehmigung eingereicht.');
@@ -168,6 +169,15 @@ export const MemberForm = ({
     }
   };
 
+  let submitButtonLabel = '';
+  if (createMutation.isPending || updateMutation.isPending) {
+    submitButtonLabel = 'Wird gespeichert...';
+  } else if (mode === 'create') {
+    submitButtonLabel = 'Mitglied anlegen';
+  } else {
+    submitButtonLabel = 'Änderungen speichern';
+  }
+
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)}>
@@ -176,7 +186,7 @@ export const MemberForm = ({
             <CardTitle>
               {mode === 'create'
                 ? 'Neues Mitglied anlegen'
-                : `${initialData?.vorname} ${initialData?.nachname} bearbeiten`}
+                : `${initialData?.vorname ?? ''} ${initialData?.nachname ?? ''} bearbeiten`}
             </CardTitle>
             <CardDescription>
               {mode === 'create'
@@ -229,11 +239,7 @@ export const MemberForm = ({
                 Abbrechen
               </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-                {createMutation.isPending || updateMutation.isPending
-                  ? 'Wird gespeichert...'
-                  : mode === 'create'
-                    ? 'Mitglied anlegen'
-                    : 'Änderungen speichern'}
+                {submitButtonLabel}
               </Button>
             </div>
           </CardContent>

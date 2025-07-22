@@ -119,36 +119,33 @@ export type MemberActionsCardProps = {
 
 export type MemberFormMode = 'create' | 'edit';
 
-export type MemberFormCreateData = {
-  mode: 'create';
-  memberType: 'member' | 'creator' | 'sponsor' | 'partner';
-  passwordOption: PasswordOption;
-  sendCredentials: boolean;
+// Vereinfache die Form Types ohne discriminated union
+export type MemberFormData = {
+  // Common fields
   vorname: string;
   nachname: string;
   email: string;
   telefon?: string;
+
+  // Create mode fields
+  memberType?: 'member' | 'creator' | 'sponsor' | 'partner';
+  passwordOption?: PasswordOption;
+  sendCredentials?: boolean;
   kuenstlername?: string;
   portfolio?: string;
   password?: string;
-};
 
-export type MemberFormEditData = {
-  mode: 'edit';
-  vorname: string;
-  nachname: string;
-  email: string;
-  telefon?: string;
+  // Edit mode fields
   geburtsdatum?: string;
-  mitgliedsnummer: string;
-  istAktiv: boolean;
+  mitgliedsnummer?: string;
+  istAktiv?: boolean;
   adresse?: {
     strasse: string;
     hausnummer: string;
     plz: string;
     stadt: string;
   };
-  sichtbarkeit: {
+  sichtbarkeit?: {
     email: Sichtbarkeit;
     telefon: Sichtbarkeit;
     profil: Sichtbarkeit;
@@ -159,9 +156,6 @@ export type MemberFormEditData = {
   };
   iban?: string;
 };
-
-export type MemberFormData = MemberFormCreateData | MemberFormEditData;
-
 // Options für FormSelect
 export type MemberTypeOption = {
   value: 'member' | 'creator' | 'sponsor' | 'partner';

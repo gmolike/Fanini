@@ -120,6 +120,7 @@ export const useToggleMemberStatus = createRemoteMutation<
 // ============================================
 
 // Create Local Member
+// Fix die Typen für useCreateLocalMember
 export const useCreateLocalMember = createRemoteMutation<
   CreateLocalMemberRequest,
   CreateLocalMemberResponse

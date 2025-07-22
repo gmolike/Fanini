@@ -1,8 +1,4 @@
-import {
-  type MemberFormData,
-  type Sichtbarkeit,
-  SICHTBARKEIT_CONFIG,
-} from '@/entities/intern/member';
+import { type MemberFormData } from '@/entities/intern/member';
 
 import { FormInput, FormSelect } from '@/shared/ui/form';
 
@@ -20,16 +16,13 @@ type ContactSectionProps = {
  * @returns {JSX.Element} Rendered section
  */
 export const ContactSection = ({ control }: ContactSectionProps) => {
-  // Fix: Korrekte Extraktion der Labels aus der Config
-  const sichtbarkeitOptions = (
-    Object.keys(SICHTBARKEIT_CONFIG) as (keyof typeof SICHTBARKEIT_CONFIG)[]
-  ).map(key => {
-    const config = SICHTBARKEIT_CONFIG[key];
-    return {
-      value: key,
-      label: config.label,
-    };
-  });
+  // Fix: SICHTBARKEIT_CONFIG ist bereits ein korrektes Config-Objekt
+  const sichtbarkeitOptions = [
+    { value: 'alle', label: 'Öffentlich' },
+    { value: 'mitglieder', label: 'Nur Mitglieder' },
+    { value: 'vorstand', label: 'Nur Vorstand' },
+    { value: 'niemand', label: 'Privat' },
+  ];
 
   return (
     <div className="space-y-4">

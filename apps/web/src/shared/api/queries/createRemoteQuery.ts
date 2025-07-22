@@ -165,7 +165,7 @@ async function fetchAndValidate<TData>(
   schema?: z.ZodSchema<TData>
 ): Promise<TData> {
   try {
-    const response = await apiClient.get<unknown>(endpoint);
+    const response = await apiClient.get(endpoint);
 
     if (!schema) {
       return response as TData;

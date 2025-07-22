@@ -13,6 +13,38 @@ import type {
 } from '@tanstack/react-table';
 
 /**
+ * Server-Side Configuration
+ * @description Konfiguration für vollständige Server-seitige Datenverarbeitung
+ */
+export type ServerSideConfig = {
+  /** Aktiviert Server-seitiges Rendering */
+  enabled: boolean;
+  /** Totale Anzahl der Einträge (für Pagination) */
+  totalCount: number;
+  /** Aktuelle Seite (0-basiert) */
+  currentPage: number;
+  /** Einträge pro Seite */
+  pageSize: number;
+  /** Suchbare Felder */
+  searchableFields?: string[];
+  /** Debounce für Suche in ms */
+  debounceMs?: number;
+};
+
+/**
+ * Server-Side Request Parameters
+ * @description Parameter die an das Backend gesendet werden
+ */
+export type ServerSideParams = {
+  search?: string;
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  filters?: Record<string, unknown>;
+};
+
+/**
  * Props für die Haupt-DataTable Komponente
  * @template TData - Datentyp der Tabellenzeilen
  * @template TTableDef - Typ der TableDefinition
@@ -158,6 +190,13 @@ export type DataTableProps<
   // Custom Components
   emptyStateComponent?: React.ComponentType;
   errorStateComponent?: React.ComponentType<ErrorStateProps>;
+
+  /** Backend Search Configuration */
+  /** Server-Side Configuration */
+  serverSide?: ServerSideConfig;
+
+  /** Callback wenn Server-Parameter sich ändern */
+  onServerParamsChange?: (params: ServerSideParams) => void;
 };
 
 /**
@@ -324,4 +363,5 @@ export type ToolbarProps<TData> = {
   searchableColumns: string[] | undefined;
   disabledColumns: string[] | undefined;
   tableDefinition: TableDefinition<TData> | undefined;
+  serverSide?: ServerSideConfig;
 };

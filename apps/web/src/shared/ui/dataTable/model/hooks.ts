@@ -1,17 +1,21 @@
+/* eslint-disable complexity */
 /**
  * @module dataTable/hooks
  * @description Custom Hooks für DataTable Funktionalität
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
+
+import { debounce as debounceUtil } from '../lib/helpers';
 
 import { convertTableDefinition, getColumnVisibility, getSearchableColumns } from './converter';
 
@@ -19,12 +23,15 @@ import type {
   DataTableController,
   DataTableProps,
   DataTableState,
+  ServerSideParams,
   TableDataConstraint,
 } from './types';
 
 /**
  * useDataTable Hook
  */
+// apps/web/src/shared/ui/dataTable/model/hooks.ts
+
 export const useDataTable = <TData extends TableDataConstraint>(
   props: DataTableProps<TData>
 ): DataTableController<TData> => {
@@ -54,9 +61,20 @@ export const useDataTable = <TData extends TableDataConstraint>(
     idKey = 'id',
     containerClassName,
     disabledColumns,
+    serverSide,
+    onServerParamsChange,
   } = props;
 
-  // Effective columns MUSS VOR columnVisibility definiert werden
+  // State für Server-Parameter
+  const [serverParams, setServerParams] = useState<ServerSideParams>({
+    page: serverSide?.currentPage ?? 0,
+    limit: serverSide?.pageSize ?? pageSize,
+    search: '',
+    sortBy: undefined,
+    sortOrder: undefined,
+  });
+
+  // Effective columns
   const effectiveSelectableColumns = useMemo(
     () => selectableColumns ?? tableDefinition.fields.map(field => field.id),
     [selectableColumns, tableDefinition.fields]
@@ -69,6 +87,57 @@ export const useDataTable = <TData extends TableDataConstraint>(
   const [isExpanded, setIsExpanded] = useState(!expandable);
   const [columnVisibility, setColumnVisibility] = useState(() =>
     getColumnVisibility(tableDefinition, effectiveSelectableColumns)
+  );
+
+  // Handle selected row scrolling
+
+  // Debounced search handler für Server-Mode
+  const debouncedServerSearch = useMemo(
+    () =>
+      debounceUtil((...args: unknown[]) => {
+        const search = args[0] as string;
+        const newParams: ServerSideParams = {
+          ...serverParams,
+          search,
+          page: 0, // Reset auf erste Seite bei neuer Suche
+        };
+        setServerParams(newParams);
+        onServerParamsChange?.(newParams);
+      }, serverSide?.debounceMs ?? 300),
+    [serverParams, onServerParamsChange, serverSide?.debounceMs]
+  );
+
+  // Handle global filter change
+  const handleGlobalFilterChange = useCallback(
+    (value: string) => {
+      setGlobalFilter(value);
+
+      if (serverSide?.enabled) {
+        debouncedServerSearch(value);
+      }
+    },
+    [serverSide?.enabled, debouncedServerSearch]
+  );
+
+  // Handle sorting change
+  const handleSortingChange = useCallback(
+    (updater: SortingState | ((old: SortingState) => SortingState)) => {
+      const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
+      setSorting(newSorting);
+
+      if (serverSide?.enabled && onServerParamsChange) {
+        const sortConfig = newSorting[0];
+        const newParams: ServerSideParams = {
+          ...serverParams,
+          sortBy: sortConfig?.id,
+          sortOrder: sortConfig?.desc ? 'desc' : 'asc',
+          page: 0, // Reset auf erste Seite bei neuer Sortierung
+        };
+        setServerParams(newParams);
+        onServerParamsChange(newParams);
+      }
+    },
+    [serverSide?.enabled, sorting, serverParams, onServerParamsChange]
   );
 
   // Convert to TanStack columns
@@ -88,25 +157,67 @@ export const useDataTable = <TData extends TableDataConstraint>(
       columnFilters,
       columnVisibility,
       globalFilter,
+      ...(serverSide?.enabled
+        ? {
+            pagination: {
+              pageIndex: serverSide.currentPage,
+              pageSize: serverSide.pageSize,
+            },
+          }
+        : {}),
     },
-    onSortingChange: setSorting,
+    // Server-Mode Konfiguration
+    manualPagination: serverSide?.enabled,
+    manualSorting: serverSide?.enabled,
+    manualFiltering: serverSide?.enabled,
+    pageCount: serverSide?.enabled
+      ? Math.ceil(serverSide.totalCount / serverSide.pageSize)
+      : undefined,
+
+    // Event Handler
+    onSortingChange: handleSortingChange,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onGlobalFilterChange: setGlobalFilter,
+    onPaginationChange: updater => {
+      if (serverSide?.enabled && onServerParamsChange) {
+        const newPaginationState =
+          typeof updater === 'function' ? updater(table.getState().pagination) : updater;
+
+        const newParams: ServerSideParams = {
+          ...serverParams,
+          page: newPaginationState.pageIndex,
+          limit: newPaginationState.pageSize,
+        };
+        setServerParams(newParams);
+        onServerParamsChange(newParams);
+      }
+    },
+
+    // Row Model Functions
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    getFilteredRowModel: serverSide?.enabled ? undefined : getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: serverSide?.enabled ? undefined : getSortedRowModel(),
+
     initialState: {
-      pagination: { pageSize },
+      pagination: {
+        pageSize: serverSide?.pageSize ?? pageSize,
+      },
     },
   });
 
-  // Computed values
-  const filteredRows = table.getFilteredRowModel().rows;
-  const sortedRows = table.getSortedRowModel().rows;
+  const filteredRows = serverSide?.enabled
+    ? table.getCoreRowModel().rows // Verwende getCoreRowModel für konsistente Row-Typen
+    : table.getFilteredRowModel().rows;
+
+  const sortedRows = serverSide?.enabled
+    ? table.getCoreRowModel().rows // Auch hier getCoreRowModel verwenden
+    : table.getSortedRowModel().rows;
+
   const paginatedRows = table.getPaginationRowModel().rows;
-  const filteredRowsCount = filteredRows.length;
+
+  const filteredRowsCount = serverSide?.enabled ? serverSide.totalCount : filteredRows.length;
 
   const displayRows = useMemo(
     () => (expandable && !isExpanded ? sortedRows.slice(0, initialRowCount) : paginatedRows),
@@ -116,7 +227,6 @@ export const useDataTable = <TData extends TableDataConstraint>(
   const showExpandButton = expandable && filteredRowsCount > initialRowCount;
   const showPagination = !expandable || isExpanded;
 
-  // Handle selected row scrolling
   useEffect(() => {
     if (selectedId && data.length > 0) {
       const rowIndex = data.findIndex(row => row[idKey] == selectedId);
@@ -146,22 +256,19 @@ export const useDataTable = <TData extends TableDataConstraint>(
   }, [selectedId, data, idKey, expandable, isExpanded, initialRowCount, table]);
 
   // Build controller
-  const state: DataTableState = {
-    sorting,
-    columnFilters,
-    columnVisibility,
-    globalFilter,
-    isExpanded,
-    selectedRows: {},
-  };
-  const searchableColumns = getSearchableColumns(tableDefinition);
-
   const controller: DataTableController<TData> = {
     // Table instance
     table,
 
     // State
-    state,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      globalFilter,
+      isExpanded,
+      selectedRows: {},
+    },
 
     // Loading/Error/Empty states
     isLoading: isLoading && data.length === 0,
@@ -177,7 +284,7 @@ export const useDataTable = <TData extends TableDataConstraint>(
     toolbarProps: {
       table,
       globalFilter,
-      onGlobalFilterChange: setGlobalFilter,
+      onGlobalFilterChange: handleGlobalFilterChange,
       searchPlaceholder,
       columnLabels: tableDefinition.labels,
       showColumnToggle,
@@ -186,8 +293,9 @@ export const useDataTable = <TData extends TableDataConstraint>(
       addButtonText,
       addButtonTitle,
       disabledColumns,
-      searchableColumns,
+      searchableColumns: getSearchableColumns(tableDefinition),
       tableDefinition,
+      serverSide,
     },
 
     paginationProps: {

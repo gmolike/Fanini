@@ -28,6 +28,9 @@ type SortableProps<TData> = {
 export const Sortable = <TData,>({ label, column }: SortableProps<TData>) => {
   const isSorted = column.getIsSorted();
 
+  // Server-Mode: Zeige immer den Sort-Indikator
+  const canSort = column.getCanSort();
+
   return (
     <Button
       variant="ghost"
@@ -35,11 +38,12 @@ export const Sortable = <TData,>({ label, column }: SortableProps<TData>) => {
         column.toggleSorting(column.getIsSorted() === 'asc');
       }}
       className="-ml-3 h-8 text-xs font-medium tracking-wider uppercase hover:bg-transparent"
+      disabled={!canSort}
     >
       {label}
       {isSorted === 'asc' && <ArrowUp className="ml-2 size-4" />}
       {isSorted === 'desc' && <ArrowDown className="ml-2 size-4" />}
-      {isSorted === false && <ArrowUpDown className="ml-2 size-4 opacity-50" />}
+      {isSorted === false && canSort ? <ArrowUpDown className="ml-2 size-4 opacity-50" /> : null}
     </Button>
   );
 };

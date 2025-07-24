@@ -1,0 +1,49 @@
+# .github/workflows/db-test.yml
+name: Database Tests
+
+on:
+  push:
+    paths:
+      - "apps/api/src/infrastructure/database/**"
+      - "docker-compose.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: fanini_db
+          MYSQL_USER: fanini
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10.12.4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - run: pnpm install
+
+      - name: Run migrations
+        run: pnpm db:migrate
+        env:
+          DB_HOST: localhost
+
+      - name: Run seeds
+        run: pnpm db:seed:complete
+
+      - name: Test database
+        run: pnpm db:test

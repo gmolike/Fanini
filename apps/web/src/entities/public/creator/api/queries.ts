@@ -1,5 +1,6 @@
 // entities/public/creator/api/queries.ts
 import { createRemoteQuery, createSimpleRemoteQuery } from '@/shared/api';
+import { API_ROUTES } from '@/shared/api/constants';
 
 import {
   creatorDetailResponseSchema,
@@ -13,28 +14,25 @@ import type {
   CreatorWorksResponse,
 } from '../model/types';
 
-// Liste aller Creator
 export const useCreatorsList = createSimpleRemoteQuery<CreatorsListResponse>({
   queryKey: ['creators', 'list'],
-  endpoint: '/api/creators/public/list',
+  endpoint: API_ROUTES.PUBLIC.CREATORS.LIST,
   schema: creatorsListResponseSchema,
   staleTime: 1000 * 60 * 5,
 });
 
-// Creator Detail
 type CreatorDetailParams = {
   creatorId: string;
 };
 
 export const useCreatorDetail = createRemoteQuery<CreatorDetailResponse, CreatorDetailParams>({
   queryKey: ({ creatorId }) => ['creators', 'detail', creatorId],
-  endpoint: ({ creatorId }) => `/api/creators/public/${creatorId}`,
+  endpoint: ({ creatorId }) => API_ROUTES.PUBLIC.CREATORS.DETAIL(creatorId),
   schema: creatorDetailResponseSchema,
   staleTime: 1000 * 60 * 10,
   enabled: ({ creatorId }) => !!creatorId,
 });
 
-// Creator Werke
 type CreatorWorksParams = {
   creatorId: string;
   page?: number;
@@ -44,16 +42,15 @@ type CreatorWorksParams = {
 export const useCreatorWorks = createRemoteQuery<CreatorWorksResponse, CreatorWorksParams>({
   queryKey: ({ creatorId, page = 1 }) => ['creators', 'works', creatorId, page],
   endpoint: ({ creatorId, page = 1, limit = 12 }) =>
-    `/api/creators/public/${creatorId}/works?page=${String(page)}&limit=${String(limit)}`,
+    API_ROUTES.PUBLIC.CREATORS.WORKS(creatorId, page, limit),
   schema: creatorWorksResponseSchema,
   staleTime: 1000 * 60 * 5,
   enabled: ({ creatorId }) => !!creatorId,
 });
 
-// Alle Werke für Galerie
 export const useGalleryWorks = createSimpleRemoteQuery<CreatorWorksResponse>({
   queryKey: ['creators', 'gallery', 'all'],
-  endpoint: '/api/creators/public/gallery',
+  endpoint: API_ROUTES.PUBLIC.CREATORS.GALLERY,
   schema: creatorWorksResponseSchema,
   staleTime: 1000 * 60 * 5,
 });

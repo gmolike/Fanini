@@ -1,5 +1,6 @@
-// frontend/src/entities/team-history/api/queries.ts
+// entities/public/team-history/api/queries.ts
 import { createSimpleRemoteQuery } from '@/shared/api';
+import { API_ROUTES } from '@/shared/api/constants';
 
 import { availableYearsResponseSchema, teamHistoryYearResponseSchema } from '../model/schemas';
 
@@ -10,7 +11,7 @@ import type { AvailableYearsResponse, TeamHistoryYearResponse } from '../model/t
  */
 export const useAvailableYears = createSimpleRemoteQuery<AvailableYearsResponse>({
   queryKey: ['team-history', 'available-years'],
-  endpoint: '/api/team-history/years',
+  endpoint: API_ROUTES.PUBLIC.TEAM_HISTORY.YEARS,
   schema: availableYearsResponseSchema,
   staleTime: 1000 * 60 * 30, // 30 Minuten
 });
@@ -21,7 +22,7 @@ export const useAvailableYears = createSimpleRemoteQuery<AvailableYearsResponse>
 export const useTeamHistoryByYear = (year: number) =>
   createSimpleRemoteQuery<TeamHistoryYearResponse>({
     queryKey: ['team-history', 'year', year],
-    endpoint: `/api/team-history/${String(year)}`,
+    endpoint: API_ROUTES.PUBLIC.TEAM_HISTORY.BY_YEAR(year),
     schema: teamHistoryYearResponseSchema,
     staleTime: 1000 * 60 * 15,
     enabled: year > 0,

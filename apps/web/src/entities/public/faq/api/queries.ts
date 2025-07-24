@@ -1,7 +1,8 @@
-// frontend/src/entities/public/faq/api/queries.ts
+// entities/public/faq/api/queries.ts
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api';
+import { API_ROUTES } from '@/shared/api/constants';
 
 import { faqListResponseSchema } from '../model/schemas';
 
@@ -14,7 +15,7 @@ export const useFaqList = (): UseQueryResult<{
   return useQuery({
     queryKey: ['faq', 'list'],
     queryFn: async () => {
-      const response = await apiClient.get('/api/public/faq');
+      const response = await apiClient.get(API_ROUTES.PUBLIC.FAQ);
       return faqListResponseSchema.parse(response);
     },
     staleTime: 1000 * 60 * 60, // 1 hour

@@ -1,9 +1,10 @@
-// frontend/src/entities/public/newsletter/api/mutations.ts
+// entities/public/newsletter/api/mutations.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { type z } from 'zod';
 
 import { apiClient, ApiClientError } from '@/shared/api';
+import { API_ROUTES } from '@/shared/api/constants';
 
 import { newsletterSubscriptionSchema } from '../model/schemas';
 
@@ -21,10 +22,12 @@ export const useNewsletterSubscription = () => {
   return useMutation<SubscriptionResponse, Error, SubscriptionData>({
     mutationFn: async data => {
       const validated = newsletterSubscriptionSchema.parse(data);
-      return apiClient.post<SubscriptionResponse>('/api/public/newsletter/subscribe', validated);
+      return apiClient.post<SubscriptionResponse>(
+        API_ROUTES.PUBLIC.NEWSLETTER.SUBSCRIBE,
+        validated
+      );
     },
     onSuccess: response => {
-      // Optional: Cache invalidation falls es eine Subscriber-Liste gibt
       void queryClient.invalidateQueries({ queryKey: ['newsletter', 'subscribers'] });
 
       if (response.confirmationRequired) {
@@ -36,7 +39,6 @@ export const useNewsletterSubscription = () => {
     onError: error => {
       console.error('Newsletter subscription error:', error);
 
-      // Spezifische Error Messages basierend auf API Error
       if (error instanceof ApiClientError) {
         switch (error.statusCode) {
           case 409:
@@ -58,15 +60,12 @@ export const useNewsletterSubscription = () => {
   });
 };
 
-// Optional: Mutation für Newsletter-Abmeldung
 export const useNewsletterUnsubscribe = () => {
   return useMutation<{ success: boolean; message: string }, Error, { token: string }>({
     mutationFn: async ({ token }) => {
       return apiClient.post<{ success: boolean; message: string }>(
-        '/api/public/newsletter/unsubscribe',
-        {
-          token,
-        }
+        API_ROUTES.PUBLIC.NEWSLETTER.UNSUBSCRIBE,
+        { token }
       );
     },
     onSuccess: () => {
@@ -79,15 +78,12 @@ export const useNewsletterUnsubscribe = () => {
   });
 };
 
-// Optional: Mutation für E-Mail-Bestätigung
 export const useConfirmNewsletterSubscription = () => {
   return useMutation<{ success: boolean; message: string }, Error, { token: string }>({
     mutationFn: async ({ token }) => {
       return apiClient.post<{ success: boolean; message: string }>(
-        '/api/public/newsletter/confirm',
-        {
-          token,
-        }
+        API_ROUTES.PUBLIC.NEWSLETTER.CONFIRM,
+        { token }
       );
     },
     onSuccess: () => {

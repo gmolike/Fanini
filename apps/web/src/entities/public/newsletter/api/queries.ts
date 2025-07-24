@@ -1,7 +1,8 @@
-// frontend/src/entities/public/newsletter/api/queries.ts
+// entities/public/newsletter/api/queries.ts
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api';
+import { API_ROUTES } from '@/shared/api/constants';
 
 import { newsletterDetailResponseSchema, newsletterListResponseSchema } from '../model/schemas';
 
@@ -11,7 +12,9 @@ export const useNewsletterList = (): UseQueryResult<NewsletterListResponse> => {
   return useQuery({
     queryKey: ['newsletter', 'list'],
     queryFn: async () => {
-      const response = await apiClient.get<NewsletterListResponse>('/api/public/newsletter/list');
+      const response = await apiClient.get<NewsletterListResponse>(
+        API_ROUTES.PUBLIC.NEWSLETTER.LIST
+      );
       return newsletterListResponseSchema.parse(response);
     },
     staleTime: 1000 * 60 * 10, // 10 minutes
@@ -27,7 +30,7 @@ export const useNewsletterDetail = (
     queryFn: async () => {
       if (!newsletterId) throw new Error('Newsletter ID is required');
       const response = await apiClient.get<NewsletterDetailResponse>(
-        `/api/public/newsletter/${newsletterId}`
+        API_ROUTES.PUBLIC.NEWSLETTER.DETAIL(newsletterId)
       );
       return newsletterDetailResponseSchema.parse(response);
     },

@@ -1,7 +1,8 @@
-// frontend/src/entities/public/newsletter/api/queryOptions.ts
+// entities/public/newsletter/api/queryOptions.ts
 import { queryOptions } from '@tanstack/react-query';
 
 import { apiClient } from '@/shared/api';
+import { API_ROUTES } from '@/shared/api/constants';
 
 import { newsletterDetailResponseSchema } from '../model/schemas';
 
@@ -12,7 +13,7 @@ export const newsletterDetailQueryOptions = (newsletterId: string) =>
     queryKey: ['newsletter', 'detail', newsletterId],
     queryFn: async () => {
       const response = await apiClient.get<NewsletterDetailResponse>(
-        `/api/public/newsletter/${newsletterId}`
+        API_ROUTES.PUBLIC.NEWSLETTER.DETAIL(newsletterId)
       );
       return newsletterDetailResponseSchema.parse(response);
     },

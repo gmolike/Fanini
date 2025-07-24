@@ -11,5 +11,6 @@ export { createRemoteMutation } from './mutations';
 export { createRemoteQuery, createSimpleRemoteQuery } from './queries';
 
 // Types
+export * from './constants';
 export type { RemoteMutationConfig } from './mutations';
 export type { RemoteQueryConfig } from './queries';

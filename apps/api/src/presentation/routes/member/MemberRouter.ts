@@ -1,28 +1,37 @@
-// src/presentation/routes/member/MemberRouter.ts
+import { authMiddleware } from "@/presentation/middleware";
 import { createPermissionMiddleware } from "@/presentation/middleware/permissionMiddleware";
 import { BaseRouter } from "../BaseRouter";
-import { authMiddleware } from "@/presentation/middleware/auth";
 
+// apps/api/src/presentation/routes/member/MemberRouter.ts
 export class MemberRouter extends BaseRouter {
   setupRoutes(): void {
+    // PROBLEM: Hier wird der falsche Controller verwendet!
     const controller = this.container.get("MemberController");
 
+    // Das sollte sein:
+    const protectedController = this.container.get("ProtectedMemberController");
+    const localMemberController = this.container.get("LocalMemberController");
+
+    // GET /api/members sollte ProtectedMemberController verwenden
     this.addRoute({
       method: "GET",
       path: "/api/members",
-      handler: controller.getMembers.bind(controller),
-      middlewares: [authMiddleware],
+      handler: protectedController.getMembers.bind(protectedController), 
+      middlewares: [
+        authMiddleware,
+        createPermissionMiddleware(this.container, "member.read"),
+      ],
     });
 
+    // GET /api/members/:id
     this.addRoute({
       method: "GET",
       path: "/api/members/:id",
       handler: controller.getMember.bind(controller),
       middlewares: [authMiddleware],
     });
-    const localMemberController = this.container.get("LocalMemberController");
 
-    // Create local member
+    // POST /api/members/local
     this.addRoute({
       method: "POST",
       path: "/api/members/local",
@@ -35,7 +44,7 @@ export class MemberRouter extends BaseRouter {
       ],
     });
 
-    // Set member password
+    // PUT /api/members/:id/password
     this.addRoute({
       method: "PUT",
       path: "/api/members/:id/password",

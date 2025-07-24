@@ -62,7 +62,11 @@ export class LocalMemberController {
 
       if (!result.success) {
         return Response.json(
-          { success: false, error: result.error },
+          {
+            success: false,
+            error: result.error,
+            statusCode: 400, // Füge statusCode hinzu
+          },
           { status: 400 },
         );
       }
@@ -75,18 +79,28 @@ export class LocalMemberController {
             userId: result.userId,
             temporaryPassword: result.temporaryPassword,
           },
+          statusCode: 201, // Füge statusCode hinzu
         },
         { status: 201 },
       );
     } catch (error) {
       if (error instanceof z.ZodError) {
         return Response.json(
-          { success: false, errors: error.errors },
+          {
+            success: false,
+            errors: error.errors,
+            statusCode: 400, // Füge statusCode hinzu
+          },
           { status: 400 },
         );
       }
+      console.error("Failed to create member:", error); // Besseres Error Logging
       return Response.json(
-        { success: false, error: "Failed to create member" },
+        {
+          success: false,
+          error: "Failed to create member",
+          statusCode: 500, // Füge statusCode hinzu
+        },
         { status: 500 },
       );
     }
@@ -113,7 +127,7 @@ export class LocalMemberController {
       // Permission check
       if (!["ADMIN", "VORSTAND"].includes(userRole)) {
         return Response.json(
-          { success: false, error: "Insufficient permissions" },
+          { success: false, error: "Insufficient permissions", statusCode: 403 },
           { status: 403 },
         );
       }
@@ -126,7 +140,7 @@ export class LocalMemberController {
 
       if (!result.success) {
         return Response.json(
-          { success: false, error: result.error },
+          { success: false, error: result.error, statusCode: 400 },
           { status: 400 },
         );
       }
@@ -140,12 +154,12 @@ export class LocalMemberController {
     } catch (error) {
       if (error instanceof z.ZodError) {
         return Response.json(
-          { success: false, errors: error.errors },
+          { success: false, errors: error.errors, statusCode: 400 },
           { status: 400 },
         );
       }
       return Response.json(
-        { success: false, error: "Failed to set password" },
+        { success: false, error: "Failed to set password", statusCode: 500 },
         { status: 500 },
       );
     }

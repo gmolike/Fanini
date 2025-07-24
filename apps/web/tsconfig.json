@@ -82,7 +82,7 @@
     "tailwind.config.ts",
     "src/pages/_public/.tsx",
     "eslint/**/*",
-    "demo/**/*",
+    "src/demo/**/*",
     ".storybook/**/*",
     "../packages/charts/src/charts"
   ],

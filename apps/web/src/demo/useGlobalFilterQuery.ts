@@ -1,7 +1,6 @@
 // src/shared/hooks/useGlobalFilterQuery.ts
 import { useMemo } from 'react';
 
-import { useRemoteQuery } from '@/shared/api/query';
 import { toBackendSort } from '@/shared/api/utils/sortUtils';
 
 import type { GlobalFilterResponse } from '@/shared/api/types/response';

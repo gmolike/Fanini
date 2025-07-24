@@ -1,0 +1,96 @@
+// apps/web/src/demo/features/product-list/ui/ProductTable.tsx
+// Final location: apps/web/src/features/product-list/ui/ProductTable.tsx
+
+import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+import { Card } from '@/shared/shadcn';
+import { DataTable } from '@/shared/ui/dataTable';
+import type { ServerSideParams } from '@/shared/ui/dataTable/model/types';
+
+import { useProductList } from '../../../entities/product/api/queries';
+import { useFilterUrlState } from '../../../shared/hooks/useFilterUrlState';
+import { productTableDefinition } from '../model/tableDefinition';
+
+import type { Product } from '../../../entities/product/model/types';
+
+/**
+ * ProductTable Component
+ * @description Server-seitige Produkttabelle mit URL-State
+ */
+export const ProductTable = () => {
+  const navigate = useNavigate();
+
+  // URL State Management
+  const [filterState, setFilterState] = useFilterUrlState({
+    sortBy: 'createdAt',
+    sortOrder: 'desc',
+  });
+
+  // Data Query
+  const { data, isLoading, error, isFetching } = useProductList(filterState);
+
+  // Handle DataTable parameter changes
+  const handleServerParamsChange = useCallback(
+    (params: ServerSideParams) => {
+      setFilterState({
+        page: params.page,
+        pageSize: params.limit,
+        searchTerm: params.search,
+        sortBy: params.sortBy,
+        sortOrder: params.sortOrder,
+      });
+    },
+    [setFilterState]
+  );
+
+  // Actions
+  const handleEdit = useCallback(
+    (product: Product) => {
+      navigate(`/products/${product.id}/edit`);
+    },
+    [navigate]
+  );
+
+  const handleDelete = useCallback((product: Product) => {
+    console.log('Delete product:', product.id);
+  }, []);
+
+  const handleAdd = useCallback(() => {
+    navigate('/products/new');
+  }, [navigate]);
+
+  return (
+    <Card className="relative">
+      {/* Loading Indicator */}
+      {isFetching ? (
+        <div className="absolute top-4 right-4 z-10">
+          <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
+        </div>
+      ) : null}
+
+      <DataTable
+        tableDefinition={productTableDefinition}
+        data={data?.result ?? []}
+        isLoading={isLoading}
+        error={error}
+        serverSide={{
+          enabled: true,
+          totalCount: data?.totalElements ?? 0,
+          currentPage: filterState.page,
+          pageSize: filterState.pageSize,
+          searchableFields: ['name', 'description', 'sku', 'category'],
+          debounceMs: 500,
+        }}
+        onServerParamsChange={handleServerParamsChange}
+        searchPlaceholder="Produkte durchsuchen..."
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onAdd={handleAdd}
+        addButtonText="Neues Produkt"
+        stickyHeader
+        maxHeight="600px"
+      />
+    </Card>
+  );
+};

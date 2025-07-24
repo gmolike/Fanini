@@ -178,6 +178,8 @@ CREATE TABLE IF NOT EXISTS events (
   aktualisiert_von VARCHAR(36),
   genehmigt_am TIMESTAMP NULL,
   genehmigt_von VARCHAR(36),
+  deleted_at TIMESTAMP NULL,
+  deleted_by VARCHAR(36),
   FOREIGN KEY (verantwortlich_id) REFERENCES mitglieder(id),
   FOREIGN KEY (erstellt_von) REFERENCES mitglieder(id),
   FOREIGN KEY (aktualisiert_von) REFERENCES mitglieder(id),
@@ -186,11 +188,45 @@ CREATE TABLE IF NOT EXISTS events (
   INDEX idx_status (status),
   INDEX idx_oeffentlich (ist_oeffentlich),
   INDEX idx_typ (typ),
-  INDEX idx_genehmigt (genehmigt_am)
+  INDEX idx_genehmigt (genehmigt_am),
+  INDEX idx_deleted (deleted_at)
+);
+
+-- Event Audit Log
+CREATE TABLE IF NOT EXISTS event_audit_log (
+  id VARCHAR(36) PRIMARY KEY,
+  event_id VARCHAR(36) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  field_name VARCHAR(100),
+  old_value TEXT,
+  new_value TEXT,
+  changed_by VARCHAR(36) NOT NULL,
+  changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  INDEX idx_event_audit (event_id, changed_at)
 );
 
 -- Event Teilnahmen
 CREATE TABLE IF NOT EXISTS event_teilnahmen (
+  id VARCHAR(36) PRIMARY KEY,
+  event_id VARCHAR(36) NOT NULL,
+  mitglied_id VARCHAR(36) NOT NULL,
+  angemeldet_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('angemeldet', 'bestaetigt', 'abgesagt', 'teilgenommen') DEFAULT 'angemeldet',
+  kommentar TEXT,
+  ist_bestaetigt BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  FOREIGN KEY (mitglied_id) REFERENCES mitglieder(id),
+  UNIQUE KEY unique_teilnahme (event_id, mitglied_id),
+  INDEX idx_event (event_id),
+  INDEX idx_mitglied (mitglied_id),
+  INDEX idx_status (status)
+);
+
+-- Event Teilnahme (alternative Tabelle für Kompatibilität)
+CREATE TABLE IF NOT EXISTS event_teilnahme (
   id VARCHAR(36) PRIMARY KEY,
   event_id VARCHAR(36) NOT NULL,
   mitglied_id VARCHAR(36) NOT NULL,
@@ -264,6 +300,22 @@ CREATE TABLE IF NOT EXISTS task_comments (
   FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
   FOREIGN KEY (autor_id) REFERENCES mitglieder(id),
   INDEX idx_task_comments (task_id, erstellt_am)
+);
+
+-- Task Audit Log
+CREATE TABLE IF NOT EXISTS task_audit_log (
+  id VARCHAR(36) PRIMARY KEY,
+  task_id VARCHAR(36) NOT NULL,
+  aktion VARCHAR(50) NOT NULL,
+  ausgefuehrt_von VARCHAR(36) NOT NULL,
+  ausgefuehrt_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  alte_werte JSON,
+  neue_werte JSON,
+  ip_adresse VARCHAR(45),
+  user_agent TEXT,
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (ausgefuehrt_von) REFERENCES mitglieder(id),
+  INDEX idx_task_audit (task_id, ausgefuehrt_am)
 );
 
 -- =====================================
@@ -455,22 +507,6 @@ CREATE TABLE IF NOT EXISTS upload_logs (
   INDEX idx_upload_type (upload_type)
 );
 
--- Task Audit Log
-CREATE TABLE IF NOT EXISTS task_audit_log (
-  id VARCHAR(36) PRIMARY KEY,
-  task_id VARCHAR(36) NOT NULL,
-  aktion VARCHAR(50) NOT NULL,
-  ausgefuehrt_von VARCHAR(36) NOT NULL,
-  ausgefuehrt_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  alte_werte JSON,
-  neue_werte JSON,
-  ip_adresse VARCHAR(45),
-  user_agent TEXT,
-  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
-  FOREIGN KEY (ausgefuehrt_von) REFERENCES mitglieder(id),
-  INDEX idx_task_audit (task_id, ausgefuehrt_am)
-);
-
 -- Field Access Log
 CREATE TABLE IF NOT EXISTS field_access_log (
   id VARCHAR(36) PRIMARY KEY,
@@ -642,10 +678,50 @@ CREATE TABLE IF NOT EXISTS approval_requests (
   changes_summary TEXT,
   priority ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
   due_date DATETIME,
+  applied_at TIMESTAMP NULL,
   FOREIGN KEY (requested_by) REFERENCES users(id),
   INDEX idx_status (status),
   INDEX idx_resource (resource_type, resource_id),
   INDEX idx_requested_by (requested_by)
+);
+
+-- Approval Actions
+CREATE TABLE IF NOT EXISTS approval_actions (
+  id VARCHAR(36) PRIMARY KEY,
+  request_id VARCHAR(36) NOT NULL,
+  action ENUM('approved', 'rejected', 'commented') NOT NULL,
+  performed_by VARCHAR(36) NOT NULL,
+  performed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  comment TEXT,
+  FOREIGN KEY (request_id) REFERENCES approval_requests(id) ON DELETE CASCADE,
+  FOREIGN KEY (performed_by) REFERENCES users(id),
+  INDEX idx_request (request_id)
+);
+
+-- Approval Rules
+CREATE TABLE IF NOT EXISTS approval_rules (
+  id VARCHAR(36) PRIMARY KEY,
+  resource_type VARCHAR(50) NOT NULL,
+  action VARCHAR(50),
+  required_role_id VARCHAR(36) NOT NULL,
+  min_approvers INT DEFAULT 1,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (required_role_id) REFERENCES roles(id),
+  INDEX idx_resource_action (resource_type, action)
+);
+
+-- Approval Notifications
+CREATE TABLE IF NOT EXISTS approval_notifications (
+  id VARCHAR(36) PRIMARY KEY,
+  request_id VARCHAR(36) NOT NULL,
+  notified_user_id VARCHAR(36) NOT NULL,
+  notification_type ENUM('new_request', 'status_change', 'reminder') NOT NULL,
+  sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  read_at TIMESTAMP NULL,
+  FOREIGN KEY (request_id) REFERENCES approval_requests(id) ON DELETE CASCADE,
+  FOREIGN KEY (notified_user_id) REFERENCES users(id),
+  INDEX idx_user_unread (notified_user_id, read_at)
 );
 
 -- Sensitive Fields Definition
@@ -668,6 +744,27 @@ CREATE TABLE IF NOT EXISTS member_visibility_overrides (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (member_id, field_name),
   FOREIGN KEY (member_id) REFERENCES mitglieder(id) ON DELETE CASCADE
+);
+
+-- Aufgaben (Legacy - falls noch benötigt)
+CREATE TABLE IF NOT EXISTS aufgaben (
+  id VARCHAR(36) PRIMARY KEY,
+  event_id VARCHAR(36),
+  titel VARCHAR(255) NOT NULL,
+  beschreibung TEXT,
+  verantwortlich_id VARCHAR(36),
+  status ENUM('offen', 'in_bearbeitung', 'erledigt', 'blockiert') DEFAULT 'offen',
+  prioritaet ENUM('niedrig', 'mittel', 'hoch', 'kritisch') DEFAULT 'mittel',
+  frist DATETIME,
+  erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  erstellt_von VARCHAR(36) NOT NULL,
+  aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  FOREIGN KEY (verantwortlich_id) REFERENCES mitglieder(id),
+  FOREIGN KEY (erstellt_von) REFERENCES mitglieder(id),
+  INDEX idx_event (event_id),
+  INDEX idx_status (status),
+  INDEX idx_verantwortlich (verantwortlich_id)
 );
 
 -- =====================================
@@ -763,58 +860,6 @@ STARTS (DATE(NOW()) + INTERVAL 1 DAY + INTERVAL 3 HOUR)
 DO CALL cleanup_expired_tokens();
 
 -- =====================================
--- INITIAL DATA
+-- WICHTIG: KEINE INSERT STATEMENTS!
+-- Alle Daten werden über seedComplete.ts eingefügt
 -- =====================================
-
--- Standard-Rollen einfügen
-INSERT INTO roles (id, name, beschreibung, hierarchie_ebene) VALUES
-  ('role_admin', 'ADMIN', 'Systemadministrator mit vollständigen Rechten', 1),
-  ('role_vorstand', 'VORSTAND', 'Vorstandsmitglied', 2),
-  ('role_beirat', 'BEIRAT', 'Beiratsmitglied', 3),
-  ('role_team_event', 'TEAM_EVENT', 'Team Event - Veranstaltungsorganisation', 4),
-  ('role_team_medien', 'TEAM_MEDIEN', 'Team Medien - Social Media und Content', 4),
-  ('role_team_technik', 'TEAM_TECHNIK', 'Team Technik - IT und Website', 4),
-  ('role_team_verein', 'TEAM_VEREIN', 'Team Verein - Verwaltung', 4),
-  ('role_mitglied', 'MITGLIED', 'Normales Vereinsmitglied', 5)
-ON DUPLICATE KEY UPDATE beschreibung = VALUES(beschreibung);
-
--- Berechtigungsgruppen
-INSERT INTO permission_groups (id, name, description) VALUES
-  ('pg_members', 'Mitgliederverwaltung', 'Berechtigungen für Mitgliederdaten'),
-  ('pg_events', 'Eventverwaltung', 'Berechtigungen für Events'),
-  ('pg_finance', 'Finanzen', 'Berechtigungen für Finanzdaten'),
-  ('pg_content', 'Inhalte', 'Berechtigungen für Content-Management'),
-  ('pg_system', 'System', 'System-Administrationsrechte')
-ON DUPLICATE KEY UPDATE description = VALUES(description);
-
--- Basis-Berechtigungen
-INSERT INTO permissions (id, resource, action, group_id, beschreibung) VALUES
-  ('perm_member_view_basic', 'member', 'view_basic', 'pg_members', 'Basis-Mitgliederdaten einsehen'),
-  ('perm_member_view_contact', 'member', 'view_contact', 'pg_members', 'Kontaktdaten einsehen'),
-  ('perm_member_view_sensitive', 'member', 'view_sensitive', 'pg_members', 'Sensible Daten einsehen'),
-  ('perm_member_edit_own', 'member', 'edit_own', 'pg_members', 'Eigene Daten bearbeiten'),
-  ('perm_member_edit_all', 'member', 'edit_all', 'pg_members', 'Alle Mitgliederdaten bearbeiten'),
-  ('perm_event_create', 'event', 'create', 'pg_events', 'Events erstellen'),
-  ('perm_event_edit_own', 'event', 'edit_own', 'pg_events', 'Eigene Events bearbeiten'),
-  ('perm_event_approve', 'event', 'approve', 'pg_events', 'Events genehmigen')
-ON DUPLICATE KEY UPDATE beschreibung = VALUES(beschreibung);
-
--- Globale Settings
-INSERT INTO settings (
-  id, association_name, founded_year, passion_percentage,
-  contact_email, contact_phone, contact_address_street,
-  contact_address_zip, contact_address_city
-) VALUES (
-  'global-settings', 'Faninitiative Spandau e.V.', 2025, 100,
-  'info@fanini.live', '+49 30 12345678', 'Vereinsstraße 1',
-  '13587', 'Berlin-Spandau'
-) ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
-
--- Sensitive Fields Definition
-INSERT INTO sensitive_fields (id, entity_type, field_name, sensitivity_level, required_permission, description) VALUES
-  ('sf_member_email', 'member', 'email', 'medium', 'member.view_contact', 'E-Mail Adresse'),
-  ('sf_member_phone', 'member', 'telefon', 'medium', 'member.view_contact', 'Telefonnummer'),
-  ('sf_member_address', 'member', 'adresse', 'high', 'member.view_sensitive', 'Wohnadresse'),
-  ('sf_member_birth', 'member', 'geburtsdatum', 'high', 'member.view_sensitive', 'Geburtsdatum'),
-  ('sf_member_iban', 'member', 'iban', 'critical', 'member.view_sensitive', 'Bankverbindung')
-ON DUPLICATE KEY UPDATE description = VALUES(description);

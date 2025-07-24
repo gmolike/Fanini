@@ -1,13 +1,20 @@
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
+import path from "path";
 
-// Lade Umgebungsvariablen
-dotenv.config();
+// Lade die richtige .env Datei
+const envFile =
+  (process.env.NODE_ENV as string) === "docker" ? ".env.docker" : ".env.local";
+dotenv.config({ path: path.resolve(process.cwd(), envFile) });
 
-// Erstelle einen Pool von Verbindungen
-// Ein Pool ist wie mehrere Telefonleitungen - mehrere Anfragen können gleichzeitig bearbeitet werden
+// Fallback auf .env wenn spezifische Datei nicht existiert
+if (!process.env.DB_HOST) {
+  dotenv.config();
+}
+
+// Jetzt erst den Pool erstellen
 export const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
+  host: process.env.DB_HOST || "localhost", // Fallback zu localhost
   port: parseInt(process.env.DB_PORT || "3306"),
   user: process.env.DB_USER || "fanini",
   password: process.env.DB_PASSWORD || "password",
@@ -17,6 +24,14 @@ export const pool = mysql.createPool({
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
+});
+
+// Debug-Ausgabe
+console.log("🔌 Database connection config:", {
+  host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT || "3306",
+  user: process.env.DB_USER || "fanini",
+  database: process.env.DB_NAME || "fanini_db",
 });
 
 // Test-Funktion um zu prüfen ob die Verbindung funktioniert

@@ -29,7 +29,7 @@ async function runMigrations() {
 
     for (let i = 0; i < statements.length; i++) {
       try {
-        await pool.query(statements[i]);
+        await pool.execute(statements[i]);
         console.log(`✅ Statement ${i + 1}/${statements.length} executed`);
       } catch (error: any) {
         if (error.message.includes("already exists")) {

@@ -36,10 +36,10 @@ export type Product = {
 // Nutze den globalen Response Type
 export type ProductListResponse = GlobalFilterResponse<Product>;
 
-export type ProductFilter = {
+// Erweitere ServerSideParams für Multi-Sort
+export type ServerSideParams = {
   search?: string;
-  page?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  page: number;
+  limit: number;
+  sorts?: { field: string; order: 'asc' | 'desc' }[]; // Für Multi-Sort
 };

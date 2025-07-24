@@ -3,10 +3,9 @@ import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DataTable } from '@/shared/ui/dataTable';
+import { useUrlState } from '@/shared/hooks/useUrlState';
 
 import { useProductList } from '@/entities/test/product';
-
-import { useUrlState } from '@/shared/hooks/useUrlState';
 
 import { getProductTableDefinition } from '../lib/tableDefinition';
 
@@ -14,30 +13,36 @@ import type { ServerSideParams } from '@/shared/ui/dataTable';
 
 /**
  * ProductTable Component
- * @description Server-Side DataTable mit GlobalFilterResponse
+ * @description Server-Side DataTable mit angepasstem Backend-Format
  */
 export const ProductTable = () => {
   const navigate = useNavigate();
 
-  // URL State Management (0-basiert wie das Backend)
+  // URL State Management
   const [urlState, setUrlState] = useUrlState({
     page: 0,
-    limit: 20,
-    search: '',
+    pageSize: 20,
+    searchTerm: '',
     sortBy: 'createdAt',
     sortOrder: 'desc' as const,
   });
 
-  // Query mit URL State - keine Konvertierung nötig!
-  const { data, isLoading, error, isFetching } = useProductList(urlState);
+  // Query mit angepassten Parametern
+  const { data, isLoading, error, isFetching } = useProductList({
+    page: urlState.page,
+    pageSize: urlState.pageSize,
+    searchTerm: urlState.searchTerm,
+    sortBy: urlState.sortBy,
+    sortOrder: urlState.sortOrder,
+  });
 
-  // Handle params change
+  // Handle params change von DataTable
   const handleServerParamsChange = useCallback(
     (params: ServerSideParams) => {
       setUrlState({
         page: params.page,
-        limit: params.limit,
-        search: params.search || '',
+        pageSize: params.limit, // DataTable nutzt "limit", Backend "pageSize"
+        searchTerm: params.search || '',
         sortBy: params.sortBy || 'createdAt',
         sortOrder: params.sortOrder || 'desc',
       });
@@ -47,12 +52,9 @@ export const ProductTable = () => {
 
   const tableDefinition = getProductTableDefinition();
 
-  // Berechne die Gesamtseiten für die DataTable
-  const totalPages = data ? Math.ceil(data.totalNumber / data.limit) : 0;
-
   return (
     <div className="relative">
-      {/* Subtle loading indicator */}
+      {/* Loading indicator */}
       {isFetching && !isLoading && (
         <div className="absolute top-2 right-2 z-10">
           <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
@@ -66,9 +68,9 @@ export const ProductTable = () => {
         error={error}
         serverSide={{
           enabled: true,
-          totalCount: data?.totalNumber ?? 0,
-          currentPage: data?.page ?? urlState.page,
-          pageSize: data?.limit ?? urlState.limit,
+          totalCount: data?.totalElements ?? 0,
+          currentPage: data?.page ?? 0,
+          pageSize: data?.pageSize ?? 20,
           searchableFields: ['name', 'description', 'sku', 'category'],
           debounceMs: 500,
         }}

@@ -39,14 +39,12 @@ services:
   # Backend (Next.js API)
   backend:
     image: node:20-alpine
-    working_dir: /workspace/apps/api
+    working_dir: /workspace
     ports:
       - "3000:3000"
     volumes:
-      # Mount entire monorepo
+      # Mount gesamtes Projekt als Workspace
       - ./:/workspace
-        # Mount .env file
-      - ./apps/api/.env:/workspace/apps/api/.env
       # Exclude node_modules
       - /workspace/node_modules
       - /workspace/apps/web/node_modules
@@ -54,8 +52,6 @@ services:
       - /workspace/packages/config/node_modules
       - /workspace/packages/shared/node_modules
       - /workspace/packages/ui/node_modules
-    env_file:
-      - ./apps/api/.env
     environment:
       - NODE_ENV=development
       - DATABASE_URL=mysql://fanini:password@mysql:3306/fanini_db
@@ -66,15 +62,14 @@ services:
       - DB_NAME=fanini_db
     command: >
       sh -c "
-        echo 'Installing pnpm...' &&
+        echo '🔧 Installing pnpm...' &&
         npm install -g pnpm@10.12.4 &&
-        cd /workspace &&
-        echo 'Installing dependencies from root...' &&
+        echo '📦 Installing workspace dependencies from root...' &&
         pnpm install &&
-        echo 'Waiting for database...' &&
-        sleep 10 &&
-        cd /workspace/apps/api &&
-        echo 'Starting Next.js backend...' &&
+        echo '⏳ Waiting for MySQL...' &&
+        sleep 30 &&
+        echo '🚀 Starting API...' &&
+        cd apps/api &&
         pnpm dev
       "
     depends_on:

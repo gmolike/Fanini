@@ -2,7 +2,8 @@
 // Final location: apps/web/src/shared/hooks/useFilterUrlState.ts
 
 import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
+import { useLocation } from '@tanstack/react-router';
 
 import type { DataTableFilterState } from '../api/types/filter';
 
@@ -21,7 +22,7 @@ const DEFAULT_FILTER_STATE: DataTableFilterState = {
 /**
  * useFilterUrlState Hook
  * @description Synchronisiert Filter-State mit URL-Parametern
- * @param defaults - Optionale Standard-Werte (überschreiben DEFAULT_FILTER_STATE)
+ * @param defaults - Optionale Standard-Werte
  * @returns [state, setState, resetState] Tuple
  */
 export const useFilterUrlState = (
@@ -31,60 +32,58 @@ export const useFilterUrlState = (
   (updates: Partial<DataTableFilterState>) => void,
   () => void,
 ] => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const mergedDefaults = { ...DEFAULT_FILTER_STATE, ...defaults };
 
   // Parse State from URL
   const state = useMemo((): DataTableFilterState => {
-    const page = searchParams.get('page');
-    const pageSize = searchParams.get('pageSize');
-    const searchTerm = searchParams.get('search') ?? '';
-    const sortBy = searchParams.get('sortBy') ?? undefined;
-    const sortOrder = searchParams.get('sortOrder') as 'asc' | 'desc' | undefined;
+    const searchParams = new URLSearchParams(location.search);
 
     return {
-      page: page ? Number(page) : mergedDefaults.page,
-      pageSize: pageSize ? Number(pageSize) : mergedDefaults.pageSize,
-      searchTerm,
-      sortBy: sortBy ?? mergedDefaults.sortBy,
-      sortOrder: sortOrder ?? mergedDefaults.sortOrder,
+      page: Number(searchParams.get('page') ?? mergedDefaults.page),
+      pageSize: Number(searchParams.get('pageSize') ?? mergedDefaults.pageSize),
+      searchTerm: searchParams.get('search') ?? '',
+      sortBy: searchParams.get('sortBy') ?? mergedDefaults.sortBy,
+      sortOrder:
+        (searchParams.get('sortOrder') as 'asc' | 'desc' | undefined) ?? mergedDefaults.sortOrder,
     };
-  }, [searchParams, mergedDefaults]);
+  }, [location.search, mergedDefaults]);
 
   // Update State
   const setState = useCallback(
     (updates: Partial<DataTableFilterState>) => {
-      const newParams = new URLSearchParams();
-
-      // Merge with current state
       const newState = { ...state, ...updates };
+      const params = new URLSearchParams();
 
-      // Only add non-default values to URL
+      // Build clean params
       if (newState.page !== mergedDefaults.page) {
-        newParams.set('page', String(newState.page));
+        params.set('page', String(newState.page));
       }
       if (newState.pageSize !== mergedDefaults.pageSize) {
-        newParams.set('pageSize', String(newState.pageSize));
+        params.set('pageSize', String(newState.pageSize));
       }
       if (newState.searchTerm) {
-        newParams.set('search', newState.searchTerm);
+        params.set('search', newState.searchTerm);
       }
       if (newState.sortBy) {
-        newParams.set('sortBy', newState.sortBy);
+        params.set('sortBy', newState.sortBy);
         if (newState.sortOrder) {
-          newParams.set('sortOrder', newState.sortOrder);
+          params.set('sortOrder', newState.sortOrder);
         }
       }
 
-      setSearchParams(newParams, { replace: true });
+      // Update URL using window.history
+      const queryString = params.toString();
+      const newUrl = window.location.pathname + (queryString ? `?${queryString}` : '');
+      window.history.replaceState(null, '', newUrl);
     },
-    [state, mergedDefaults, setSearchParams]
+    [state, mergedDefaults]
   );
 
   // Reset to defaults
   const resetState = useCallback(() => {
-    setSearchParams(new URLSearchParams(), { replace: true });
-  }, [setSearchParams]);
+    window.history.replaceState(null, '', window.location.pathname);
+  }, []);
 
   return [state, setState, resetState] as const;
 };

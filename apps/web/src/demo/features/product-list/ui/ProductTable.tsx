@@ -2,7 +2,8 @@
 // Final location: apps/web/src/features/product-list/ui/ProductTable.tsx
 
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import { useNavigate } from '@tanstack/react-router';
 
 import { Card } from '@/shared/shadcn';
 import { DataTable } from '@/shared/ui/dataTable';
@@ -21,7 +22,7 @@ import type { Product } from '../../../entities/product/model/types';
 export const ProductTable = () => {
   const navigate = useNavigate();
 
-  // URL State Management
+  // URL State Management mit TanStack Router
   const [filterState, setFilterState] = useFilterUrlState({
     sortBy: 'createdAt',
     sortOrder: 'desc',
@@ -36,7 +37,7 @@ export const ProductTable = () => {
       setFilterState({
         page: params.page,
         pageSize: params.limit,
-        searchTerm: params.search,
+        searchTerm: params.search ?? '',
         sortBy: params.sortBy,
         sortOrder: params.sortOrder,
       });
@@ -47,7 +48,10 @@ export const ProductTable = () => {
   // Actions
   const handleEdit = useCallback(
     (product: Product) => {
-      navigate(`/products/${product.id}/edit`);
+      navigate({
+        to: '/products/$productId/edit',
+        params: { productId: product.id },
+      });
     },
     [navigate]
   );
@@ -57,7 +61,7 @@ export const ProductTable = () => {
   }, []);
 
   const handleAdd = useCallback(() => {
-    navigate('/products/new');
+    navigate({ to: '/products/new' });
   }, [navigate]);
 
   return (

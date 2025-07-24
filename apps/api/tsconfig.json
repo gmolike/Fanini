@@ -16,22 +16,22 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./*"
+        "src/*"
       ],
       "@/domain/*": [
-        "domain/*"
+        "src/domain/*"
       ],
       "@/application/*": [
-        "application/*"
+        "src/application/*"
       ],
       "@/infrastructure/*": [
-        "infrastructure/*"
+        "src/infrastructure/*"
       ],
       "@/presentation/*": [
-        "presentation/*"
+        "src/presentation/*"
       ]
     },
     "plugins": [

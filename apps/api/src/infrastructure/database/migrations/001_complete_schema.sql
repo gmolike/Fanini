@@ -1,0 +1,820 @@
+-- apps/api/src/infrastructure/database/migrations/001_complete_schema.sql
+-- Konsolidierte Migration für Faninitiative Spandau e.V.
+-- Diese Migration erstellt alle Tabellen in der richtigen Reihenfolge
+
+-- =====================================
+-- DATENBANK ERSTELLEN
+-- =====================================
+CREATE DATABASE IF NOT EXISTS fanini_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE fanini_db;
+
+-- =====================================
+-- BASIS TABELLEN
+-- =====================================
+
+-- Users (Auth Basis)
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(36) PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  vorname VARCHAR(100) NOT NULL,
+  nachname VARCHAR(100) NOT NULL,
+  mitgliedsnummer VARCHAR(50),
+  auth_source ENUM('local', 'easyverein') NOT NULL DEFAULT 'easyverein',
+  easyverein_id VARCHAR(255),
+  password_hash VARCHAR(255),
+  ist_aktiv BOOLEAN DEFAULT TRUE,
+  role VARCHAR(50) DEFAULT 'MITGLIED',
+  created_by VARCHAR(36),
+  metadata JSON,
+  password_expires_at TIMESTAMP NULL,
+  must_change_password BOOLEAN DEFAULT FALSE,
+  password_set_by VARCHAR(36),
+  password_set_at TIMESTAMP NULL,
+  erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  letzter_login TIMESTAMP NULL,
+  INDEX idx_email (email),
+  INDEX idx_auth_source (auth_source),
+  INDEX idx_easyverein_id (easyverein_id),
+  INDEX idx_role (role),
+  INDEX idx_password_expires (password_expires_at),
+  INDEX idx_must_change (must_change_password)
+);
+
+-- Mitglieder (Erweiterte Mitgliedsdaten)
+CREATE TABLE IF NOT EXISTS mitglieder (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36) UNIQUE,
+  easyverein_id VARCHAR(255) UNIQUE,
+  mitgliedsnummer VARCHAR(50),
+  vorname VARCHAR(100) NOT NULL,
+  nachname VARCHAR(100) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  telefon VARCHAR(50),
+  geburtsdatum DATE,
+  adresse_strasse VARCHAR(255),
+  adresse_hausnummer VARCHAR(20),
+  adresse_plz VARCHAR(10),
+  adresse_stadt VARCHAR(100),
+  iban VARCHAR(34),
+  notfallkontakt_name VARCHAR(100),
+  notfallkontakt_telefon VARCHAR(50),
+  ist_aktiv BOOLEAN DEFAULT TRUE,
+  hat_vertraulichkeitserklaerung BOOLEAN DEFAULT FALSE,
+  datenschutz_einwilligung BOOLEAN DEFAULT FALSE,
+  datenschutz_datum TIMESTAMP NULL,
+  mitglied_seit DATE NOT NULL,
+  austritts_datum DATE,
+  profilbild VARCHAR(500),
+  beschreibung TEXT,
+  sichtbarkeit_email ENUM('oeffentlich', 'intern', 'vorstand', 'privat') DEFAULT 'intern',
+  sichtbarkeit_telefon ENUM('oeffentlich', 'intern', 'vorstand', 'privat') DEFAULT 'privat',
+  sichtbarkeit_profil ENUM('oeffentlich', 'intern', 'vorstand', 'privat') DEFAULT 'intern',
+  member_type ENUM('easyverein', 'creator', 'sponsor', 'partner') DEFAULT 'easyverein',
+  is_local BOOLEAN GENERATED ALWAYS AS (member_type != 'easyverein') STORED,
+  erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  letzter_login TIMESTAMP NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_email (email),
+  INDEX idx_aktiv (ist_aktiv),
+  INDEX idx_user_id (user_id),
+  INDEX idx_member_type (member_type),
+  INDEX idx_is_local (is_local)
+);
+
+-- Rollen
+CREATE TABLE IF NOT EXISTS roles (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL,
+  beschreibung TEXT,
+  hierarchie_ebene INT NOT NULL,
+  erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User-Rollen Verknüpfung
+CREATE TABLE IF NOT EXISTS user_roles (
+  user_id VARCHAR(36) NOT NULL,
+  role_id VARCHAR(36) NOT NULL,
+  zugewiesen_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  zugewiesen_von VARCHAR(36),
+  gueltig_bis TIMESTAMP NULL,
+  PRIMARY KEY (user_id, role_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES roles(id),
+  FOREIGN KEY (zugewiesen_von) REFERENCES users(id)
+);
+
+-- Berechtigungsgruppen
+CREATE TABLE IF NOT EXISTS permission_groups (
+  id VARCHAR(36) PRIMARY KEY,
+  name VARCHAR(100) UNIQUE NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Berechtigungen
+CREATE TABLE IF NOT EXISTS permissions (
+  id VARCHAR(36) PRIMARY KEY,
+  resource VARCHAR(50) NOT NULL,
+  action VARCHAR(50) NOT NULL,
+  group_id VARCHAR(36),
+  conditions JSON,
+  beschreibung TEXT,
+  UNIQUE KEY unique_permission (resource, action),
+  FOREIGN KEY (group_id) REFERENCES permission_groups(id)
+);
+
+-- Rollen-Berechtigungen
+CREATE TABLE IF NOT EXISTS role_permissions (
+  role_id VARCHAR(36) NOT NULL,
+  permission_id VARCHAR(36) NOT NULL,
+  PRIMARY KEY (role_id, permission_id),
+  FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+  FOREIGN KEY (permission_id) REFERENCES permissions(id)
+);
+
+-- Rollen-Hierarchie
+CREATE TABLE IF NOT EXISTS role_hierarchy (
+  parent_role_id VARCHAR(36) NOT NULL,
+  child_role_id VARCHAR(36) NOT NULL,
+  PRIMARY KEY (parent_role_id, child_role_id),
+  FOREIGN KEY (parent_role_id) REFERENCES roles(id),
+  FOREIGN KEY (child_role_id) REFERENCES roles(id)
+);
+
+-- =====================================
+-- EVENT MANAGEMENT
+-- =====================================
+
+-- Events
+CREATE TABLE IF NOT EXISTS events (
+  id VARCHAR(36) PRIMARY KEY,
+  titel VARCHAR(255) NOT NULL,
+  beschreibung TEXT NOT NULL,
+  kurzbeschreibung VARCHAR(500),
+  datum DATE NOT NULL,
+  uhrzeit TIME NOT NULL,
+  dauer_minuten INT,
+  ort JSON NOT NULL,
+  typ ENUM('vereinstreffen', 'sportveranstaltung', 'fanfahrt', 'social', 'sitzung', 'workshop', 'turnier', 'sonstiges') NOT NULL,
+  sportbereich ENUM('league_of_legends', 'valorant', 'fussball', 'esports_allgemein', 'sonstiges'),
+  status ENUM('entwurf', 'geplant', 'genehmigt', 'aktiv', 'abgeschlossen', 'abgesagt') DEFAULT 'entwurf',
+  ist_oeffentlich BOOLEAN DEFAULT FALSE,
+  ist_vertraulich BOOLEAN DEFAULT FALSE,
+  verantwortlich_id VARCHAR(36) NOT NULL,
+  stellvertreter_ids JSON,
+  budget DECIMAL(10, 2),
+  budget_verbraucht DECIMAL(10, 2) DEFAULT 0,
+  max_teilnehmer INT,
+  anmeldeschluss DATETIME,
+  ticket_link VARCHAR(500),
+  erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  erstellt_von VARCHAR(36) NOT NULL,
+  aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  aktualisiert_von VARCHAR(36),
+  genehmigt_am TIMESTAMP NULL,
+  genehmigt_von VARCHAR(36),
+  FOREIGN KEY (verantwortlich_id) REFERENCES mitglieder(id),
+  FOREIGN KEY (erstellt_von) REFERENCES mitglieder(id),
+  FOREIGN KEY (aktualisiert_von) REFERENCES mitglieder(id),
+  FOREIGN KEY (genehmigt_von) REFERENCES mitglieder(id),
+  INDEX idx_datum (datum),
+  INDEX idx_status (status),
+  INDEX idx_oeffentlich (ist_oeffentlich),
+  INDEX idx_typ (typ),
+  INDEX idx_genehmigt (genehmigt_am)
+);
+
+-- Event Teilnahmen
+CREATE TABLE IF NOT EXISTS event_teilnahmen (
+  id VARCHAR(36) PRIMARY KEY,
+  event_id VARCHAR(36) NOT NULL,
+  mitglied_id VARCHAR(36) NOT NULL,
+  angemeldet_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('angemeldet', 'bestaetigt', 'abgesagt', 'teilgenommen') DEFAULT 'angemeldet',
+  kommentar TEXT,
+  ist_bestaetigt BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE,
+  FOREIGN KEY (mitglied_id) REFERENCES mitglieder(id),
+  UNIQUE KEY unique_teilnahme (event_id, mitglied_id),
+  INDEX idx_event (event_id),
+  INDEX idx_mitglied (mitglied_id),
+  INDEX idx_status (status)
+);
+
+-- =====================================
+-- TASK MANAGEMENT
+-- =====================================
+
+-- Tasks
+CREATE TABLE IF NOT EXISTS tasks (
+  id VARCHAR(36) PRIMARY KEY,
+  titel VARCHAR(255) NOT NULL,
+  beschreibung TEXT,
+  context_type ENUM('event', 'team', 'general') NOT NULL,
+  context_id VARCHAR(36),
+  verantwortlich_id VARCHAR(36),
+  status ENUM('offen', 'in_bearbeitung', 'review', 'erledigt', 'blockiert') NOT NULL DEFAULT 'offen',
+  prioritaet ENUM('niedrig', 'mittel', 'hoch', 'kritisch') NOT NULL DEFAULT 'mittel',
+  frist DATETIME,
+  materialien JSON,
+  abhaengig_von JSON,
+  ist_standardaufgabe BOOLEAN DEFAULT FALSE,
+  kategorie VARCHAR(100),
+  erstellt_von VARCHAR(36) NOT NULL,
+  erstellt_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  aktualisiert_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  erledigt_am DATETIME,
+  erledigt_von VARCHAR(36),
+  geloescht BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (verantwortlich_id) REFERENCES mitglieder(id),
+  FOREIGN KEY (erstellt_von) REFERENCES mitglieder(id),
+  FOREIGN KEY (erledigt_von) REFERENCES mitglieder(id),
+  INDEX idx_context (context_type, context_id),
+  INDEX idx_status (status),
+  INDEX idx_frist (frist),
+  INDEX idx_geloescht (geloescht)
+);
+
+-- Task Zuweisungen
+CREATE TABLE IF NOT EXISTS task_assignments (
+  task_id VARCHAR(36) NOT NULL,
+  mitglied_id VARCHAR(36) NOT NULL,
+  zugewiesen_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  zugewiesen_von VARCHAR(36) NOT NULL,
+  kommentar TEXT,
+  PRIMARY KEY (task_id, mitglied_id),
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (mitglied_id) REFERENCES mitglieder(id),
+  FOREIGN KEY (zugewiesen_von) REFERENCES mitglieder(id)
+);
+
+-- Task Kommentare
+CREATE TABLE IF NOT EXISTS task_comments (
+  id VARCHAR(36) PRIMARY KEY,
+  task_id VARCHAR(36) NOT NULL,
+  autor_id VARCHAR(36) NOT NULL,
+  text TEXT NOT NULL,
+  erwaehnte_personen JSON,
+  erstellt_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (autor_id) REFERENCES mitglieder(id),
+  INDEX idx_task_comments (task_id, erstellt_am)
+);
+
+-- =====================================
+-- DOKUMENTE & CONTENT
+-- =====================================
+
+-- Dokumente
+CREATE TABLE IF NOT EXISTS documents (
+  id VARCHAR(36) PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  category ENUM('satzung', 'protokolle', 'formulare', 'richtlinien', 'guides') NOT NULL,
+  file_url VARCHAR(500) NOT NULL,
+  file_size INT UNSIGNED NOT NULL,
+  file_type VARCHAR(100) NOT NULL,
+  version VARCHAR(20) NOT NULL,
+  status ENUM('current', 'outdated', 'draft') DEFAULT 'current',
+  published_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NULL,
+  author VARCHAR(100),
+  downloads INT UNSIGNED DEFAULT 0,
+  is_featured BOOLEAN DEFAULT FALSE,
+  google_drive_file_id VARCHAR(255) UNIQUE,
+  is_public BOOLEAN DEFAULT FALSE,
+  created_by VARCHAR(36),
+  document_type ENUM('document', 'image', 'spreadsheet', 'form', 'other') DEFAULT 'document',
+  folder_path VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (created_by) REFERENCES mitglieder(id),
+  INDEX idx_category (category),
+  INDEX idx_status (status),
+  INDEX idx_featured (is_featured),
+  INDEX idx_google_drive_id (google_drive_file_id),
+  INDEX idx_document_type (document_type),
+  INDEX idx_folder_path (folder_path)
+);
+
+-- Document Tags
+CREATE TABLE IF NOT EXISTS document_tags (
+  document_id VARCHAR(36) NOT NULL,
+  tag VARCHAR(50) NOT NULL,
+  PRIMARY KEY (document_id, tag),
+  FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+  INDEX idx_tag (tag)
+);
+
+-- =====================================
+-- CREATOR MANAGEMENT
+-- =====================================
+
+-- Creators
+CREATE TABLE IF NOT EXISTS creators (
+  id VARCHAR(36) PRIMARY KEY,
+  member_id VARCHAR(36) NOT NULL,
+  artist_name VARCHAR(100) NOT NULL,
+  real_name VARCHAR(100),
+  profile_image VARCHAR(500),
+  description TEXT NOT NULL,
+  portfolio VARCHAR(500) NOT NULL,
+  is_active BOOLEAN DEFAULT TRUE,
+  active_since DATE NOT NULL,
+  deactivated_at DATE,
+  instagram VARCHAR(100),
+  twitter VARCHAR(100),
+  facebook VARCHAR(100),
+  youtube VARCHAR(100),
+  tiktok VARCHAR(100),
+  website VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (member_id) REFERENCES mitglieder(id),
+  INDEX idx_active (is_active),
+  INDEX idx_member (member_id)
+);
+
+-- Erweiterte Creators (für Nicht-Mitglieder)
+CREATE TABLE IF NOT EXISTS creators_extended (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36) NOT NULL UNIQUE,
+  kuenstlername VARCHAR(100) NOT NULL,
+  profiltext TEXT NOT NULL,
+  portfolio_link VARCHAR(500),
+  ist_aktiv BOOLEAN DEFAULT TRUE,
+  aktiv_seit DATE NOT NULL,
+  deaktiviert_am DATE,
+  instagram VARCHAR(100),
+  twitter VARCHAR(100),
+  website VARCHAR(500),
+  erstellt_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  aktualisiert_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_user (user_id),
+  INDEX idx_aktiv (ist_aktiv)
+);
+
+-- Creator Types
+CREATE TABLE IF NOT EXISTS creator_types (
+  creator_id VARCHAR(36) NOT NULL,
+  type ENUM('grafik', 'foto', 'video', 'musik', 'other') NOT NULL,
+  PRIMARY KEY (creator_id, type),
+  FOREIGN KEY (creator_id) REFERENCES creators(id) ON DELETE CASCADE
+);
+
+-- Creator Works
+CREATE TABLE IF NOT EXISTS creator_works (
+  id VARCHAR(36) PRIMARY KEY,
+  creator_id VARCHAR(36) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  type ENUM('image', 'video', 'audio', 'text') NOT NULL,
+  file_url VARCHAR(500) NOT NULL,
+  thumbnail_url VARCHAR(500),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  published_at TIMESTAMP,
+  is_public BOOLEAN DEFAULT FALSE,
+  order_position INT DEFAULT 0,
+  views INT UNSIGNED DEFAULT 0,
+  likes INT UNSIGNED DEFAULT 0,
+  FOREIGN KEY (creator_id) REFERENCES creators(id) ON DELETE CASCADE,
+  INDEX idx_creator (creator_id),
+  INDEX idx_public (is_public),
+  INDEX idx_type (type)
+);
+
+-- =====================================
+-- AUTH & SECURITY
+-- =====================================
+
+-- Refresh Tokens
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36) NOT NULL,
+  token VARCHAR(500) NOT NULL UNIQUE,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  revoked_at TIMESTAMP NULL,
+  revoked_by VARCHAR(36) NULL,
+  device_info VARCHAR(255),
+  ip_address VARCHAR(45),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (revoked_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_token (token),
+  INDEX idx_user (user_id),
+  INDEX idx_expires (expires_at),
+  INDEX idx_revoked (revoked_at),
+  INDEX idx_cleanup (expires_at, revoked_at)
+);
+
+-- Password History
+CREATE TABLE IF NOT EXISTS password_history (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36) NOT NULL,
+  action ENUM('set', 'change', 'reset', 'expire') NOT NULL,
+  performed_by VARCHAR(36) NOT NULL,
+  performed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NULL,
+  temporary BOOLEAN DEFAULT FALSE,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (performed_by) REFERENCES users(id),
+  INDEX idx_user (user_id),
+  INDEX idx_performed_at (performed_at)
+);
+
+-- =====================================
+-- AUDIT & LOGGING
+-- =====================================
+
+-- Upload Logs
+CREATE TABLE IF NOT EXISTS upload_logs (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36) NOT NULL,
+  user_name VARCHAR(100) NOT NULL,
+  file_name VARCHAR(255) NOT NULL,
+  file_type VARCHAR(100) NOT NULL,
+  file_size INT UNSIGNED NOT NULL,
+  upload_type ENUM('document', 'image', 'event_photo', 'profile_image') NOT NULL,
+  google_drive_file_id VARCHAR(255),
+  folder_id VARCHAR(255) NOT NULL,
+  status ENUM('success', 'failed') NOT NULL,
+  error_message TEXT,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ip_address VARCHAR(45),
+  FOREIGN KEY (user_id) REFERENCES mitglieder(id),
+  INDEX idx_user (user_id),
+  INDEX idx_status (status),
+  INDEX idx_uploaded_at (uploaded_at),
+  INDEX idx_upload_type (upload_type)
+);
+
+-- Task Audit Log
+CREATE TABLE IF NOT EXISTS task_audit_log (
+  id VARCHAR(36) PRIMARY KEY,
+  task_id VARCHAR(36) NOT NULL,
+  aktion VARCHAR(50) NOT NULL,
+  ausgefuehrt_von VARCHAR(36) NOT NULL,
+  ausgefuehrt_am TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  alte_werte JSON,
+  neue_werte JSON,
+  ip_adresse VARCHAR(45),
+  user_agent TEXT,
+  FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE,
+  FOREIGN KEY (ausgefuehrt_von) REFERENCES mitglieder(id),
+  INDEX idx_task_audit (task_id, ausgefuehrt_am)
+);
+
+-- Field Access Log
+CREATE TABLE IF NOT EXISTS field_access_log (
+  id VARCHAR(36) PRIMARY KEY,
+  user_id VARCHAR(36) NOT NULL,
+  entity_type VARCHAR(50) NOT NULL,
+  entity_id VARCHAR(36) NOT NULL,
+  field_name VARCHAR(100) NOT NULL,
+  action ENUM('view', 'export') NOT NULL,
+  accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  INDEX idx_user (user_id),
+  INDEX idx_entity (entity_type, entity_id),
+  INDEX idx_time (accessed_at)
+);
+
+-- =====================================
+-- ORGANISATION & TEAMS
+-- =====================================
+
+-- Gremien
+CREATE TABLE IF NOT EXISTS gremien (
+  id VARCHAR(36) PRIMARY KEY,
+  type ENUM('vorstand', 'beirat', 'team_event', 'team_medien', 'team_technik', 'team_verein', 'kassenpruefung') NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  description TEXT NOT NULL,
+  short_description TEXT NOT NULL,
+  header_image VARCHAR(500),
+  gradient VARCHAR(100) NOT NULL,
+  meeting_schedule VARCHAR(255),
+  contact_email VARCHAR(255),
+  established_date DATE NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_type (type)
+);
+
+-- Gremium Members
+CREATE TABLE IF NOT EXISTS gremium_members (
+  id VARCHAR(36) PRIMARY KEY,
+  gremium_id VARCHAR(36) NOT NULL,
+  name VARCHAR(100) NOT NULL,
+  role VARCHAR(100) NOT NULL,
+  image VARCHAR(500),
+  description TEXT,
+  member_since DATE NOT NULL,
+  email VARCHAR(255),
+  phone VARCHAR(50),
+  order_position INT DEFAULT 0,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (gremium_id) REFERENCES gremien(id) ON DELETE CASCADE,
+  INDEX idx_gremium (gremium_id)
+);
+
+-- =====================================
+-- WEITERE FUNKTIONEN
+-- =====================================
+
+-- FAQ
+CREATE TABLE IF NOT EXISTS faqs (
+  id VARCHAR(36) PRIMARY KEY,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  category ENUM('mitgliedschaft', 'events', 'verein', 'technik', 'sonstige') NOT NULL,
+  order_position INT NOT NULL DEFAULT 0,
+  views INT UNSIGNED DEFAULT 0,
+  is_popular BOOLEAN DEFAULT FALSE,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_category (category),
+  INDEX idx_popular (is_popular),
+  INDEX idx_order (order_position)
+);
+
+-- Newsletter
+CREATE TABLE IF NOT EXISTS newsletters (
+  id VARCHAR(36) PRIMARY KEY,
+  edition INT NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  subtitle VARCHAR(255),
+  published_at TIMESTAMP NOT NULL,
+  status ENUM('draft', 'published', 'archived') DEFAULT 'draft',
+  header_image VARCHAR(500),
+  introduction TEXT NOT NULL,
+  closing_message TEXT,
+  next_edition_hint TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_status (status),
+  INDEX idx_edition (edition),
+  INDEX idx_published (published_at)
+);
+
+-- Newsletter Subscriptions
+CREATE TABLE IF NOT EXISTS newsletter_subscriptions (
+  id VARCHAR(36) PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100),
+  accepts_marketing BOOLEAN DEFAULT TRUE,
+  confirmed_at TIMESTAMP NULL,
+  unsubscribed_at TIMESTAMP NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email),
+  INDEX idx_confirmed (confirmed_at)
+);
+
+-- Ausgaben (Finanzen)
+CREATE TABLE IF NOT EXISTS ausgaben (
+  id VARCHAR(36) PRIMARY KEY,
+  event_id VARCHAR(36),
+  beschreibung VARCHAR(255) NOT NULL,
+  betrag DECIMAL(10, 2) NOT NULL,
+  kategorie ENUM('verpflegung', 'transport', 'material', 'unterkunft', 'sonstiges') NOT NULL,
+  beleg_url VARCHAR(500),
+  rechnungsnummer VARCHAR(100),
+  status ENUM('eingereicht', 'genehmigt', 'abgelehnt', 'erstattet') DEFAULT 'eingereicht',
+  eingereicht_von VARCHAR(36) NOT NULL,
+  eingereicht_am TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  genehmigt_von VARCHAR(36),
+  genehmigt_am TIMESTAMP NULL,
+  ablehnungsgrund TEXT,
+  FOREIGN KEY (event_id) REFERENCES events(id),
+  FOREIGN KEY (eingereicht_von) REFERENCES mitglieder(id),
+  FOREIGN KEY (genehmigt_von) REFERENCES mitglieder(id),
+  INDEX idx_event (event_id),
+  INDEX idx_status (status),
+  INDEX idx_eingereicht (eingereicht_am)
+);
+
+-- Settings
+CREATE TABLE IF NOT EXISTS settings (
+  id VARCHAR(36) PRIMARY KEY DEFAULT 'global-settings',
+  association_name VARCHAR(255) NOT NULL DEFAULT 'Faninitiative Spandau e.V.',
+  founded_year INT NOT NULL DEFAULT 2025,
+  passion_percentage INT NOT NULL DEFAULT 100,
+  contact_email VARCHAR(255),
+  contact_phone VARCHAR(50),
+  contact_address_street VARCHAR(255),
+  contact_address_zip VARCHAR(10),
+  contact_address_city VARCHAR(100),
+  primary_color VARCHAR(7) DEFAULT '#34687e',
+  secondary_color VARCHAR(7) DEFAULT '#b94f46',
+  accent_color VARCHAR(7) DEFAULT '#e8f0f4',
+  logo_url VARCHAR(500),
+  logo_alt VARCHAR(255),
+  feature_events BOOLEAN DEFAULT TRUE,
+  feature_members BOOLEAN DEFAULT TRUE,
+  feature_gallery BOOLEAN DEFAULT TRUE,
+  feature_newsletter BOOLEAN DEFAULT TRUE,
+  feature_creators BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT single_settings CHECK (id = 'global-settings')
+);
+
+-- Approval System
+CREATE TABLE IF NOT EXISTS approval_requests (
+  id VARCHAR(36) PRIMARY KEY,
+  request_type ENUM('member_edit', 'role_assignment', 'event_creation', 'finance_expense') NOT NULL,
+  resource_type VARCHAR(50) NOT NULL,
+  resource_id VARCHAR(36) NOT NULL,
+  requested_by VARCHAR(36) NOT NULL,
+  requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  status ENUM('pending', 'approved', 'rejected', 'cancelled') DEFAULT 'pending',
+  old_data JSON,
+  new_data JSON,
+  changes_summary TEXT,
+  priority ENUM('low', 'medium', 'high', 'critical') DEFAULT 'medium',
+  due_date DATETIME,
+  FOREIGN KEY (requested_by) REFERENCES users(id),
+  INDEX idx_status (status),
+  INDEX idx_resource (resource_type, resource_id),
+  INDEX idx_requested_by (requested_by)
+);
+
+-- Sensitive Fields Definition
+CREATE TABLE IF NOT EXISTS sensitive_fields (
+  id VARCHAR(36) PRIMARY KEY,
+  entity_type VARCHAR(50) NOT NULL,
+  field_name VARCHAR(100) NOT NULL,
+  sensitivity_level ENUM('low', 'medium', 'high', 'critical') NOT NULL,
+  required_permission VARCHAR(100) NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY unique_field (entity_type, field_name)
+);
+
+-- Member Visibility Overrides
+CREATE TABLE IF NOT EXISTS member_visibility_overrides (
+  member_id VARCHAR(36) NOT NULL,
+  field_name VARCHAR(100) NOT NULL,
+  visibility_level ENUM('private', 'team', 'members', 'public') NOT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (member_id, field_name),
+  FOREIGN KEY (member_id) REFERENCES mitglieder(id) ON DELETE CASCADE
+);
+
+-- =====================================
+-- VIEWS
+-- =====================================
+
+-- View für Mitglieder mit User-Daten
+CREATE OR REPLACE VIEW v_mitglieder_full AS
+SELECT
+  m.*,
+  u.email as user_email,
+  u.auth_source,
+  u.letzter_login as user_letzter_login,
+  u.ist_aktiv as user_ist_aktiv,
+  ur.role_id,
+  r.name as role_name
+FROM mitglieder m
+JOIN users u ON m.user_id = u.id
+LEFT JOIN user_roles ur ON u.id = ur.user_id
+LEFT JOIN roles r ON ur.role_id = r.id;
+
+-- =====================================
+-- STORED PROCEDURES
+-- =====================================
+
+DELIMITER $$
+
+-- Prozedur für neues Mitglied mit User
+CREATE PROCEDURE IF NOT EXISTS create_mitglied_with_user(
+  IN p_email VARCHAR(255),
+  IN p_vorname VARCHAR(100),
+  IN p_nachname VARCHAR(100),
+  IN p_auth_source VARCHAR(50),
+  IN p_easyverein_id VARCHAR(255),
+  IN p_mitgliedsnummer VARCHAR(50),
+  IN p_telefon VARCHAR(50),
+  IN p_mitglied_seit DATE
+)
+BEGIN
+  DECLARE v_user_id VARCHAR(36);
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+  BEGIN
+    ROLLBACK;
+    RESIGNAL;
+  END;
+
+  START TRANSACTION;
+
+  SET v_user_id = CONCAT('usr_', UUID());
+
+  INSERT INTO users (
+    id, email, vorname, nachname, mitgliedsnummer,
+    auth_source, easyverein_id, ist_aktiv
+  ) VALUES (
+    v_user_id, p_email, p_vorname, p_nachname, p_mitgliedsnummer,
+    p_auth_source, p_easyverein_id, TRUE
+  );
+
+  INSERT INTO mitglieder (
+    id, user_id, vorname, nachname, email, telefon,
+    easyverein_id, mitglied_seit, ist_aktiv
+  ) VALUES (
+    CONCAT('mbr_', UUID()), v_user_id, p_vorname, p_nachname,
+    p_email, p_telefon, p_easyverein_id, p_mitglied_seit, TRUE
+  );
+
+  INSERT INTO user_roles (user_id, role_id, zugewiesen_von)
+  VALUES (v_user_id, 'role_mitglied', v_user_id);
+
+  COMMIT;
+
+  SELECT v_user_id as user_id;
+END$$
+
+-- Prozedur für Token Cleanup
+CREATE PROCEDURE IF NOT EXISTS cleanup_expired_tokens()
+BEGIN
+  DELETE FROM refresh_tokens
+  WHERE expires_at < NOW()
+  OR (revoked_at IS NOT NULL AND revoked_at < DATE_SUB(NOW(), INTERVAL 30 DAY));
+END$$
+
+DELIMITER ;
+
+-- =====================================
+-- EVENTS
+-- =====================================
+
+-- Event für automatische Token-Bereinigung
+CREATE EVENT IF NOT EXISTS refresh_token_cleanup
+ON SCHEDULE EVERY 1 DAY
+STARTS (DATE(NOW()) + INTERVAL 1 DAY + INTERVAL 3 HOUR)
+DO CALL cleanup_expired_tokens();
+
+-- =====================================
+-- INITIAL DATA
+-- =====================================
+
+-- Standard-Rollen einfügen
+INSERT INTO roles (id, name, beschreibung, hierarchie_ebene) VALUES
+  ('role_admin', 'ADMIN', 'Systemadministrator mit vollständigen Rechten', 1),
+  ('role_vorstand', 'VORSTAND', 'Vorstandsmitglied', 2),
+  ('role_beirat', 'BEIRAT', 'Beiratsmitglied', 3),
+  ('role_team_event', 'TEAM_EVENT', 'Team Event - Veranstaltungsorganisation', 4),
+  ('role_team_medien', 'TEAM_MEDIEN', 'Team Medien - Social Media und Content', 4),
+  ('role_team_technik', 'TEAM_TECHNIK', 'Team Technik - IT und Website', 4),
+  ('role_team_verein', 'TEAM_VEREIN', 'Team Verein - Verwaltung', 4),
+  ('role_mitglied', 'MITGLIED', 'Normales Vereinsmitglied', 5)
+ON DUPLICATE KEY UPDATE beschreibung = VALUES(beschreibung);
+
+-- Berechtigungsgruppen
+INSERT INTO permission_groups (id, name, description) VALUES
+  ('pg_members', 'Mitgliederverwaltung', 'Berechtigungen für Mitgliederdaten'),
+  ('pg_events', 'Eventverwaltung', 'Berechtigungen für Events'),
+  ('pg_finance', 'Finanzen', 'Berechtigungen für Finanzdaten'),
+  ('pg_content', 'Inhalte', 'Berechtigungen für Content-Management'),
+  ('pg_system', 'System', 'System-Administrationsrechte')
+ON DUPLICATE KEY UPDATE description = VALUES(description);
+
+-- Basis-Berechtigungen
+INSERT INTO permissions (id, resource, action, group_id, beschreibung) VALUES
+  ('perm_member_view_basic', 'member', 'view_basic', 'pg_members', 'Basis-Mitgliederdaten einsehen'),
+  ('perm_member_view_contact', 'member', 'view_contact', 'pg_members', 'Kontaktdaten einsehen'),
+  ('perm_member_view_sensitive', 'member', 'view_sensitive', 'pg_members', 'Sensible Daten einsehen'),
+  ('perm_member_edit_own', 'member', 'edit_own', 'pg_members', 'Eigene Daten bearbeiten'),
+  ('perm_member_edit_all', 'member', 'edit_all', 'pg_members', 'Alle Mitgliederdaten bearbeiten'),
+  ('perm_event_create', 'event', 'create', 'pg_events', 'Events erstellen'),
+  ('perm_event_edit_own', 'event', 'edit_own', 'pg_events', 'Eigene Events bearbeiten'),
+  ('perm_event_approve', 'event', 'approve', 'pg_events', 'Events genehmigen')
+ON DUPLICATE KEY UPDATE beschreibung = VALUES(beschreibung);
+
+-- Globale Settings
+INSERT INTO settings (
+  id, association_name, founded_year, passion_percentage,
+  contact_email, contact_phone, contact_address_street,
+  contact_address_zip, contact_address_city
+) VALUES (
+  'global-settings', 'Faninitiative Spandau e.V.', 2025, 100,
+  'info@fanini.live', '+49 30 12345678', 'Vereinsstraße 1',
+  '13587', 'Berlin-Spandau'
+) ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP;
+
+-- Sensitive Fields Definition
+INSERT INTO sensitive_fields (id, entity_type, field_name, sensitivity_level, required_permission, description) VALUES
+  ('sf_member_email', 'member', 'email', 'medium', 'member.view_contact', 'E-Mail Adresse'),
+  ('sf_member_phone', 'member', 'telefon', 'medium', 'member.view_contact', 'Telefonnummer'),
+  ('sf_member_address', 'member', 'adresse', 'high', 'member.view_sensitive', 'Wohnadresse'),
+  ('sf_member_birth', 'member', 'geburtsdatum', 'high', 'member.view_sensitive', 'Geburtsdatum'),
+  ('sf_member_iban', 'member', 'iban', 'critical', 'member.view_sensitive', 'Bankverbindung')
+ON DUPLICATE KEY UPDATE description = VALUES(description);

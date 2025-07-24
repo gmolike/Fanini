@@ -4,16 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start -p 3000",
-    "lint": "eslint src --ext .ts,.tsx",
-    "type-check": "tsc --noEmit",
-    "clean": "rm -rf .next dist",
-    "db:drop": "docker exec fanini-mysql-1 mysql -u root -prootpassword -e \"DROP DATABASE IF EXISTS fanini_db; CREATE DATABASE fanini_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\"",
-    "db:migrate": "node scripts/migrate-docker.cjs",
-    "db:seed:auth": "node scripts/seed-auth-docker.cjs",
-    "db:reset": "npm run db:drop && npm run db:migrate && npm run db:seed:auth"
+    "// Database Scripts": "=== Database Management ===",
+    "db:migrate": "tsx src/infrastructure/database/migrate.ts",
+    "db:seed": "tsx src/infrastructure/database/seed.ts",
+    "db:seed:auth": "tsx src/infrastructure/database/seedAuth.ts",
+    "db:seed:complete": "tsx src/infrastructure/database/seedComplete.ts",
+    "db:reset": "tsx src/infrastructure/database/resetDatabase.ts",
+    "db:reset:docker": "powershell -ExecutionPolicy Bypass -File ../../scripts/reset-docker-db.ps1",
+    "db:test": "tsx src/infrastructure/database/connection.ts"
   },
   "dependencies": {
     "@faninitiative/shared": "workspace:*",

@@ -38,3 +38,16 @@ test: ## Run all tests
 
 clean: ## Clean build artifacts
 	@powershell -ExecutionPolicy Bypass -File scripts/clean.ps1 -Build
+
+db-reset: ## Reset database with fresh data
+	@echo "Resetting database..."
+	@pnpm db:reset:clean
+
+db-migrate: ## Run migrations
+	@pnpm db:migrate
+
+db-seed: ## Seed database
+	@pnpm db:seed
+
+db-shell: ## Open MySQL shell
+	@docker exec -it faninitiative-spandau-mysql-1 mysql -ufanini -ppassword fanini_db

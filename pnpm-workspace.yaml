@@ -12,6 +12,7 @@ onlyBuiltDependencies:
   - '@swc/core'
   - '@tailwindcss/oxide'
   - '@tree-sitter-grammars/tree-sitter-yaml'
+  - bcrypt
   - core-js-pure
   - esbuild
   - msw
@@ -19,3 +20,4 @@ onlyBuiltDependencies:
   - tree-sitter
   - tree-sitter-json
   - unrs-resolver
+  - vue-demi

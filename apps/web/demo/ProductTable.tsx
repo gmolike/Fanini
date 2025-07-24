@@ -1,5 +1,5 @@
-// src/features/test/product-list/ui/ProductTable.tsx
-import { useCallback, useMemo } from 'react';
+// src/features/test/product-list/ui/ProductTableWithUrl.tsx
+import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { DataTable } from '@/shared/ui/dataTable';
@@ -12,13 +12,13 @@ import { getProductTableDefinition } from '../lib/tableDefinition';
 import type { ServerSideParams } from '@/shared/ui/dataTable';
 
 /**
- * ProductTable Component
- * @description Server-Side DataTable mit angepasstem Backend-Format
+ * ProductTableWithUrl Component
+ * @description Server-Side DataTable mit URL State Management
  */
-export const ProductTable = () => {
+export const ProductTableWithUrl = () => {
   const navigate = useNavigate();
 
-  // URL State Management
+  // URL State als Single Source of Truth
   const [urlState, setUrlState] = useUrlState({
     page: 0,
     pageSize: 20,
@@ -27,21 +27,15 @@ export const ProductTable = () => {
     sortOrder: 'desc' as const,
   });
 
-  // Query mit angepassten Parametern
-  const { data, isLoading, error, isFetching } = useProductList({
-    page: urlState.page,
-    pageSize: urlState.pageSize,
-    searchTerm: urlState.searchTerm,
-    sortBy: urlState.sortBy,
-    sortOrder: urlState.sortOrder,
-  });
+  // Query mit URL State
+  const { data, isLoading, error, isFetching } = useProductList(urlState);
 
-  // Handle params change von DataTable
+  // Handle params change
   const handleServerParamsChange = useCallback(
     (params: ServerSideParams) => {
       setUrlState({
         page: params.page,
-        pageSize: params.limit, // DataTable nutzt "limit", Backend "pageSize"
+        pageSize: params.limit,
         searchTerm: params.search || '',
         sortBy: params.sortBy || 'createdAt',
         sortOrder: params.sortOrder || 'desc',
@@ -54,7 +48,6 @@ export const ProductTable = () => {
 
   return (
     <div className="relative">
-      {/* Loading indicator */}
       {isFetching && !isLoading && (
         <div className="absolute top-2 right-2 z-10">
           <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
@@ -69,8 +62,8 @@ export const ProductTable = () => {
         serverSide={{
           enabled: true,
           totalCount: data?.totalElements ?? 0,
-          currentPage: data?.page ?? 0,
-          pageSize: data?.pageSize ?? 20,
+          currentPage: urlState.page, // URL State als Source of Truth
+          pageSize: urlState.pageSize,
           searchableFields: ['name', 'description', 'sku', 'category'],
           debounceMs: 500,
         }}
@@ -80,8 +73,6 @@ export const ProductTable = () => {
         onDelete={product => console.log('Delete product:', product)}
         onAdd={() => navigate('/test/products/new')}
         addButtonText="Neues Produkt"
-        stickyHeader
-        stickyActionColumn
       />
     </div>
   );

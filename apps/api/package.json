@@ -14,7 +14,10 @@
     "db:seed:complete": "tsx src/infrastructure/database/seedComplete.ts",
     "db:reset": "tsx src/infrastructure/database/resetDatabase.ts",
     "db:reset:docker": "powershell -ExecutionPolicy Bypass -File ../../scripts/reset-docker-db.ps1",
-    "db:test": "tsx src/infrastructure/database/connection.ts"
+    "db:test": "tsx src/infrastructure/database/connection.ts",
+    "// OpenAPI": "=== OpenAPI Generation ===",
+    "openapi:generate": "tsx src/scripts/generate-openapi.ts",
+    "openapi:watch": "nodemon --watch src/domain --watch src/config --ext ts --exec 'pnpm openapi:generate'"
   },
   "dependencies": {
     "@faninitiative/shared": "workspace:*",

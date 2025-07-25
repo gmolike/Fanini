@@ -1,74 +1,91 @@
-// entities/intern/task/model/types.ts
+// apps/web/src/entities/intern/task/model/types.ts
 import type {
-  addTaskCommentSchema,
-  assignTaskSchema,
-  changeTaskStatusSchema,
-  createTaskSchema,
-  materialSchema,
-  taskCommentSchema,
-  taskDetailResponseSchema,
-  taskDetailSchema,
-  taskFilterSchema,
-  taskListItemSchema,
-  taskListResponseSchema,
-  updateTaskSchema,
-} from './schemas';
-import type { z } from 'zod';
+  Task,
+  TaskStatus,
+  TaskPriority,
+  TaskContext,
+  TaskMaterial,
+  CreateTaskRequest,
+} from '@faninitiative/shared';
 
-// Schema Types
-export type TaskListItem = z.infer<typeof taskListItemSchema>;
-export type TaskDetail = z.infer<typeof taskDetailSchema>;
-export type TaskListResponse = z.infer<typeof taskListResponseSchema>;
-export type TaskDetailResponse = z.infer<typeof taskDetailResponseSchema>;
+import { TASK_STATUS_LABELS, TASK_PRIORITY_LABELS } from '@faninitiative/shared';
 
-// Request Types
-export type CreateTaskRequest = z.infer<typeof createTaskSchema>;
-export type UpdateTaskRequest = z.infer<typeof updateTaskSchema>;
-export type ChangeTaskStatusRequest = z.infer<typeof changeTaskStatusSchema>;
-export type AssignTaskRequest = z.infer<typeof assignTaskSchema>;
-export type AddTaskCommentRequest = z.infer<typeof addTaskCommentSchema>;
-export type TaskFilter = z.infer<typeof taskFilterSchema>;
+// Re-export shared types
+export type {
+  Task,
+  TaskStatus,
+  TaskPriority,
+  TaskContext,
+  TaskMaterial,
+  CreateTaskRequest,
+} from '@faninitiative/shared';
 
-// Sub-Types
-export type TaskMaterial = z.infer<typeof materialSchema>;
-export type TaskComment = z.infer<typeof taskCommentSchema>;
+// Frontend-specific types
+export type TaskListItem = Task & {
+  verantwortlicher?: {
+    id: string;
+    name: string;
+    rolle?: string;
+  };
+  zugewiesenePersonen?: Array<{
+    id: string;
+    name: string;
+    profilbild?: string;
+  }>;
+};
 
-// Enum Types
-export type TaskStatus = 'offen' | 'in_bearbeitung' | 'review' | 'erledigt' | 'blockiert';
-export type TaskPriority = 'niedrig' | 'mittel' | 'hoch' | 'kritisch';
-export type TaskContextType = 'event' | 'team' | 'general';
+export type TaskDetail = TaskListItem & {
+  kommentare: TaskComment[];
+  history: TaskHistoryEntry[];
+};
 
-// Config Types
+export type TaskComment = {
+  id: string;
+  text: string;
+  autorId: string;
+  autor?: {
+    name: string;
+    rolle?: string;
+    profilbild?: string;
+  };
+  erstelltAm: string;
+  erwaehntePersonen?: string[];
+};
+
+export type TaskHistoryEntry = {
+  datum: string;
+  aktion: string;
+  benutzer: string;
+  details?: string;
+};
+
+// UI Config using shared labels
 export const TASK_STATUS_CONFIG: Record<
   TaskStatus,
-  {
-    label: string;
-    color: string;
-    icon: string;
-  }
+  { label: string; color: string; icon: string }
 > = {
   offen: {
-    label: 'Offen',
+    label: TASK_STATUS_LABELS.offen,
     color: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
     icon: '○',
   },
   in_bearbeitung: {
-    label: 'In Bearbeitung',
+    label: TASK_STATUS_LABELS.in_bearbeitung,
     color: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
     icon: '◐',
   },
   review: {
-    label: 'Review',
+    label: TASK_STATUS_LABELS.review,
     color: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
     icon: '◉',
   },
   erledigt: {
-    label: 'Erledigt',
+    label: TASK_STATUS_LABELS.erledigt,
     color: 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300',
     icon: '✓',
   },
   blockiert: {
-    label: 'Blockiert',
+    label: TASK_STATUS_LABELS.blockiert,
     color: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
     icon: '✗',
   },
@@ -76,55 +93,26 @@ export const TASK_STATUS_CONFIG: Record<
 
 export const TASK_PRIORITY_CONFIG: Record<
   TaskPriority,
-  {
-    label: string;
-    color: string;
-    icon: string;
-  }
+  { label: string; color: string; icon: string }
 > = {
   niedrig: {
-    label: 'Niedrig',
+    label: TASK_PRIORITY_LABELS.niedrig,
     color: 'bg-gray-100 text-gray-600',
     icon: '↓',
   },
   mittel: {
-    label: 'Mittel',
+    label: TASK_PRIORITY_LABELS.mittel,
     color: 'bg-yellow-100 text-yellow-700',
     icon: '→',
   },
   hoch: {
-    label: 'Hoch',
+    label: TASK_PRIORITY_LABELS.hoch,
     color: 'bg-orange-100 text-orange-700',
     icon: '↑',
   },
   kritisch: {
-    label: 'Kritisch',
+    label: TASK_PRIORITY_LABELS.kritisch,
     color: 'bg-red-100 text-red-700',
     icon: '⚠',
-  },
-};
-
-export const TASK_CONTEXT_CONFIG: Record<
-  TaskContextType,
-  {
-    label: string;
-    labelPlural: string;
-    icon: string;
-  }
-> = {
-  event: {
-    label: 'Event',
-    labelPlural: 'Events',
-    icon: '📅',
-  },
-  team: {
-    label: 'Team',
-    labelPlural: 'Teams',
-    icon: '👥',
-  },
-  general: {
-    label: 'Allgemein',
-    labelPlural: 'Allgemeine',
-    icon: '📌',
   },
 };

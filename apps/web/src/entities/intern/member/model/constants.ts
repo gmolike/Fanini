@@ -1,5 +1,50 @@
+// apps/web/src/entities/intern/member/model/constants.ts
+import { ROLE_LABELS, ROLE_COLORS } from '@faninitiative/shared';
 import { createEnumVariantConfig } from '@/shared/ui';
+import type { MemberRole } from '@faninitiative/shared';
 
+// Re-export shared constants
+export { ROLE_LABELS } from '@faninitiative/shared';
+
+/**
+ * Role configuration for UI components
+ * @description Combines labels and colors for role badges
+ */
+export const ROLE_CONFIG = Object.entries(ROLE_LABELS).reduce(
+  (acc, [key, label]) => {
+    const role = key as MemberRole;
+    const colors = ROLE_COLORS[role];
+
+    acc[role] = {
+      label,
+      variant: getVariantFromRole(role),
+    };
+
+    return acc;
+  },
+  {} as Record<MemberRole, { label: string; variant: string }>
+);
+
+/**
+ * Helper to get variant from role
+ */
+const getVariantFromRole = (role: MemberRole): string => {
+  const variantMap: Record<MemberRole, string> = {
+    ADMIN: 'error',
+    VORSTAND: 'purple',
+    BEIRAT: 'info',
+    KASSENPRUFER: 'orange',
+    TEAM_EVENT: 'success',
+    TEAM_TECHNIK: 'info',
+    TEAM_MEDIEN: 'warning',
+    TEAM_VEREIN: 'default',
+    MITGLIED: 'outline',
+  };
+
+  return variantMap[role];
+};
+
+// Keep existing Sichtbarkeit config
 const SichtbarkeitEnum = {
   alle: 'alle',
   mitglieder: 'mitglieder',
@@ -7,96 +52,6 @@ const SichtbarkeitEnum = {
   niemand: 'niemand',
 } as const;
 
-// Role Enum Type
-export type MemberRole =
-  | 'ADMIN'
-  | 'VORSTAND'
-  | 'BEIRAT'
-  | 'KASSENPRUFER'
-  | 'TEAM_EVENT'
-  | 'TEAM_TECHNIK'
-  | 'TEAM_MEDIEN'
-  | 'TEAM_VEREIN'
-  | 'MITGLIED';
-
-// Role Labels Map
-const ROLE_LABELS: Record<MemberRole, string> = {
-  ADMIN: 'Administrator',
-  VORSTAND: 'Vorstand',
-  BEIRAT: 'Beirat',
-  KASSENPRUFER: 'Kassenprüfer',
-  TEAM_EVENT: 'Team Event',
-  TEAM_TECHNIK: 'Team Technik',
-  TEAM_MEDIEN: 'Team Medien',
-  TEAM_VEREIN: 'Team Verein',
-  MITGLIED: 'Mitglied',
-};
-
-// Role Configuration mit createEnumVariantConfig
-export const ROLE_CONFIG = createEnumVariantConfig(
-  {
-    ADMIN: 'ADMIN',
-    VORSTAND: 'VORSTAND',
-    BEIRAT: 'BEIRAT',
-    KASSENPRUFER: 'KASSENPRUFER',
-    TEAM_EVENT: 'TEAM_EVENT',
-    TEAM_TECHNIK: 'TEAM_TECHNIK',
-    TEAM_MEDIEN: 'TEAM_MEDIEN',
-    TEAM_VEREIN: 'TEAM_VEREIN',
-    MITGLIED: 'MITGLIED',
-  } as const,
-  {
-    ADMIN: {
-      label: 'Administrator',
-      variant: 'error',
-    },
-    VORSTAND: {
-      label: 'Vorstand',
-      variant: 'purple',
-    },
-    BEIRAT: {
-      label: 'Beirat',
-      variant: 'info',
-    },
-    KASSENPRUFER: {
-      label: 'Kassenprüfer',
-      variant: 'orange',
-    },
-    TEAM_EVENT: {
-      label: 'Team Event',
-      variant: 'success',
-    },
-    TEAM_TECHNIK: {
-      label: 'Team Technik',
-      variant: 'info',
-    },
-    TEAM_MEDIEN: {
-      label: 'Team Medien',
-      variant: 'warning',
-    },
-    TEAM_VEREIN: {
-      label: 'Team Verein',
-      variant: 'default',
-    },
-    MITGLIED: {
-      label: 'Mitglied',
-      variant: 'outline',
-    },
-  }
-);
-
-// Helper function to get role label
-export const getRoleLabel = (role: MemberRole): string => {
-  return ROLE_LABELS[role];
-};
-
-// Export role options as constant
-export const ROLE_OPTIONS = Object.entries(ROLE_LABELS).map(([value, label]) => ({
-  value: value as MemberRole,
-  label,
-}));
-
-// Sichtbarkeit Configuration
 export const SICHTBARKEIT_CONFIG = createEnumVariantConfig(SichtbarkeitEnum, {
   alle: {
     label: 'Öffentlich',
@@ -115,18 +70,3 @@ export const SICHTBARKEIT_CONFIG = createEnumVariantConfig(SichtbarkeitEnum, {
     variant: 'error',
   },
 });
-export const SENSITIVITY_LABELS = {
-  none: 'Keine',
-  low: 'Niedrig',
-  medium: 'Mittel',
-  high: 'Hoch',
-  critical: 'Kritisch',
-} as const;
-
-export const FIELD_SENSITIVITY = {
-  telefon: 'low',
-  geburtsdatum: 'medium',
-  adresse: 'high',
-  notfallkontakt: 'high',
-  iban: 'critical',
-} as const;

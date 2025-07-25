@@ -30,7 +30,6 @@ import type {
 /**
  * useDataTable Hook
  */
-
 export const useDataTable = <TData extends TableDataConstraint>(
   props: DataTableProps<TData>
 ): DataTableController<TData> => {
@@ -93,6 +92,17 @@ export const useDataTable = <TData extends TableDataConstraint>(
   );
 
   // Handle selected row scrolling
+
+  // Sync server params when serverSide config changes (e.g., from URL)
+  useEffect(() => {
+    if (serverSide?.enabled) {
+      setServerParams(prev => ({
+        ...prev,
+        page: serverSide.currentPage,
+        limit: serverSide.pageSize,
+      }));
+    }
+  }, [serverSide?.enabled, serverSide?.currentPage, serverSide?.pageSize]);
 
   // Debounced search handler für Server-Mode
   const debouncedServerSearch = useMemo(

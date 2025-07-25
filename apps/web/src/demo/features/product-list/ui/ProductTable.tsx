@@ -1,7 +1,7 @@
 // apps/web/src/demo/features/product-list/ui/ProductTable.tsx
 // Final location: apps/web/src/features/product-list/ui/ProductTable.tsx
 
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
@@ -32,29 +32,43 @@ export const ProductTable = () => {
   // Data Query - verwende filterState direkt
   const { data, isLoading, error, isFetching } = useProductList(filterState);
 
+  // Sync initial URL params to DataTable
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    setIsInitialized(true);
+  }, []);
+
   // Handle DataTable parameter changes
   const handleServerParamsChange = useCallback(
     (params: ServerSideParams) => {
-      // Update only changed values to preserve sort
-      const updates: Partial<DataTableFilterState> = {
-        page: params.page,
-        pageSize: params.limit,
-      };
+      // Only process changes after initialization to avoid conflicts
+      if (!isInitialized) return;
 
-      // Only update search if it changed
+      // Update only changed values to preserve other params
+      const updates: Partial<DataTableFilterState> = {};
+
+      // Check what actually changed
+      if (params.page !== filterState.page) {
+        updates.page = params.page;
+      }
+      if (params.limit !== filterState.pageSize) {
+        updates.pageSize = params.limit;
+      }
       if (params.search !== filterState.searchTerm) {
         updates.searchTerm = params.search ?? '';
       }
-
-      // Only update sort if it explicitly changed
-      if (params.sortBy !== undefined && params.sortOrder !== undefined) {
+      if (params.sortBy !== filterState.sortBy || params.sortOrder !== filterState.sortOrder) {
         updates.sortBy = params.sortBy;
         updates.sortOrder = params.sortOrder;
       }
 
-      setFilterState(updates);
+      // Only update if there are actual changes
+      if (Object.keys(updates).length > 0) {
+        setFilterState(updates);
+      }
     },
-    [setFilterState, filterState.searchTerm]
+    [setFilterState, filterState, isInitialized]
   );
 
   // Actions

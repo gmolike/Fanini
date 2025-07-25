@@ -3,7 +3,7 @@
 
 import { useCallback, useMemo } from 'react';
 
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useLocation, useNavigate, useSearch } from '@tanstack/react-router';
 
 import type { DataTableFilterState } from '../api/types/filter';
 
@@ -22,6 +22,7 @@ const DEFAULT_FILTER_STATE: DataTableFilterState = {
 /**
  * useFilterUrlState Hook
  * @description Synchronisiert Filter-State mit URL-Parametern
+ * Flow: URL → Defaults → Query
  * @param defaults - Optionale Standard-Werte
  * @returns [state, setState, resetState] Tuple
  */
@@ -32,75 +33,95 @@ export const useFilterUrlState = (
   (updates: Partial<DataTableFilterState>) => void,
   () => void,
 ] => {
-  const navigate = useNavigate({ from: '/' });
+  const navigate = useNavigate();
+  const location = useLocation();
   const search = useSearch({ strict: false });
   const mergedDefaults = useMemo(() => ({ ...DEFAULT_FILTER_STATE, ...defaults }), [defaults]);
 
-  // Parse State from URL
+  // Parse State from URL - URL has highest priority
   const state = useMemo((): DataTableFilterState => {
     // Type-safe parsing of search params
     const searchParams = search as Record<string, unknown>;
 
     return {
-      page: Number(searchParams['page'] ?? mergedDefaults.page),
-      pageSize: Number(searchParams['pageSize'] ?? mergedDefaults.pageSize),
-      searchTerm: typeof searchParams['search'] === 'string' ? searchParams['search'] : '',
-      sortBy: (searchParams['sortBy'] as string | undefined) ?? mergedDefaults.sortBy,
+      page: searchParams['page'] !== undefined ? Number(searchParams['page']) : mergedDefaults.page,
+      pageSize:
+        searchParams['pageSize'] !== undefined
+          ? Number(searchParams['pageSize'])
+          : mergedDefaults.pageSize,
+      searchTerm:
+        searchParams['search'] !== undefined && typeof searchParams['search'] === 'string'
+          ? searchParams['search']
+          : '',
+      sortBy:
+        searchParams['sortBy'] !== undefined && typeof searchParams['sortBy'] === 'string'
+          ? searchParams['sortBy']
+          : mergedDefaults.sortBy,
       sortOrder:
-        (searchParams['sortOrder'] as 'asc' | 'desc' | undefined) ?? mergedDefaults.sortOrder,
+        searchParams['sortOrder'] !== undefined &&
+        (searchParams['sortOrder'] === 'asc' || searchParams['sortOrder'] === 'desc')
+          ? searchParams['sortOrder']
+          : mergedDefaults.sortOrder,
     };
   }, [search, mergedDefaults]);
 
   // Update State
   const setState = useCallback(
     (updates: Partial<DataTableFilterState>) => {
-      const newState = { ...state, ...updates };
+      const currentState = { ...state };
+      const newState = { ...currentState, ...updates };
 
-      // Build clean params - only include non-default values
+      // Build search params from complete state
       const searchParams: Record<string, string> = {};
 
+      // Always include page if not default
       if (newState.page !== mergedDefaults.page) {
         searchParams['page'] = String(newState.page);
       }
+
+      // Always include pageSize if not default
       if (newState.pageSize !== mergedDefaults.pageSize) {
         searchParams['pageSize'] = String(newState.pageSize);
       }
+
+      // Include search if present
       if (newState.searchTerm) {
         searchParams['search'] = newState.searchTerm;
       }
 
-      // Preserve existing sort if not explicitly changed
-      if (updates.sortBy !== undefined || updates.sortOrder !== undefined) {
-        // Sort was explicitly changed
-        if (newState.sortBy && newState.sortOrder) {
-          searchParams['sortBy'] = newState.sortBy;
-          searchParams['sortOrder'] = newState.sortOrder;
-        }
-      }
-      // Sort was not changed, preserve existing values
-      else if (state.sortBy && state.sortOrder) {
-        searchParams['sortBy'] = state.sortBy;
-        searchParams['sortOrder'] = state.sortOrder;
+      // Include sort if present (both values must exist)
+      if (newState.sortBy && newState.sortOrder) {
+        searchParams['sortBy'] = newState.sortBy;
+        searchParams['sortOrder'] = newState.sortOrder;
       }
 
-      // Navigate with new search params
+      // Navigate to current path with new search params
       void navigate({
-        to: '.',
+        to: location.pathname,
         search: searchParams,
         replace: true,
       });
     },
-    [state, mergedDefaults, navigate]
+    [state, mergedDefaults, navigate, location.pathname]
   );
 
   // Reset to defaults
   const resetState = useCallback(() => {
+    // Reset to defaults but keep the current path
+    const searchParams: Record<string, string> = {};
+
+    // Only add non-default values from mergedDefaults
+    if (mergedDefaults.sortBy && mergedDefaults.sortOrder) {
+      searchParams['sortBy'] = mergedDefaults.sortBy;
+      searchParams['sortOrder'] = mergedDefaults.sortOrder;
+    }
+
     void navigate({
-      to: '.',
-      search: {},
+      to: location.pathname,
+      search: searchParams,
       replace: true,
     });
-  }, [navigate]);
+  }, [navigate, location.pathname, mergedDefaults]);
 
   return [state, setState, resetState] as const;
 };

@@ -34,7 +34,7 @@ export const useGlobalFilter = <TData>({
   const request = toGlobalFilterRequest(filters);
 
   return useQuery<GlobalFilterResponse<TData>>({
-    queryKey: [...queryKey, request],
+    queryKey: [...queryKey, request, endpoint],
     queryFn: async () => {
       const params = new URLSearchParams();
 

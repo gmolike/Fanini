@@ -1,7 +1,7 @@
 // apps/web/src/demo/features/product-list/ui/ProductTable.tsx
 // Final location: apps/web/src/features/product-list/ui/ProductTable.tsx
 
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 import { useNavigate } from '@tanstack/react-router';
 
@@ -14,6 +14,7 @@ import { useFilterUrlState } from '../../../shared/hooks/useFilterUrlState';
 import { productTableDefinition } from '../model/tableDefinition';
 
 import type { Product } from '../../../entities/product/model/types';
+import type { DataTableFilterState } from '../../../shared/api/types/filter';
 
 /**
  * ProductTable Component
@@ -28,21 +29,32 @@ export const ProductTable = () => {
     sortOrder: 'desc',
   });
 
-  // Data Query
+  // Data Query - verwende filterState direkt
   const { data, isLoading, error, isFetching } = useProductList(filterState);
 
   // Handle DataTable parameter changes
   const handleServerParamsChange = useCallback(
     (params: ServerSideParams) => {
-      setFilterState({
+      // Update only changed values to preserve sort
+      const updates: Partial<DataTableFilterState> = {
         page: params.page,
         pageSize: params.limit,
-        searchTerm: params.search ?? '',
-        sortBy: params.sortBy,
-        sortOrder: params.sortOrder,
-      });
+      };
+
+      // Only update search if it changed
+      if (params.search !== filterState.searchTerm) {
+        updates.searchTerm = params.search ?? '';
+      }
+
+      // Only update sort if it explicitly changed
+      if (params.sortBy !== undefined && params.sortOrder !== undefined) {
+        updates.sortBy = params.sortBy;
+        updates.sortOrder = params.sortOrder;
+      }
+
+      setFilterState(updates);
     },
-    [setFilterState]
+    [setFilterState, filterState.searchTerm]
   );
 
   // Actions
@@ -94,6 +106,12 @@ export const ProductTable = () => {
         addButtonText="Neues Produkt"
         stickyHeader
         maxHeight="600px"
+        initialGlobalFilter={filterState.searchTerm}
+        initialSorting={
+          filterState.sortBy
+            ? [{ id: filterState.sortBy, desc: filterState.sortOrder === 'desc' }]
+            : undefined
+        }
       />
     </Card>
   );

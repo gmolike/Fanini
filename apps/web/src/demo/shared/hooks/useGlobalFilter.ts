@@ -51,7 +51,6 @@ export const useGlobalFilter = <TData>({
       return apiClient.get<GlobalFilterResponse<TData>>(`${endpoint}?${params.toString()}`);
     },
     ...options,
-    // Wichtig für smooth transitions
-    keepPreviousData: true,
+    placeholderData: previousData => previousData,
   });
 };

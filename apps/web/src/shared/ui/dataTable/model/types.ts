@@ -192,11 +192,19 @@ export type DataTableProps<
   errorStateComponent?: React.ComponentType<ErrorStateProps>;
 
   /** Backend Search Configuration */
-  /** Server-Side Configuration */
   serverSide?: ServerSideConfig;
 
   /** Callback wenn Server-Parameter sich ändern */
   onServerParamsChange?: (params: ServerSideParams) => void;
+
+  /** Initial global filter value (for server-side mode) */
+  initialGlobalFilter?: string;
+
+  /** Initial sorting state */
+  initialSorting?: {
+    id: string;
+    desc: boolean;
+  }[];
 };
 
 /**

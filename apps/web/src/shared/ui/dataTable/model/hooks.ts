@@ -30,7 +30,6 @@ import type {
 /**
  * useDataTable Hook
  */
-// apps/web/src/shared/ui/dataTable/model/hooks.ts
 
 export const useDataTable = <TData extends TableDataConstraint>(
   props: DataTableProps<TData>
@@ -63,30 +62,34 @@ export const useDataTable = <TData extends TableDataConstraint>(
     disabledColumns,
     serverSide,
     onServerParamsChange,
+    initialGlobalFilter,
+    initialSorting,
   } = props;
 
-  // State für Server-Parameter
+  // State
+  const [sorting, setSorting] = useState<DataTableState['sorting']>(initialSorting ?? []);
+  const [columnFilters, setColumnFilters] = useState<DataTableState['columnFilters']>([]);
+  const [globalFilter, setGlobalFilter] = useState<DataTableState['globalFilter']>(
+    initialGlobalFilter ?? ''
+  );
+  const [isExpanded, setIsExpanded] = useState(!expandable);
+  const [columnVisibility, setColumnVisibility] = useState(() =>
+    getColumnVisibility(tableDefinition, effectiveSelectableColumns)
+  );
+
+  // State für Server-Parameter - initialisiere mit aktuellen Werten
   const [serverParams, setServerParams] = useState<ServerSideParams>({
     page: serverSide?.currentPage ?? 0,
     limit: serverSide?.pageSize ?? pageSize,
-    search: '',
-    sortBy: undefined,
-    sortOrder: undefined,
+    search: initialGlobalFilter ?? '',
+    sortBy: initialSorting?.[0]?.id,
+    sortOrder: initialSorting?.[0]?.desc ? 'desc' : 'asc',
   });
 
   // Effective columns
   const effectiveSelectableColumns = useMemo(
     () => selectableColumns ?? tableDefinition.fields.map(field => field.id),
     [selectableColumns, tableDefinition.fields]
-  );
-
-  // State
-  const [sorting, setSorting] = useState<DataTableState['sorting']>([]);
-  const [columnFilters, setColumnFilters] = useState<DataTableState['columnFilters']>([]);
-  const [globalFilter, setGlobalFilter] = useState<DataTableState['globalFilter']>('');
-  const [isExpanded, setIsExpanded] = useState(!expandable);
-  const [columnVisibility, setColumnVisibility] = useState(() =>
-    getColumnVisibility(tableDefinition, effectiveSelectableColumns)
   );
 
   // Handle selected row scrolling

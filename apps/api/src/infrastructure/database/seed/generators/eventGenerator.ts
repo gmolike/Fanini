@@ -1,5 +1,5 @@
 // seed/generators/eventGenerator.ts
-import { dateHelpers, generateId, PREDEFINED_IDS } from '../helpers';
+import { dateHelpers, generateId, PREDEFINED_IDS } from "../helpers/index.js";
 
 type EventTemplate = {
   readonly titel: string;
@@ -24,184 +24,197 @@ type EventTemplate = {
 const EVENT_TEMPLATES: readonly EventTemplate[] = [
   // Fanfahrten
   {
-    titel: 'Auswärtsfahrt Union Berlin',
-    beschreibung: 'Gemeinsame Busfahrt zum Auswärtsspiel gegen Union Berlin. Abfahrt vom Vereinsheim.',
-    typ: 'fanfahrt',
+    titel: "Auswärtsfahrt Union Berlin",
+    beschreibung:
+      "Gemeinsame Busfahrt zum Auswärtsspiel gegen Union Berlin. Abfahrt vom Vereinsheim.",
+    typ: "fanfahrt", // Korrekt
     dauer: 360,
     istOeffentlich: true,
     budget: 1500,
     maxTeilnehmer: 50,
     ort: {
-      name: 'Stadion An der Alten Försterei',
+      name: "Stadion An der Alten Försterei",
       adresse: {
-        strasse: 'An der Alten Försterei',
-        hausnummer: '1',
-        plz: '12555',
-        stadt: 'Berlin-Köpenick'
-      }
-    }
+        strasse: "An der Alten Försterei",
+        hausnummer: "1",
+        plz: "12555",
+        stadt: "Berlin-Köpenick",
+      },
+    },
   },
   {
-    titel: 'Heimspiel gegen Hertha BSC II',
-    beschreibung: 'Unterstützung unserer Mannschaft im Heimspiel. Treffpunkt: Fantreff am Stadion.',
-    typ: 'heimspiel',
+    titel: "Heimspiel gegen Hertha BSC II",
+    beschreibung:
+      "Unterstützung unserer Mannschaft im Heimspiel. Treffpunkt: Fantreff am Stadion.",
+    typ: "sportveranstaltung", // Geändert von 'heimspiel'
     dauer: 180,
     istOeffentlich: true,
     ort: {
-      name: 'Stadion im Falkenhagener Feld',
+      name: "Stadion im Falkenhagener Feld",
       adresse: {
-        strasse: 'Falkenseer Chaussee',
-        hausnummer: '239',
-        plz: '13583',
-        stadt: 'Berlin-Spandau'
-      }
-    }
+        strasse: "Falkenseer Chaussee",
+        hausnummer: "239",
+        plz: "13583",
+        stadt: "Berlin-Spandau",
+      },
+    },
   },
 
   // League of Legends Events
   {
-    titel: 'LoL Team Training Session',
-    beschreibung: 'Intensives Training für unser League of Legends Team. Fokus auf Teamfight-Koordination.',
-    typ: 'training',
-    sportbereich: 'league_of_legends',
+    titel: "LoL Team Training Session",
+    beschreibung:
+      "Intensives Training für unser League of Legends Team. Fokus auf Teamfight-Koordination.",
+    typ: "workshop", // Geändert von 'training'
+    sportbereich: "league_of_legends",
     dauer: 240,
     istOeffentlich: false,
-    ort: { name: 'Discord Server - Trainingskanal' }
+    ort: { name: "Discord Server - Trainingskanal" },
   },
   {
-    titel: 'LoL Community Turnier',
-    beschreibung: 'Offenes 5v5 Turnier für alle Vereinsmitglieder. Anfänger willkommen!',
-    typ: 'turnier',
-    sportbereich: 'league_of_legends',
+    titel: "LoL Community Turnier",
+    beschreibung:
+      "Offenes 5v5 Turnier für alle Vereinsmitglieder. Anfänger willkommen!",
+    typ: "turnier", // Korrekt
+    sportbereich: "league_of_legends",
     dauer: 480,
     istOeffentlich: true,
     maxTeilnehmer: 40,
     budget: 300,
-    ort: { name: 'Online - Tournament Server' }
+    ort: { name: "Online - Tournament Server" },
   },
 
   // Vereinstreffen
   {
-    titel: 'Monatstreffen',
-    beschreibung: 'Reguläres Monatstreffen mit aktuellen Themen und Planungen.',
-    typ: 'vereinstreffen',
+    titel: "Monatstreffen",
+    beschreibung: "Reguläres Monatstreffen mit aktuellen Themen und Planungen.",
+    typ: "vereinstreffen", // Korrekt
     dauer: 120,
     istOeffentlich: false,
     ort: {
-      name: 'Vereinsheim Faninitiative Spandau',
+      name: "Vereinsheim Faninitiative Spandau",
       adresse: {
-        strasse: 'Neuendorfer Straße',
-        hausnummer: '101',
-        plz: '13585',
-        stadt: 'Berlin-Spandau'
-      }
-    }
+        strasse: "Neuendorfer Straße",
+        hausnummer: "101",
+        plz: "13585",
+        stadt: "Berlin-Spandau",
+      },
+    },
   },
   {
-    titel: 'Jahreshauptversammlung 2025',
-    beschreibung: 'Wichtige Abstimmungen und Vorstandswahlen. Teilnahme nur für Mitglieder.',
-    typ: 'jahreshauptversammlung',
+    titel: "Jahreshauptversammlung 2025",
+    beschreibung:
+      "Wichtige Abstimmungen und Vorstandswahlen. Teilnahme nur für Mitglieder.",
+    typ: "sitzung", // Geändert von 'jahreshauptversammlung'
     dauer: 180,
     istOeffentlich: false,
     ort: {
-      name: 'Kulturhaus Spandau',
+      name: "Kulturhaus Spandau",
       adresse: {
-        strasse: 'Mauerstraße',
-        hausnummer: '6',
-        plz: '13597',
-        stadt: 'Berlin-Spandau'
-      }
-    }
+        strasse: "Mauerstraße",
+        hausnummer: "6",
+        plz: "13597",
+        stadt: "Berlin-Spandau",
+      },
+    },
   },
 
   // Social Events
   {
-    titel: 'Sommerfest 2025',
-    beschreibung: 'Großes Vereinsfest mit Grill, Musik und Aktivitäten für die ganze Familie.',
-    typ: 'fest',
+    titel: "Sommerfest 2025",
+    beschreibung:
+      "Großes Vereinsfest mit Grill, Musik und Aktivitäten für die ganze Familie.",
+    typ: "social", // Geändert von 'fest'
     dauer: 360,
     istOeffentlich: true,
     budget: 2000,
     maxTeilnehmer: 150,
     ort: {
-      name: 'Vereinsgelände',
+      name: "Vereinsgelände",
       adresse: {
-        strasse: 'Neuendorfer Straße',
-        hausnummer: '101',
-        plz: '13585',
-        stadt: 'Berlin-Spandau'
-      }
-    }
+        strasse: "Neuendorfer Straße",
+        hausnummer: "101",
+        plz: "13585",
+        stadt: "Berlin-Spandau",
+      },
+    },
   },
   {
-    titel: 'Weihnachtsfeier',
-    beschreibung: 'Gemütlicher Jahresausklang mit Glühwein und Lebkuchen.',
-    typ: 'fest',
+    titel: "Weihnachtsfeier",
+    beschreibung: "Gemütlicher Jahresausklang mit Glühwein und Lebkuchen.",
+    typ: "social", // Geändert von 'fest'
     dauer: 240,
     istOeffentlich: false,
     budget: 800,
-    ort: { name: 'Vereinsheim Faninitiative Spandau' }
+    ort: { name: "Vereinsheim Faninitiative Spandau" },
   },
 
   // Creator Events
   {
-    titel: 'Fan-Art Workshop',
-    beschreibung: 'Workshop für kreative Fans. Gestaltet eure eigenen Fanschals und Banner!',
-    typ: 'workshop',
+    titel: "Fan-Art Workshop",
+    beschreibung:
+      "Workshop für kreative Fans. Gestaltet eure eigenen Fanschals und Banner!",
+    typ: "workshop", // Korrekt
     dauer: 180,
     istOeffentlich: true,
     budget: 400,
     maxTeilnehmer: 20,
-    ort: { name: 'Kreativraum im Vereinsheim' }
+    ort: { name: "Kreativraum im Vereinsheim" },
   },
   {
-    titel: 'Choreo-Planung Derbyspiel',
-    beschreibung: 'Planung und Vorbereitung der großen Choreographie für das Derby.',
-    typ: 'workshop',
+    titel: "Choreo-Planung Derbyspiel",
+    beschreibung:
+      "Planung und Vorbereitung der großen Choreographie für das Derby.",
+    typ: "workshop", // Korrekt
     dauer: 150,
     istOeffentlich: false,
     budget: 1200,
-    ort: { name: 'Vereinsheim - Großer Saal' }
-  }
+    ort: { name: "Vereinsheim - Großer Saal" },
+  },
 ];
 
 export const generateEvents = (count: number, publicRatio: number): any[] => {
   const events = [];
-  const members = [
-    PREDEFINED_IDS.teamEvent1,
-    PREDEFINED_IDS.teamEvent2,
-    PREDEFINED_IDS.beirat1,
-    PREDEFINED_IDS.vorstand1
+
+  const memberIds = [
+    "mbr_event1",
+    "mbr_event2",
+    "mbr_beirat1",
+    "mbr_vorstand1",
   ];
 
-  // Stelle sicher, dass jedes Template mindestens einmal verwendet wird
   for (let i = 0; i < count; i++) {
     const template = EVENT_TEMPLATES[i % EVENT_TEMPLATES.length];
-    const isPast = i % 3 === 0; // 33% vergangene Events
+    const isPast = i % 3 === 0;
     const isPublic = Math.random() < publicRatio;
 
     const event = {
-      id: generateId('evt'),
-      titel: `${template.titel}${i > EVENT_TEMPLATES.length ? ` #${Math.floor(i / EVENT_TEMPLATES.length) + 1}` : ''}`,
+      id: generateId("evt"),
+      titel: `${template.titel}${i >= EVENT_TEMPLATES.length ? ` #${Math.floor(i / EVENT_TEMPLATES.length) + 1}` : ""}`,
       beschreibung: template.beschreibung,
-      kurzbeschreibung: template.beschreibung.substring(0, 100) + '...',
-      datum: isPast ? dateHelpers.pastEventDate() : dateHelpers.upcomingEventDate(),
-      uhrzeit: `${14 + (i % 6)}:${i % 2 === 0 ? '00' : '30'}`,
-      dauer: template.dauer,
+      kurzbeschreibung: template.beschreibung.substring(0, 100) + "...",
+      datum: isPast
+        ? dateHelpers.pastEventDate()
+        : dateHelpers.upcomingEventDate(),
+      uhrzeit: `${14 + (i % 6)}:${i % 2 === 0 ? "00" : "30"}:00`,
+      dauer_minuten: template.dauer,
       ort: JSON.stringify(template.ort),
       typ: template.typ,
       sportbereich: template.sportbereich || null,
-      status: isPast ? 'ABGESCHLOSSEN' : (i % 4 === 0 ? 'GEPLANT' : 'GENEHMIGT'),
+      status: isPast ? "abgeschlossen" : i % 4 === 0 ? "geplant" : "genehmigt",
       ist_oeffentlich: isPublic,
       ist_vertraulich: false,
-      verantwortlich_id: members[i % members.length],
-      stellvertreter_ids: JSON.stringify([members[(i + 1) % members.length]]),
+      verantwortlich_id: memberIds[i % memberIds.length],
+      stellvertreter_ids: JSON.stringify([
+        memberIds[(i + 1) % memberIds.length],
+      ]),
       budget: template.budget || null,
-      budget_verbraucht: isPast && template.budget ? Math.floor(template.budget * 0.8) : 0,
+      budget_verbraucht:
+        isPast && template.budget ? Math.floor(template.budget * 0.8) : 0,
       max_teilnehmer: template.maxTeilnehmer || null,
       anmeldeschluss: isPast ? null : dateHelpers.withinNextMonth(),
       erstellt_am: new Date(),
-      erstellt_von: PREDEFINED_IDS.teamEvent1
+      erstellt_von: memberIds[i % memberIds.length],
     };
 
     events.push(event);

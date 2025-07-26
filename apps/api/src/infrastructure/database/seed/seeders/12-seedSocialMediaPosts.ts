@@ -1,6 +1,6 @@
 // seed/seeders/12-seedSocialMediaPosts.ts
 import { Connection, PoolConnection } from 'mysql2/promise';
-import { generateId, randomElement, dateHelpers, PREDEFINED_IDS } from '../helpers';
+import { generateId, randomElement, dateHelpers, PREDEFINED_IDS } from '../helpers/index.js';
 
 const POST_TEMPLATES = [
   {
@@ -30,7 +30,7 @@ const POST_TEMPLATES = [
   }
 ];
 
-export const seedSocialMediaPosts = async (connection: Connection | PoolConnection): Promise<void> => {
+const seedSocialMediaPosts = async (connection: Connection | PoolConnection): Promise<void> => {
   try {
     await connection.beginTransaction();
 
@@ -63,9 +63,9 @@ export const seedSocialMediaPosts = async (connection: Connection | PoolConnecti
           ? dateHelpers.withinLastWeek()
           : dateHelpers.withinNextMonth(),
         status,
-        erstellt_von: PREDEFINED_IDS.teamMedien1,
+        erstellt_von: 'mbr_medien',  // Use member ID, not user ID!
         erstellt_am: new Date(),
-        approved_von: status === 'VEROEFFENTLICHT' ? PREDEFINED_IDS.beirat1 : null,
+        approved_von: status === 'VEROEFFENTLICHT' ? 'mbr_beirat1' : null,  // Member ID!
         approved_am: status === 'VEROEFFENTLICHT' ? new Date() : null,
         hashtags: JSON.stringify(template.hashtags),
         medien_urls: Math.random() > 0.5

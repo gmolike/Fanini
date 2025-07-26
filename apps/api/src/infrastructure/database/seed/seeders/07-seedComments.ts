@@ -1,30 +1,33 @@
 // seed/seeders/07-seedComments.ts
-import { Connection, PoolConnection } from 'mysql2/promise';
-import { generateId, randomElement, dateHelpers } from '../helpers';
+import { Connection, PoolConnection } from "mysql2/promise";
+import { generateId, randomElement, dateHelpers } from "../helpers/index.js";
 
 const COMMENT_TEMPLATES = [
-  'Super organisiert! Freue mich schon drauf.',
-  'Wer fährt noch mit dem Auto? Hätte noch 2 Plätze frei.',
-  'Kann jemand Trommeln mitbringen?',
-  'Wird es wieder Fanschals geben?',
-  'Letzte Auswärtsfahrt war der Hammer! 💙',
-  'Bitte denkt an warme Kleidung, wird kalt.',
-  'Treffen wir uns vorher am Vereinsheim?',
-  'Ich bringe Fahnen mit!',
-  'Können wir diesmal früher losfahren?',
-  'Top Event, bin dabei! 👍'
+  "Super organisiert! Freue mich schon drauf.",
+  "Wer fährt noch mit dem Auto? Hätte noch 2 Plätze frei.",
+  "Kann jemand Trommeln mitbringen?",
+  "Wird es wieder Fanschals geben?",
+  "Letzte Auswärtsfahrt war der Hammer! 💙",
+  "Bitte denkt an warme Kleidung, wird kalt.",
+  "Treffen wir uns vorher am Vereinsheim?",
+  "Ich bringe Fahnen mit!",
+  "Können wir diesmal früher losfahren?",
+  "Top Event, bin dabei! 👍",
 ];
 
-export const seedComments = async (connection: Connection | PoolConnection): Promise<void> => {
+const seedComments = async (
+  connection: Connection | PoolConnection,
+): Promise<void> => {
   try {
     await connection.beginTransaction();
 
-    // Get events and members
-    const [events] = await connection.execute('SELECT id FROM events LIMIT 20');
-    const [members] = await connection.execute('SELECT id FROM mitglieder WHERE ist_aktiv = 1');
-    const [tasks] = await connection.execute('SELECT id FROM aufgaben LIMIT 30');
+    const [events] = await connection.execute("SELECT id FROM events LIMIT 20");
+    const [members] = await connection.execute(
+      "SELECT id FROM mitglieder WHERE ist_aktiv = 1",
+    );
+    const [tasks] = await connection.execute("SELECT id FROM tasks LIMIT 30"); // Use tasks table!
 
-    const memberIds = (members as any[]).map(m => m.id);
+    const memberIds = (members as any[]).map((m) => m.id);
     const comments = [];
 
     // Comments on events
@@ -33,13 +36,14 @@ export const seedComments = async (connection: Connection | PoolConnection): Pro
 
       for (let i = 0; i < commentCount; i++) {
         comments.push({
-          id: generateId('cmt'),
+          id: generateId("cmt"),
           text: randomElement(COMMENT_TEMPLATES),
           event_id: event.id,
           aufgabe_id: null,
+          dokument_id: null,
           autor_id: randomElement(memberIds),
           erstellt_am: dateHelpers.withinLastWeek(),
-          ist_intern: Math.random() > 0.7
+          ist_intern: Math.random() > 0.7,
         });
       }
     }
@@ -47,13 +51,14 @@ export const seedComments = async (connection: Connection | PoolConnection): Pro
     // Comments on tasks
     for (const task of (tasks as any[]).slice(0, 15)) {
       comments.push({
-        id: generateId('cmt'),
-        text: 'Ich übernehme das!',
+        id: generateId("cmt"),
+        text: "Ich übernehme das!",
         event_id: null,
         aufgabe_id: task.id,
+        dokument_id: null,
         autor_id: randomElement(memberIds),
         erstellt_am: dateHelpers.withinLastWeek(),
-        ist_intern: true
+        ist_intern: true,
       });
     }
 
@@ -61,18 +66,19 @@ export const seedComments = async (connection: Connection | PoolConnection): Pro
     for (const comment of comments) {
       await connection.execute(
         `INSERT INTO kommentare (
-          id, text, event_id, aufgabe_id, autor_id,
+          id, text, event_id, aufgabe_id, dokument_id, autor_id,
           erstellt_am, ist_intern
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           comment.id,
           comment.text,
           comment.event_id,
           comment.aufgabe_id,
+          comment.dokument_id,
           comment.autor_id,
           comment.erstellt_am,
-          comment.ist_intern
-        ]
+          comment.ist_intern,
+        ],
       );
     }
 
@@ -80,7 +86,7 @@ export const seedComments = async (connection: Connection | PoolConnection): Pro
     console.log(`✅ ${comments.length} Comments seeded successfully`);
   } catch (error) {
     await connection.rollback();
-    console.error('❌ Comments seeding failed:', error);
+    console.error("❌ Comments seeding failed:", error);
     throw error;
   }
 };

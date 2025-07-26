@@ -1,89 +1,97 @@
 // seed/seeders/11-seedExpenses.ts
 import { Connection, PoolConnection } from "mysql2/promise";
-import { generateId, randomElement, PREDEFINED_IDS } from "../helpers";
+import { generateId, randomElement, PREDEFINED_IDS } from "../helpers/index.js";
 
 const EXPENSE_TEMPLATES = [
   {
     beschreibung: "Busmiete für Auswärtsfahrt",
-    kategorie: "TRANSPORT",
+    kategorie: "transport",
     betrag: 850,
   },
   {
     beschreibung: "Verpflegung für Busfahrt",
-    kategorie: "VERPFLEGUNG",
+    kategorie: "verpflegung",
     betrag: 120,
   },
   {
     beschreibung: "Eintrittskarten Gästeblock",
-    kategorie: "TICKETS",
+    kategorie: "material",
     betrag: 450,
   },
-  { beschreibung: "Fahnen und Banner", kategorie: "MATERIAL", betrag: 200 },
+  {
+    beschreibung: "Fahnen und Banner",
+    kategorie: "material",
+    betrag: 200,
+  },
   {
     beschreibung: "Pyrotechnik für Choreo",
-    kategorie: "MATERIAL",
+    kategorie: "material",
     betrag: 300,
   },
-  { beschreibung: "Druckkosten Flyer", kategorie: "MARKETING", betrag: 80 },
+  {
+    beschreibung: "Druckkosten Flyer",
+    kategorie: "material",
+    betrag: 80,
+  },
   {
     beschreibung: "Getränke Vereinsheim",
-    kategorie: "VERPFLEGUNG",
+    kategorie: "verpflegung",
     betrag: 150,
   },
-  { beschreibung: "DJ für Sommerfest", kategorie: "UNTERHALTUNG", betrag: 400 },
+  {
+    beschreibung: "DJ für Sommerfest",
+    kategorie: "sonstiges",
+    betrag: 400,
+  },
   {
     beschreibung: "Miete Grillausrüstung",
-    kategorie: "EQUIPMENT",
+    kategorie: "material",
     betrag: 100,
   },
   {
     beschreibung: "Versicherung Event",
-    kategorie: "VERSICHERUNG",
+    kategorie: "sonstiges",
     betrag: 180,
   },
 ];
 
-export const seedExpenses = async (
+const seedExpenses = async (
   connection: Connection | PoolConnection,
 ): Promise<void> => {
   try {
     await connection.beginTransaction();
 
-    // Get events with budget
     const [events] = await connection.execute(
       "SELECT id, budget FROM events WHERE budget IS NOT NULL",
     );
 
-    // Get team members who can submit expenses
     const submitters = [
-      PREDEFINED_IDS.teamEvent1,
-      PREDEFINED_IDS.teamEvent2,
-      PREDEFINED_IDS.beirat1,
-      PREDEFINED_IDS.vorstand1,
+      "mbr_event1",
+      "mbr_event2",
+      "mbr_beirat1",
+      "mbr_vorstand1",
     ];
 
     const expenses = [];
 
     for (const event of events as any[]) {
-      // 1-4 Ausgaben pro Event mit Budget
       const expenseCount = Math.floor(Math.random() * 4) + 1;
       let totalExpenses = 0;
 
       for (let i = 0; i < expenseCount; i++) {
         const template = randomElement(EXPENSE_TEMPLATES);
 
-        // Ensure we don't exceed budget
         if (totalExpenses + template.betrag > event.budget * 0.9) {
           continue;
         }
 
         const status = randomElement([
-          "EINGEREICHT",
-          "GENEHMIGT",
-          "GENEHMIGT",
-          "ABGELEHNT",
+          "eingereicht",
+          "genehmigt",
+          "genehmigt",
+          "abgelehnt",
         ]);
-        const isApproved = status === "GENEHMIGT";
+        const isApproved = status === "genehmigt";
 
         expenses.push({
           id: generateId("exp"),
@@ -102,10 +110,10 @@ export const seedExpenses = async (
           status,
           eingereicht_von: randomElement(submitters),
           eingereicht_am: new Date(),
-          genehmigt_von: isApproved ? PREDEFINED_IDS.vorstand1 : null,
+          genehmigt_von: isApproved ? "mbr_vorstand1" : null,
           genehmigt_am: isApproved ? new Date() : null,
           ablehnungsgrund:
-            status === "ABGELEHNT" ? "Budget überschritten" : null,
+            status === "abgelehnt" ? "Budget überschritten" : null,
         });
 
         if (isApproved) {
@@ -114,7 +122,6 @@ export const seedExpenses = async (
       }
     }
 
-    // Insert expenses
     for (const expense of expenses) {
       await connection.execute(
         `INSERT INTO ausgaben (

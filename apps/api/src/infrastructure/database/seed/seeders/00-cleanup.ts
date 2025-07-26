@@ -2,27 +2,54 @@
 import { Connection, PoolConnection } from 'mysql2/promise';
 
 const tables = [
-  'mitglied_rolle',
+  // Richtige Tabellennamen aus der Migration
+  'user_roles',
   'event_teilnahmen',
-  'kommentare',
-  'benachrichtigungen',
-  'aufgaben',
+  'event_teilnahme',
+  'task_comments',
+  'task_assignments',
+  'task_audit_log',
+  'tasks',
   'ausgaben',
-  'social_media_posts',
-  'werke',
+  'newsletter_subscriptions',
+  'newsletters',
+  'creator_works',
+  'creator_types',
+  'creators_extended',
   'creators',
   'tagesordnungspunkte',
   'protokolle',
   'email_vorlagen',
-  'dokumente',
+  'documents',
+  'document_tags',
   'events',
+  'event_audit_log',
   'mitglieder',
+  'refresh_tokens',
+  'password_history',
+  'role_permissions',
+  'permissions',
+  'permission_groups',
+  'user_roles',
   'users',
-  'berechtigungen',
-  'rollen'
+  'role_hierarchy',
+  'roles',
+  'faqs',
+  'gremien',
+  'gremium_members',
+  'settings',
+  'approval_requests',
+  'approval_actions',
+  'approval_rules',
+  'approval_notifications',
+  'sensitive_fields',
+  'member_visibility_overrides',
+  'field_access_log',
+  'upload_logs',
+  'aufgaben'
 ] as const;
 
-export const cleanup = async (connection: Connection | PoolConnection): Promise<void> => {
+const cleanup = async (connection: Connection | PoolConnection): Promise<void> => {
   try {
     await connection.beginTransaction();
 
@@ -34,9 +61,12 @@ export const cleanup = async (connection: Connection | PoolConnection): Promise<
       try {
         await connection.execute(`TRUNCATE TABLE ${table}`);
         console.log(`  ✓ Cleaned table: ${table}`);
-      } catch (error) {
-        console.log(`  ⚠️  Table ${table} might not exist, skipping...`);
-        console.error(error);
+      } catch (error: any) {
+        if (error.code === 'ER_NO_SUCH_TABLE') {
+          console.log(`  ⚠️  Table ${table} doesn't exist, skipping...`);
+        } else {
+          console.error(`  ❌ Error cleaning ${table}:`, error.message);
+        }
       }
     }
 

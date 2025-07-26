@@ -1,6 +1,5 @@
 // seed/helpers/index.ts
-export { PREDEFINED_IDS } from "./ids";
-export { generateId } from "./ids";
+export { PREDEFINED_IDS, generateId } from "./ids";
 export { dateHelpers, randomDate } from "./dates";
 export { generateEvents } from "../generators/eventGenerator";
 export { generateMembers } from "../generators/memberGenerator";

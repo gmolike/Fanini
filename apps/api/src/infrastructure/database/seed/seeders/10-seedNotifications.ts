@@ -1,6 +1,6 @@
 // seed/seeders/10-seedNotifications.ts
 import { Connection, PoolConnection } from 'mysql2/promise';
-import { generateId, randomElement, dateHelpers } from '../helpers';
+import { generateId, randomElement, dateHelpers } from '../helpers/index.js';
 
 const NOTIFICATION_TEMPLATES = [
   {
@@ -30,22 +30,19 @@ const NOTIFICATION_TEMPLATES = [
   }
 ];
 
-export const seedNotifications = async (connection: Connection | PoolConnection): Promise<void> => {
+const seedNotifications = async (connection: Connection | PoolConnection): Promise<void> => {
   try {
     await connection.beginTransaction();
 
-    // Get members
     const [members] = await connection.execute('SELECT id FROM mitglieder WHERE ist_aktiv = 1');
     const memberIds = (members as any[]).map(m => m.id);
 
     const notifications = [];
-
-    // Create 50-100 notifications
     const notificationCount = Math.floor(Math.random() * 50) + 50;
 
     for (let i = 0; i < notificationCount; i++) {
       const template = randomElement(NOTIFICATION_TEMPLATES);
-      const isRead = Math.random() > 0.3; // 70% gelesen
+      const isRead = Math.random() > 0.3;
       const sentDate = dateHelpers.randomDate(
         new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
         new Date()
@@ -60,11 +57,10 @@ export const seedNotifications = async (connection: Connection | PoolConnection)
         gelesen: isRead,
         gelesen_am: isRead ? dateHelpers.randomDate(sentDate, new Date()) : null,
         versendet_am: sentDate,
-        prioritaet: randomElement(['NIEDRIG', 'MITTEL', 'HOCH'])
+        prioritaet: randomElement(['niedrig', 'mittel', 'hoch'])
       });
     }
 
-    // Insert notifications
     for (const notification of notifications) {
       await connection.execute(
         `INSERT INTO benachrichtigungen (

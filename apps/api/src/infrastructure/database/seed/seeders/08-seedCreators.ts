@@ -1,6 +1,6 @@
 // seed/seeders/08-seedCreators.ts
 import { Connection, PoolConnection } from 'mysql2/promise';
-import { generateId, dateHelpers } from '../helpers';
+import { generateId, dateHelpers } from '../helpers/index.js';
 
 const CREATOR_DATA = [
   {
@@ -49,11 +49,10 @@ const CREATOR_DATA = [
   }
 ];
 
-export const seedCreators = async (connection: Connection | PoolConnection): Promise<void> => {
+const seedCreators = async (connection: Connection | PoolConnection): Promise<void> => {
   try {
     await connection.beginTransaction();
 
-    // Get random members
     const [members] = await connection.execute(
       'SELECT id FROM mitglieder WHERE ist_aktiv = 1 LIMIT 8'
     );
@@ -67,69 +66,66 @@ export const seedCreators = async (connection: Connection | PoolConnection): Pro
 
       creators.push({
         id: creatorId,
-        mitglied_id: (members as any[])[i].id,
-        kuenstlername: data.kuenstlername,
-        profiltext: data.profiltext,
-        portfolio_link: data.portfolioLink || null,
-        ist_aktiv: true,
-        aktiv_seit: dateHelpers.randomMemberSince(),
+        member_id: (members as any[])[i].id,
+        artist_name: data.kuenstlername,
+        real_name: data.kuenstlername,
+        description: data.profiltext,
+        portfolio: data.portfolioLink || 'https://example.com',
+        is_active: true,
+        active_since: dateHelpers.randomMemberSince(),
         instagram: data.instagram || null,
         twitter: data.twitter || null,
         website: data.website || null
       });
 
-      // Create 2-4 works per creator
       const werkCount = Math.floor(Math.random() * 3) + 2;
       for (let w = 0; w < werkCount; w++) {
         werke.push({
           id: generateId('wrk'),
           creator_id: creatorId,
-          titel: `${data.kuenstlername} Werk ${w + 1}`,
-          beschreibung: 'Ein kreatives Werk für unseren Verein.',
-          typ: ['BILD', 'VIDEO'][Math.floor(Math.random() * 2)],
-          datei_url: `https://storage.example.com/werke/${creatorId}_${w}.jpg`,
+          title: `${data.kuenstlername} Werk ${w + 1}`,
+          description: 'Ein kreatives Werk für unseren Verein.',
+          type: ['image', 'video'][Math.floor(Math.random() * 2)],
+          file_url: `https://storage.example.com/werke/${creatorId}_${w}.jpg`,
           thumbnail_url: `https://storage.example.com/werke/${creatorId}_${w}_thumb.jpg`,
-          erstellt_am: dateHelpers.withinLastWeek(),
-          veroeffentlicht_am: new Date(),
-          ist_oeffentlich: true,
-          reihenfolge: w
+          created_at: dateHelpers.withinLastWeek(),
+          published_at: new Date(),
+          is_public: true,
+          order_position: w
         });
       }
     }
 
-    // Insert creators
     for (const creator of creators) {
       await connection.execute(
         `INSERT INTO creators (
-          id, mitglied_id, kuenstlername, profiltext, portfolio_link,
-          ist_aktiv, aktiv_seit, instagram, twitter, website
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          id, member_id, artist_name, real_name, description, portfolio,
+          is_active, active_since, instagram, twitter, website
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          creator.id, creator.mitglied_id, creator.kuenstlername,
-          creator.profiltext, creator.portfolio_link, creator.ist_aktiv,
-          creator.aktiv_seit, creator.instagram, creator.twitter, creator.website
+          creator.id, creator.member_id, creator.artist_name, creator.real_name,
+          creator.description, creator.portfolio, creator.is_active,
+          creator.active_since, creator.instagram, creator.twitter, creator.website
         ]
       );
     }
 
-    // Insert werke
     for (const werk of werke) {
       await connection.execute(
-        `INSERT INTO werke (
-          id, creator_id, titel, beschreibung, typ, datei_url,
-          thumbnail_url, erstellt_am, veroeffentlicht_am,
-          ist_oeffentlich, reihenfolge
+        `INSERT INTO creator_works (
+          id, creator_id, title, description, type, file_url,
+          thumbnail_url, created_at, published_at, is_public, order_position
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          werk.id, werk.creator_id, werk.titel, werk.beschreibung,
-          werk.typ, werk.datei_url, werk.thumbnail_url, werk.erstellt_am,
-          werk.veroeffentlicht_am, werk.ist_oeffentlich, werk.reihenfolge
+          werk.id, werk.creator_id, werk.title, werk.description,
+          werk.type, werk.file_url, werk.thumbnail_url, werk.created_at,
+          werk.published_at, werk.is_public, werk.order_position
         ]
       );
     }
 
     await connection.commit();
-    console.log(`✅ ${creators.length} Creators and ${werke.length} Werke seeded successfully`);
+    console.log(`✅ ${creators.length} Creators and ${werke.length} Works seeded successfully`);
   } catch (error) {
     await connection.rollback();
     console.error('❌ Creators seeding failed:', error);

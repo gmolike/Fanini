@@ -21,13 +21,19 @@ async function resetDatabase() {
     await connection.query("DROP DATABASE IF EXISTS fanini_db");
 
     console.log("✨ Erstelle neue Datenbank...");
-    await connection.query("CREATE DATABASE fanini_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+    await connection.query(
+      "CREATE DATABASE fanini_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci",
+    );
 
     connection.release();
 
     // 3. Migration ausführen
     console.log("\n📋 Führe Migration aus...");
-    const migrationPath = path.join(__dirname, "migrations", "001_complete_schema.sql");
+    const migrationPath = path.join(
+      __dirname,
+      "migrations",
+      "001_complete_schema.sql",
+    );
 
     // MySQL-Befehl mit Umgebungsvariablen
     const mysqlCommand = `mysql -h ${process.env.DB_HOST || "localhost"} -P ${process.env.DB_PORT || "3306"} -u ${process.env.DB_USER || "fanini"} -p${process.env.DB_PASSWORD || "password"} fanini_db < "${migrationPath}"`;
@@ -42,11 +48,10 @@ async function resetDatabase() {
 
     // 4. Seed-Daten einfügen
     console.log("\n🌱 Füge Seed-Daten ein...");
-    const seedModule = await import("./seedComplete.js");
+    const seedModule = await import("./seed/seedComplete.js");
     await seedModule.seedCompleteDatabase();
 
     console.log("\n✅ Datenbank-Reset erfolgreich abgeschlossen!");
-
   } catch (error) {
     console.error("\n❌ Fehler beim Datenbank-Reset:", error);
     throw error;

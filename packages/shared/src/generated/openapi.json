@@ -1,0 +1,3378 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Faninitiative Spandau API",
+    "version": "1.0.0",
+    "description": "Clean Architecture Backend API mit Slice-Organisation"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "🌐 Public Events",
+      "description": "Öffentliche Event-Informationen"
+    },
+    {
+      "name": "🌐 Public Creators",
+      "description": "Öffentliche Creator-Profile"
+    },
+    {
+      "name": "🌐 Public Documents",
+      "description": "Öffentliche Dokumente"
+    },
+    {
+      "name": "🌐 Public Newsletter",
+      "description": "Newsletter-Verwaltung"
+    },
+    {
+      "name": "🌐 Public Organization",
+      "description": "Vereinsstruktur"
+    },
+    {
+      "name": "🌐 Public Stats",
+      "description": "Öffentliche Statistiken"
+    },
+    {
+      "name": "🔐 Auth",
+      "description": "Authentifizierung"
+    },
+    {
+      "name": "📅 Events",
+      "description": "Event-Management (geschützt)"
+    },
+    {
+      "name": "👥 Members",
+      "description": "Mitgliederverwaltung"
+    },
+    {
+      "name": "📄 Documents",
+      "description": "Dokumentenverwaltung (geschützt)"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "time": {
+            "type": "string"
+          },
+          "durationMinutes": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "vereinstreffen",
+              "sportveranstaltung",
+              "fanfahrt",
+              "social",
+              "sitzung",
+              "workshop",
+              "turnier",
+              "sonstiges"
+            ]
+          },
+          "sportBereich": {
+            "type": "string",
+            "enum": [
+              "league_of_legends",
+              "fussball",
+              "esports_allgemein",
+              "sonstiges"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "entwurf",
+              "geplant",
+              "genehmigt",
+              "aktiv",
+              "abgeschlossen",
+              "abgesagt"
+            ]
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "isConfidential": {
+            "type": "boolean"
+          },
+          "responsibleMemberId": {
+            "type": "string"
+          },
+          "deputyMemberIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "budget": {
+            "type": "number"
+          },
+          "budgetUsed": {
+            "type": "number"
+          },
+          "maxParticipants": {
+            "type": "integer"
+          },
+          "registrationDeadline": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ticketLink": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "type": "string"
+          },
+          "approvedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approvedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "description",
+          "date",
+          "time",
+          "location",
+          "type",
+          "status",
+          "isPublic",
+          "isConfidential",
+          "responsibleMemberId",
+          "budgetUsed",
+          "createdAt",
+          "createdBy",
+          "updatedAt"
+        ]
+      },
+      "Member": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "vorname": {
+            "type": "string"
+          },
+          "nachname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "istAktiv": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Document": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Task": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "titel": {
+            "type": "string"
+          },
+          "beschreibung": {
+            "type": "string"
+          },
+          "context": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "event",
+                  "team",
+                  "general"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "nullable": true
+              }
+            },
+            "required": [
+              "type",
+              "id"
+            ]
+          },
+          "verantwortlichId": {
+            "type": "string"
+          },
+          "zugewiesenAn": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "offen",
+              "in_bearbeitung",
+              "review",
+              "erledigt",
+              "blockiert"
+            ]
+          },
+          "prioritaet": {
+            "type": "string",
+            "enum": [
+              "niedrig",
+              "mittel",
+              "hoch",
+              "kritisch"
+            ]
+          },
+          "frist": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "materialien": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "menge": {
+                  "type": "number"
+                },
+                "einheit": {
+                  "type": "string"
+                },
+                "beschreibung": {
+                  "type": "string"
+                },
+                "besorgt": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "menge",
+                "einheit",
+                "besorgt"
+              ]
+            }
+          },
+          "abhaengigVon": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "istStandardaufgabe": {
+            "type": "boolean"
+          },
+          "kategorie": {
+            "type": "string"
+          },
+          "erstelltVon": {
+            "type": "string"
+          },
+          "erstelltAm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aktualisiertAm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "erledigtAm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "erledigtVon": {
+            "type": "string"
+          },
+          "geloescht": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "titel",
+          "context",
+          "zugewiesenAn",
+          "status",
+          "prioritaet",
+          "materialien",
+          "istStandardaufgabe",
+          "erstelltVon",
+          "erstelltAm",
+          "aktualisiertAm",
+          "geloescht"
+        ]
+      },
+      "CreateTask": {
+        "type": "object",
+        "required": [
+          "titel",
+          "context_type"
+        ],
+        "properties": {
+          "titel": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255
+          },
+          "beschreibung": {
+            "type": "string"
+          },
+          "context_type": {
+            "type": "string",
+            "enum": [
+              "event",
+              "team",
+              "general"
+            ]
+          },
+          "context_id": {
+            "type": "string"
+          },
+          "verantwortlich_id": {
+            "type": "string"
+          },
+          "prioritaet": {
+            "type": "string",
+            "enum": [
+              "niedrig",
+              "mittel",
+              "hoch",
+              "kritisch"
+            ]
+          },
+          "frist": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "materialien": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "menge": {
+                  "type": "number"
+                },
+                "einheit": {
+                  "type": "string"
+                },
+                "beschreibung": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "abhaengig_von": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kategorie": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateTask": {
+        "type": "object",
+        "properties": {
+          "titel": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255
+          },
+          "beschreibung": {
+            "type": "string"
+          },
+          "verantwortlich_id": {
+            "type": "string"
+          },
+          "prioritaet": {
+            "type": "string",
+            "enum": [
+              "niedrig",
+              "mittel",
+              "hoch",
+              "kritisch"
+            ]
+          },
+          "frist": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "materialien": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "menge": {
+                  "type": "number"
+                },
+                "einheit": {
+                  "type": "string"
+                },
+                "beschreibung": {
+                  "type": "string"
+                },
+                "besorgt": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "abhaengig_von": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kategorie": {
+            "type": "string"
+          }
+        }
+      },
+      "RoleName": {
+        "type": "string",
+        "enum": [
+          "ADMIN",
+          "VORSTAND",
+          "BEIRAT",
+          "KASSENPRUFER",
+          "TEAM_EVENT",
+          "TEAM_MEDIEN",
+          "TEAM_TECHNIK",
+          "TEAM_VEREIN",
+          "MITGLIED"
+        ]
+      },
+      "EventType": {
+        "type": "string",
+        "enum": [
+          "vereinstreffen",
+          "sportveranstaltung",
+          "fanfahrt",
+          "social",
+          "sitzung",
+          "workshop",
+          "turnier",
+          "sonstiges"
+        ]
+      },
+      "EventStatus": {
+        "type": "string",
+        "enum": [
+          "entwurf",
+          "geplant",
+          "genehmigt",
+          "aktiv",
+          "abgeschlossen",
+          "abgesagt"
+        ]
+      },
+      "SportBereich": {
+        "type": "string",
+        "enum": [
+          "league_of_legends",
+          "fussball",
+          "esports_allgemein",
+          "sonstiges"
+        ]
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": [
+          "offen",
+          "in_bearbeitung",
+          "review",
+          "erledigt",
+          "blockiert"
+        ]
+      },
+      "TaskPriority": {
+        "type": "string",
+        "enum": [
+          "niedrig",
+          "mittel",
+          "hoch",
+          "kritisch"
+        ]
+      },
+      "SichtbarkeitLevel": {
+        "type": "string",
+        "enum": [
+          "alle",
+          "mitglieder",
+          "vorstand",
+          "niemand"
+        ]
+      },
+      "Adresse": {
+        "type": "object",
+        "properties": {
+          "strasse": {
+            "type": "string"
+          },
+          "hausnummer": {
+            "type": "string"
+          },
+          "plz": {
+            "type": "string",
+            "pattern": "^\\d{5}$"
+          },
+          "stadt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "strasse",
+          "hausnummer",
+          "plz",
+          "stadt"
+        ]
+      },
+      "Notfallkontakt": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "telefon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "telefon"
+        ]
+      },
+      "Sichtbarkeit": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "enum": [
+              "alle",
+              "mitglieder",
+              "vorstand",
+              "niemand"
+            ]
+          },
+          "telefon": {
+            "type": "string",
+            "enum": [
+              "alle",
+              "mitglieder",
+              "vorstand",
+              "niemand"
+            ]
+          },
+          "profil": {
+            "type": "string",
+            "enum": [
+              "alle",
+              "mitglieder",
+              "vorstand",
+              "niemand"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "telefon",
+          "profil"
+        ]
+      },
+      "EventLocation": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "TaskContext": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "event",
+              "team",
+              "general"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ]
+      },
+      "TaskMaterial": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "menge": {
+            "type": "number"
+          },
+          "einheit": {
+            "type": "string"
+          },
+          "beschreibung": {
+            "type": "string"
+          },
+          "besorgt": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "menge",
+          "einheit",
+          "besorgt"
+        ]
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "vorname": {
+            "type": "string"
+          },
+          "nachname": {
+            "type": "string"
+          },
+          "mitgliedsnummer": {
+            "type": "string"
+          },
+          "authSource": {
+            "type": "string",
+            "enum": [
+              "local",
+              "easyverein"
+            ]
+          },
+          "easyVereinId": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "VORSTAND",
+              "BEIRAT",
+              "KASSENPRUFER",
+              "TEAM_EVENT",
+              "TEAM_MEDIEN",
+              "TEAM_TECHNIK",
+              "TEAM_VEREIN",
+              "MITGLIED"
+            ]
+          },
+          "istAktiv": {
+            "type": "boolean"
+          },
+          "erstelltAm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aktualisiertAm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "letzterLogin": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "vorname",
+          "nachname",
+          "authSource",
+          "istAktiv",
+          "erstelltAm",
+          "aktualisiertAm"
+        ]
+      },
+      "MemberListItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "vorname": {
+            "type": "string"
+          },
+          "nachname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telefon": {
+            "type": "string"
+          },
+          "mitgliedsnummer": {
+            "type": "string"
+          },
+          "istAktiv": {
+            "type": "boolean"
+          },
+          "mitgliedSeit": {
+            "type": "string",
+            "format": "date"
+          },
+          "geburtsdatum": {
+            "type": "string",
+            "format": "date"
+          },
+          "rolle": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "VORSTAND",
+                "BEIRAT",
+                "KASSENPRUFER",
+                "TEAM_EVENT",
+                "TEAM_MEDIEN",
+                "TEAM_TECHNIK",
+                "TEAM_VEREIN",
+                "MITGLIED"
+              ]
+            }
+          },
+          "profilbild": {
+            "type": "string"
+          },
+          "letzteAktivitaet": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "vollstaendigerName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "vorname",
+          "nachname",
+          "email",
+          "mitgliedsnummer",
+          "istAktiv",
+          "mitgliedSeit",
+          "rolle"
+        ]
+      },
+      "MemberDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "vorname": {
+            "type": "string"
+          },
+          "nachname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telefon": {
+            "type": "string"
+          },
+          "mitgliedsnummer": {
+            "type": "string"
+          },
+          "istAktiv": {
+            "type": "boolean"
+          },
+          "mitgliedSeit": {
+            "type": "string",
+            "format": "date"
+          },
+          "geburtsdatum": {
+            "type": "string",
+            "format": "date"
+          },
+          "rolle": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "ADMIN",
+                "VORSTAND",
+                "BEIRAT",
+                "KASSENPRUFER",
+                "TEAM_EVENT",
+                "TEAM_MEDIEN",
+                "TEAM_TECHNIK",
+                "TEAM_VEREIN",
+                "MITGLIED"
+              ]
+            }
+          },
+          "profilbild": {
+            "type": "string"
+          },
+          "letzteAktivitaet": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "vollstaendigerName": {
+            "type": "string"
+          },
+          "adresse": {
+            "type": "object",
+            "properties": {
+              "strasse": {
+                "type": "string"
+              },
+              "hausnummer": {
+                "type": "string"
+              },
+              "plz": {
+                "type": "string",
+                "pattern": "^\\d{5}$"
+              },
+              "stadt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "strasse",
+              "hausnummer",
+              "plz",
+              "stadt"
+            ]
+          },
+          "notfallkontakt": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "telefon": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "telefon"
+            ]
+          },
+          "iban": {
+            "type": "string"
+          },
+          "hatVertraulichkeitserklaerung": {
+            "type": "boolean"
+          },
+          "sichtbarkeit": {
+            "type": "object",
+            "properties": {
+              "email": {
+                "type": "string",
+                "enum": [
+                  "alle",
+                  "mitglieder",
+                  "vorstand",
+                  "niemand"
+                ]
+              },
+              "telefon": {
+                "type": "string",
+                "enum": [
+                  "alle",
+                  "mitglieder",
+                  "vorstand",
+                  "niemand"
+                ]
+              },
+              "profil": {
+                "type": "string",
+                "enum": [
+                  "alle",
+                  "mitglieder",
+                  "vorstand",
+                  "niemand"
+                ]
+              }
+            },
+            "required": [
+              "email",
+              "telefon",
+              "profil"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "vorname",
+          "nachname",
+          "email",
+          "mitgliedsnummer",
+          "istAktiv",
+          "mitgliedSeit",
+          "rolle",
+          "hatVertraulichkeitserklaerung",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateMemberRequest": {
+        "type": "object",
+        "properties": {
+          "memberType": {
+            "type": "string",
+            "enum": [
+              "member",
+              "creator",
+              "sponsor",
+              "partner"
+            ]
+          },
+          "vorname": {
+            "type": "string",
+            "minLength": 2
+          },
+          "nachname": {
+            "type": "string",
+            "minLength": 2
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telefon": {
+            "type": "string"
+          },
+          "kuenstlername": {
+            "type": "string"
+          },
+          "portfolio": {
+            "type": "string"
+          },
+          "passwordOption": {
+            "type": "string",
+            "enum": [
+              "none",
+              "generate",
+              "manual"
+            ]
+          },
+          "password": {
+            "type": "string"
+          },
+          "sendCredentials": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "memberType",
+          "vorname",
+          "nachname",
+          "email"
+        ]
+      },
+      "UpdateMemberRequest": {
+        "type": "object",
+        "properties": {
+          "vorname": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "nachname": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "telefon": {
+            "type": "string"
+          },
+          "mitgliedsnummer": {
+            "type": "string"
+          },
+          "istAktiv": {
+            "type": "boolean"
+          },
+          "geburtsdatum": {
+            "type": "string",
+            "format": "date"
+          },
+          "adresse": {
+            "type": "object",
+            "properties": {
+              "strasse": {
+                "type": "string"
+              },
+              "hausnummer": {
+                "type": "string"
+              },
+              "plz": {
+                "type": "string",
+                "pattern": "^\\d{5}$"
+              },
+              "stadt": {
+                "type": "string"
+              }
+            }
+          },
+          "iban": {
+            "type": "string"
+          },
+          "notfallkontakt": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "telefon": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "CreateEventRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 3
+          },
+          "description": {
+            "type": "string",
+            "minLength": 10
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "time": {
+            "type": "string"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "vereinstreffen",
+              "sportveranstaltung",
+              "fanfahrt",
+              "social",
+              "sitzung",
+              "workshop",
+              "turnier",
+              "sonstiges"
+            ]
+          },
+          "responsibleMemberId": {
+            "type": "string"
+          },
+          "isPublic": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "description",
+          "date",
+          "time",
+          "location",
+          "type",
+          "responsibleMemberId"
+        ]
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "titel": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 255
+          },
+          "beschreibung": {
+            "type": "string"
+          },
+          "context_type": {
+            "type": "string",
+            "enum": [
+              "event",
+              "team",
+              "general"
+            ]
+          },
+          "context_id": {
+            "type": "string"
+          },
+          "verantwortlich_id": {
+            "type": "string"
+          },
+          "prioritaet": {
+            "type": "string",
+            "enum": [
+              "niedrig",
+              "mittel",
+              "hoch",
+              "kritisch"
+            ]
+          },
+          "frist": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "materialien": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "menge": {
+                  "type": "number"
+                },
+                "einheit": {
+                  "type": "string"
+                },
+                "beschreibung": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "abhaengig_von": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kategorie": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "titel",
+          "context_type"
+        ]
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "type": "string"
+          },
+          "meta": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer"
+              },
+              "page": {
+                "type": "integer"
+              },
+              "limit": {
+                "type": "integer"
+              },
+              "pages": {
+                "type": "integer"
+              },
+              "filtered": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "total",
+              "page",
+              "limit",
+              "pages"
+            ]
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/api/auth/login": {
+      "post": {
+        "summary": "Benutzer anmelden",
+        "tags": [
+          "🔐 Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "max@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 6,
+                    "example": "password123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich angemeldet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "description": "JWT Access Token"
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "Refresh Token"
+                        },
+                        "user": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            },
+                            "vorname": {
+                              "type": "string"
+                            },
+                            "nachname": {
+                              "type": "string"
+                            },
+                            "rollen": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "berechtigungen": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validierungsfehler"
+          },
+          "401": {
+            "description": "Ungültige Anmeldedaten"
+          }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Neuen Benutzer registrieren",
+        "tags": [
+          "🔐 Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password",
+                  "vorname",
+                  "nachname"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "neu@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 6,
+                    "example": "sicheresPasswort123"
+                  },
+                  "vorname": {
+                    "type": "string",
+                    "minLength": 2,
+                    "example": "Max"
+                  },
+                  "nachname": {
+                    "type": "string",
+                    "minLength": 2,
+                    "example": "Mustermann"
+                  },
+                  "telefon": {
+                    "type": "string",
+                    "example": "+49 123 4567890"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Benutzer erfolgreich erstellt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Registration successful. Please check your email to verify your account."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validierungsfehler oder Benutzer existiert bereits"
+          },
+          "500": {
+            "description": "Serverfehler"
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "summary": "Access Token erneuern",
+        "tags": [
+          "🔐 Auth"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "refreshToken"
+                ],
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Der Refresh Token"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token erfolgreich erneuert",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "accessToken": {
+                          "type": "string",
+                          "description": "Neuer JWT Access Token"
+                        },
+                        "refreshToken": {
+                          "type": "string",
+                          "description": "Neuer Refresh Token"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Ungültiger Refresh Token"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "summary": "Benutzer abmelden",
+        "tags": [
+          "🔐 Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "refreshToken": {
+                    "type": "string",
+                    "description": "Optional - wenn angegeben, wird nur dieser Token widerrufen"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich abgemeldet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Logged out successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Nicht autorisiert"
+          }
+        }
+      }
+    },
+    "/api/public/creators/list": {
+      "get": {
+        "summary": "Liste aller Creator",
+        "tags": [
+          "🌐 Public Creators"
+        ],
+        "responses": {
+          "200": {
+            "description": "Creator-Liste",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "kuenstlername": {
+                            "type": "string"
+                          },
+                          "profiltext": {
+                            "type": "string"
+                          },
+                          "istAktiv": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/public/creators/{creatorId}": {
+      "get": {
+        "summary": "Creator-Profil Details",
+        "tags": [
+          "🌐 Public Creators"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "creatorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Creator gefunden"
+          },
+          "404": {
+            "description": "Creator nicht gefunden"
+          }
+        }
+      }
+    },
+    "/api/public/creators/gallery": {
+      "get": {
+        "summary": "Öffentliche Galerie aller Werke",
+        "tags": [
+          "🌐 Public Creators"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BILD",
+                "VIDEO",
+                "AUDIO",
+                "TEXT"
+              ]
+            },
+            "description": "Filter nach Werktyp"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Galerie-Inhalte"
+          }
+        }
+      }
+    },
+    "/api/public/creators/{creatorId}/works": {
+      "get": {
+        "summary": "Werke eines Creators",
+        "tags": [
+          "🌐 Public Creators"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "creatorId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Werke mit Pagination"
+          }
+        }
+      }
+    },
+    "/api/public/documents": {
+      "get": {
+        "summary": "Öffentliche Dokumente",
+        "tags": [
+          "🌐 Public Documents"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "satzung",
+                "protokolle",
+                "formulare",
+                "richtlinien",
+                "guides"
+              ]
+            },
+            "description": "Filter nach Kategorie"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dokumentenliste"
+          }
+        }
+      }
+    },
+    "/api/public/documents/{documentId}": {
+      "get": {
+        "summary": "Öffentliches Dokument Details",
+        "tags": [
+          "🌐 Public Documents"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dokument gefunden"
+          },
+          "404": {
+            "description": "Dokument nicht gefunden"
+          }
+        }
+      }
+    },
+    "/api/documents": {
+      "get": {
+        "summary": "Alle Dokumente (geschützt)",
+        "tags": [
+          "📄 Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dokumentenliste"
+          }
+        }
+      }
+    },
+    "/api/documents/{id}": {
+      "delete": {
+        "summary": "Dokument löschen",
+        "tags": [
+          "📄 Documents"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dokument gelöscht"
+          },
+          "404": {
+            "description": "Dokument nicht gefunden"
+          }
+        }
+      }
+    },
+    "/api/public/event/list": {
+      "get": {
+        "summary": "Liste öffentlicher Events",
+        "tags": [
+          "🌐 Public Events"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sportBereich",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event-Liste"
+          }
+        }
+      }
+    },
+    "/api/public/event/{eventId}": {
+      "get": {
+        "summary": "Öffentliche Event-Details",
+        "tags": [
+          "🌐 Public Events"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/internal/events": {
+      "post": {
+        "summary": "Event erstellen",
+        "tags": [
+          "📅 Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Event erfolgreich erstellt"
+          },
+          "400": {
+            "description": "Validierungsfehler"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/events/{id}": {
+      "put": {
+        "summary": "Event aktualisieren",
+        "tags": [
+          "📅 Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event erfolgreich aktualisiert"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          },
+          "404": {
+            "description": "Event nicht gefunden"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Event löschen (Soft Delete)",
+        "tags": [
+          "📅 Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event erfolgreich gelöscht"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          },
+          "404": {
+            "description": "Event nicht gefunden"
+          }
+        }
+      },
+      "get": {
+        "summary": "Event-Details mit allen Relationen",
+        "tags": [
+          "📅 Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vollständige Event-Details"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          },
+          "404": {
+            "description": "Event nicht gefunden"
+          }
+        }
+      }
+    },
+    "/api/internal/events/{id}/status": {
+      "patch": {
+        "summary": "Event-Status ändern",
+        "tags": [
+          "📅 Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "entwurf",
+                      "geplant",
+                      "genehmigt",
+                      "aktiv",
+                      "abgeschlossen",
+                      "abgesagt"
+                    ]
+                  },
+                  "kommentar": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status erfolgreich geändert"
+          },
+          "403": {
+            "description": "Keine Berechtigung für diese Status-Änderung"
+          }
+        }
+      }
+    },
+    "/api/internal/events/list": {
+      "get": {
+        "summary": "Erweiterte Event-Liste (intern)",
+        "tags": [
+          "📅 Events"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "includeDeleted",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "responsibleId",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event-Liste mit erweiterten Daten"
+          }
+        }
+      }
+    },
+    "/api/members/local": {
+      "post": {
+        "summary": "Lokales Mitglied anlegen",
+        "tags": [
+          "👥 Members"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/members/{id}/password": {
+      "put": {
+        "summary": "Passwort setzen/zurücksetzen",
+        "tags": [
+          "👥 Members"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/members": {
+      "get": {
+        "summary": "Liste aller Mitglieder (gefiltert nach Berechtigungen)",
+        "tags": [
+          "👥 Members"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "active",
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Nur aktive Mitglieder"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Suche nach Name oder Email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mitgliederliste",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Member"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/members/{id}": {
+      "get": {
+        "summary": "Mitglied-Details",
+        "tags": [
+          "👥 Members"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mitglied gefunden"
+          },
+          "404": {
+            "description": "Mitglied nicht gefunden"
+          }
+        }
+      },
+      "put": {
+        "summary": "Mitglied aktualisieren (mit Approval wenn nötig)",
+        "tags": [
+          "👥 Members"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/public/newsletter/subscribe": {
+      "post": {
+        "summary": "Newsletter abonnieren",
+        "tags": [
+          "🌐 Public Newsletter"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "vorname"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "vorname": {
+                    "type": "string"
+                  },
+                  "nachname": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich abonniert"
+          }
+        }
+      }
+    },
+    "/api/public/newsletter/confirm": {
+      "post": {
+        "summary": "Newsletter-Anmeldung bestätigen",
+        "tags": [
+          "🌐 Public Newsletter"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "token"
+                ],
+                "properties": {
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bestätigung erfolgreich"
+          }
+        }
+      }
+    },
+    "/api/public/newsletter/unsubscribe": {
+      "post": {
+        "summary": "Newsletter abbestellen",
+        "tags": [
+          "🌐 Public Newsletter"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "token"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "token": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Erfolgreich abgemeldet"
+          }
+        }
+      }
+    },
+    "/api/public/newsletter/list": {
+      "get": {
+        "summary": "Newsletter-Archiv",
+        "tags": [
+          "🌐 Public Newsletter"
+        ],
+        "responses": {
+          "200": {
+            "description": "Newsletter-Liste"
+          }
+        }
+      }
+    },
+    "/api/public/newsletter/{newsletterId}": {
+      "get": {
+        "summary": "Newsletter Details",
+        "tags": [
+          "🌐 Public Newsletter"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "newsletterId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newsletter gefunden"
+          }
+        }
+      }
+    },
+    "/api/public/organization/structure": {
+      "get": {
+        "summary": "Vereinsstruktur",
+        "tags": [
+          "🌐 Public Organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Organisationsstruktur"
+          }
+        }
+      }
+    },
+    "/api/public/organization/documents": {
+      "get": {
+        "summary": "Vereinsdokumente",
+        "tags": [
+          "🌐 Public Organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Dokumentenliste"
+          }
+        }
+      }
+    },
+    "/api/public/organization/gremien/{gremiumId}": {
+      "get": {
+        "summary": "Gremium Details",
+        "tags": [
+          "🌐 Public Organization"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gremiumId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gremium gefunden"
+          }
+        }
+      }
+    },
+    "/api/public/faq": {
+      "get": {
+        "summary": "Häufig gestellte Fragen",
+        "tags": [
+          "🌐 Public Organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "FAQ-Liste"
+          }
+        }
+      }
+    },
+    "/api/public/team-history/years": {
+      "get": {
+        "summary": "Verfügbare Jahre der Team-Historie",
+        "tags": [
+          "🌐 Public Organization"
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der Jahre"
+          }
+        }
+      }
+    },
+    "/api/public/team-history/{year}": {
+      "get": {
+        "summary": "Team-Historie für ein Jahr",
+        "tags": [
+          "🌐 Public Organization"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "year",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2024
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Historie des Jahres"
+          }
+        }
+      }
+    },
+    "/api/public/stats": {
+      "get": {
+        "summary": "Öffentliche Vereinsstatistiken",
+        "tags": [
+          "🌐 Public Stats"
+        ],
+        "responses": {
+          "200": {
+            "description": "Statistiken",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "memberCount": {
+                          "type": "number",
+                          "description": "Anzahl aktiver Mitglieder"
+                        },
+                        "eventsPerYear": {
+                          "type": "number",
+                          "description": "Events pro Jahr"
+                        },
+                        "foundedYear": {
+                          "type": "number",
+                          "description": "Gründungsjahr"
+                        },
+                        "passionPercentage": {
+                          "type": "number",
+                          "description": "Leidenschaft in Prozent"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "data": {
+                    "memberCount": 42,
+                    "eventsPerYear": 24,
+                    "foundedYear": 2025,
+                    "passionPercentage": 100
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/internal/tasks": {
+      "post": {
+        "summary": "Task erstellen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task erfolgreich erstellt"
+          },
+          "400": {
+            "description": "Validierungsfehler"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      },
+      "get": {
+        "summary": "Task-Liste abrufen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "contextType",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "event",
+                "team",
+                "general"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "contextId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "prioritaet",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "nurMeine",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task-Liste"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}": {
+      "put": {
+        "summary": "Task aktualisieren",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTask"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task erfolgreich aktualisiert"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          },
+          "404": {
+            "description": "Task nicht gefunden"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Task löschen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task erfolgreich gelöscht"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          },
+          "404": {
+            "description": "Task nicht gefunden"
+          }
+        }
+      },
+      "get": {
+        "summary": "Task-Details abrufen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task mit allen Details"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          },
+          "404": {
+            "description": "Task nicht gefunden"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}/status": {
+      "patch": {
+        "summary": "Task-Status ändern",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "offen",
+                      "in_bearbeitung",
+                      "review",
+                      "erledigt",
+                      "blockiert"
+                    ]
+                  },
+                  "kommentar": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status erfolgreich geändert"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}/assign": {
+      "patch": {
+        "summary": "Mitglieder zuweisen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "memberIds"
+                ],
+                "properties": {
+                  "memberIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "kommentar": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mitglieder erfolgreich zugewiesen"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}/assign/{memberId}": {
+      "delete": {
+        "summary": "Mitglied von Task entfernen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mitglied erfolgreich entfernt"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}/comments": {
+      "post": {
+        "summary": "Kommentar hinzufügen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "text"
+                ],
+                "properties": {
+                  "text": {
+                    "type": "string"
+                  },
+                  "erwaehntePersonen": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Kommentar erfolgreich hinzugefügt"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      },
+      "get": {
+        "summary": "Kommentare abrufen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Kommentarliste"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/my-tasks": {
+      "get": {
+        "summary": "Meine Tasks abrufen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "in": "query",
+            "name": "prioritaet",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Persönliche Task-Liste"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/member/{memberId}": {
+      "get": {
+        "summary": "Tasks eines Mitglieds",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "memberId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task-Liste des Mitglieds"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/events/{eventId}/tasks": {
+      "get": {
+        "summary": "Tasks eines Events",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "eventId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task-Liste des Events"
+          }
+        }
+      }
+    },
+    "/api/internal/teams/{teamId}/tasks": {
+      "get": {
+        "summary": "Tasks eines Teams",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "teamId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task-Liste des Teams"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}/complete": {
+      "post": {
+        "summary": "Task als erledigt markieren",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "kommentar": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task erfolgreich erledigt"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/{id}/block": {
+      "post": {
+        "summary": "Task blockieren",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "grund"
+                ],
+                "properties": {
+                  "grund": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task erfolgreich blockiert"
+          },
+          "403": {
+            "description": "Keine Berechtigung"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/create-from-template": {
+      "post": {
+        "summary": "Task aus Vorlage erstellen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "templateId",
+                  "context_type",
+                  "context_id"
+                ],
+                "properties": {
+                  "templateId": {
+                    "type": "string"
+                  },
+                  "context_type": {
+                    "type": "string",
+                    "enum": [
+                      "event",
+                      "team",
+                      "general"
+                    ]
+                  },
+                  "context_id": {
+                    "type": "string"
+                  },
+                  "anpassungen": {
+                    "type": "object",
+                    "properties": {
+                      "titel": {
+                        "type": "string"
+                      },
+                      "frist": {
+                        "type": "string"
+                      },
+                      "verantwortlich_id": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Task aus Vorlage erstellt"
+          },
+          "404": {
+            "description": "Vorlage nicht gefunden"
+          }
+        }
+      }
+    },
+    "/api/internal/tasks/templates": {
+      "get": {
+        "summary": "Verfügbare Task-Vorlagen",
+        "tags": [
+          "📋 Tasks"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "kategorie",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Liste der Vorlagen"
+          }
+        }
+      }
+    }
+  }
+}

@@ -6,70 +6,43 @@ import type { OpenAPIV3 } from 'openapi-types';
  * @description Zentrale Schema-Definitionen für Type Generation
  */
 export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
-  // ========== USER & AUTH ==========
-  User: {
-    type: 'object',
-    properties: {
-      id: { type: 'string' },
-      email: { type: 'string', format: 'email' },
-      vorname: { type: 'string' },
-      nachname: { type: 'string' },
-      mitgliedsnummer: { type: 'string' },
-      authSource: { type: 'string', enum: ['local', 'easyverein'] },
-      easyVereinId: { type: 'string' },
-      role: { $ref: '#/components/schemas/RoleName' },
-      istAktiv: { type: 'boolean' },
-      erstelltAm: { type: 'string', format: 'date-time' },
-      aktualisiertAm: { type: 'string', format: 'date-time' },
-      letzterLogin: { type: 'string', format: 'date-time' },
-    },
-    required: ['id', 'email', 'vorname', 'nachname', 'authSource', 'istAktiv', 'erstelltAm', 'aktualisiertAm'],
-  },
-
+  // ========== ENUMS ==========
   RoleName: {
     type: 'string',
     enum: ['ADMIN', 'VORSTAND', 'BEIRAT', 'KASSENPRUFER', 'TEAM_EVENT', 'TEAM_MEDIEN', 'TEAM_TECHNIK', 'TEAM_VEREIN', 'MITGLIED'],
   },
 
-  // ========== MEMBER ==========
-  MemberListItem: {
-    type: 'object',
-    properties: {
-      id: { type: 'string' },
-      vorname: { type: 'string' },
-      nachname: { type: 'string' },
-      email: { type: 'string', format: 'email' },
-      telefon: { type: 'string' },
-      mitgliedsnummer: { type: 'string' },
-      istAktiv: { type: 'boolean' },
-      mitgliedSeit: { type: 'string', format: 'date' },
-      geburtsdatum: { type: 'string', format: 'date' },
-      rolle: { type: 'array', items: { $ref: '#/components/schemas/RoleName' } },
-      profilbild: { type: 'string' },
-      letzteAktivitaet: { type: 'string', format: 'date-time' },
-      vollstaendigerName: { type: 'string' },
-    },
-    required: ['id', 'vorname', 'nachname', 'email', 'mitgliedsnummer', 'istAktiv', 'mitgliedSeit', 'rolle'],
+  EventType: {
+    type: 'string',
+    enum: ['vereinstreffen', 'sportveranstaltung', 'fanfahrt', 'social', 'sitzung', 'workshop', 'turnier', 'sonstiges'],
   },
 
-  MemberDetail: {
-    allOf: [
-      { $ref: '#/components/schemas/MemberListItem' },
-      {
-        type: 'object',
-        properties: {
-          adresse: { $ref: '#/components/schemas/Adresse' },
-          notfallkontakt: { $ref: '#/components/schemas/Notfallkontakt' },
-          iban: { type: 'string' },
-          hatVertraulichkeitserklaerung: { type: 'boolean' },
-          sichtbarkeit: { $ref: '#/components/schemas/Sichtbarkeit' },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
-        },
-      },
-    ],
+  EventStatus: {
+    type: 'string',
+    enum: ['entwurf', 'geplant', 'genehmigt', 'aktiv', 'abgeschlossen', 'abgesagt'],
   },
 
+  SportBereich: {
+    type: 'string',
+    enum: ['league_of_legends', 'fussball', 'esports_allgemein', 'sonstiges'],
+  },
+
+  TaskStatus: {
+    type: 'string',
+    enum: ['offen', 'in_bearbeitung', 'review', 'erledigt', 'blockiert'],
+  },
+
+  TaskPriority: {
+    type: 'string',
+    enum: ['niedrig', 'mittel', 'hoch', 'kritisch'],
+  },
+
+  SichtbarkeitLevel: {
+    type: 'string',
+    enum: ['alle', 'mitglieder', 'vorstand', 'niemand'],
+  },
+
+  // ========== SUB-SCHEMAS ==========
   Adresse: {
     type: 'object',
     properties: {
@@ -93,11 +66,176 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
   Sichtbarkeit: {
     type: 'object',
     properties: {
-      email: { type: 'string', enum: ['alle', 'mitglieder', 'vorstand', 'niemand'] },
-      telefon: { type: 'string', enum: ['alle', 'mitglieder', 'vorstand', 'niemand'] },
-      profil: { type: 'string', enum: ['alle', 'mitglieder', 'vorstand', 'niemand'] },
+      email: {
+        type: 'string',
+        enum: ['alle', 'mitglieder', 'vorstand', 'niemand']
+      },
+      telefon: {
+        type: 'string',
+        enum: ['alle', 'mitglieder', 'vorstand', 'niemand']
+      },
+      profil: {
+        type: 'string',
+        enum: ['alle', 'mitglieder', 'vorstand', 'niemand']
+      },
     },
     required: ['email', 'telefon', 'profil'],
+  },
+
+  EventLocation: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      address: { type: 'string' },
+      description: { type: 'string' },
+    },
+    required: ['name'],
+  },
+
+  TaskContext: {
+    type: 'object',
+    properties: {
+      type: {
+        type: 'string',
+        enum: ['event', 'team', 'general']
+      },
+      id: {
+        type: 'string',
+        nullable: true
+      },
+    },
+    required: ['type', 'id'],
+  },
+
+  TaskMaterial: {
+    type: 'object',
+    properties: {
+      name: { type: 'string' },
+      menge: { type: 'number' },
+      einheit: { type: 'string' },
+      beschreibung: { type: 'string' },
+      besorgt: { type: 'boolean' },
+    },
+    required: ['name', 'menge', 'einheit', 'besorgt'],
+  },
+
+  // ========== USER & AUTH ==========
+  User: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      email: { type: 'string', format: 'email' },
+      vorname: { type: 'string' },
+      nachname: { type: 'string' },
+      mitgliedsnummer: { type: 'string' },
+      authSource: {
+        type: 'string',
+        enum: ['local', 'easyverein']
+      },
+      easyVereinId: { type: 'string' },
+      role: {
+        type: 'string',
+        enum: ['ADMIN', 'VORSTAND', 'BEIRAT', 'KASSENPRUFER', 'TEAM_EVENT', 'TEAM_MEDIEN', 'TEAM_TECHNIK', 'TEAM_VEREIN', 'MITGLIED']
+      },
+      istAktiv: { type: 'boolean' },
+      erstelltAm: { type: 'string', format: 'date-time' },
+      aktualisiertAm: { type: 'string', format: 'date-time' },
+      letzterLogin: { type: 'string', format: 'date-time' },
+    },
+    required: ['id', 'email', 'vorname', 'nachname', 'authSource', 'istAktiv', 'erstelltAm', 'aktualisiertAm'],
+  },
+
+  // ========== MEMBER ==========
+  MemberListItem: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      vorname: { type: 'string' },
+      nachname: { type: 'string' },
+      email: { type: 'string', format: 'email' },
+      telefon: { type: 'string' },
+      mitgliedsnummer: { type: 'string' },
+      istAktiv: { type: 'boolean' },
+      mitgliedSeit: { type: 'string', format: 'date' },
+      geburtsdatum: { type: 'string', format: 'date' },
+      rolle: {
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['ADMIN', 'VORSTAND', 'BEIRAT', 'KASSENPRUFER', 'TEAM_EVENT', 'TEAM_MEDIEN', 'TEAM_TECHNIK', 'TEAM_VEREIN', 'MITGLIED']
+        }
+      },
+      profilbild: { type: 'string' },
+      letzteAktivitaet: { type: 'string', format: 'date-time' },
+      vollstaendigerName: { type: 'string' },
+    },
+    required: ['id', 'vorname', 'nachname', 'email', 'mitgliedsnummer', 'istAktiv', 'mitgliedSeit', 'rolle'],
+  },
+
+  MemberDetail: {
+    type: 'object',
+    properties: {
+      id: { type: 'string' },
+      vorname: { type: 'string' },
+      nachname: { type: 'string' },
+      email: { type: 'string', format: 'email' },
+      telefon: { type: 'string' },
+      mitgliedsnummer: { type: 'string' },
+      istAktiv: { type: 'boolean' },
+      mitgliedSeit: { type: 'string', format: 'date' },
+      geburtsdatum: { type: 'string', format: 'date' },
+      rolle: {
+        type: 'array',
+        items: {
+          type: 'string',
+          enum: ['ADMIN', 'VORSTAND', 'BEIRAT', 'KASSENPRUFER', 'TEAM_EVENT', 'TEAM_MEDIEN', 'TEAM_TECHNIK', 'TEAM_VEREIN', 'MITGLIED']
+        }
+      },
+      profilbild: { type: 'string' },
+      letzteAktivitaet: { type: 'string', format: 'date-time' },
+      vollstaendigerName: { type: 'string' },
+      adresse: {
+        type: 'object',
+        properties: {
+          strasse: { type: 'string' },
+          hausnummer: { type: 'string' },
+          plz: { type: 'string', pattern: '^\\d{5}$' },
+          stadt: { type: 'string' },
+        },
+        required: ['strasse', 'hausnummer', 'plz', 'stadt'],
+      },
+      notfallkontakt: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          telefon: { type: 'string' },
+        },
+        required: ['name', 'telefon'],
+      },
+      iban: { type: 'string' },
+      hatVertraulichkeitserklaerung: { type: 'boolean' },
+      sichtbarkeit: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            enum: ['alle', 'mitglieder', 'vorstand', 'niemand']
+          },
+          telefon: {
+            type: 'string',
+            enum: ['alle', 'mitglieder', 'vorstand', 'niemand']
+          },
+          profil: {
+            type: 'string',
+            enum: ['alle', 'mitglieder', 'vorstand', 'niemand']
+          },
+        },
+        required: ['email', 'telefon', 'profil'],
+      },
+      createdAt: { type: 'string', format: 'date-time' },
+      updatedAt: { type: 'string', format: 'date-time' },
+    },
+    required: ['id', 'vorname', 'nachname', 'email', 'mitgliedsnummer', 'istAktiv', 'mitgliedSeit', 'rolle', 'hatVertraulichkeitserklaerung', 'createdAt', 'updatedAt'],
   },
 
   // ========== EVENT ==========
@@ -111,10 +249,27 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
       date: { type: 'string', format: 'date-time' },
       time: { type: 'string' },
       durationMinutes: { type: 'integer' },
-      location: { $ref: '#/components/schemas/EventLocation' },
-      type: { $ref: '#/components/schemas/EventType' },
-      sportBereich: { $ref: '#/components/schemas/SportBereich' },
-      status: { $ref: '#/components/schemas/EventStatus' },
+      location: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          address: { type: 'string' },
+          description: { type: 'string' },
+        },
+        required: ['name'],
+      },
+      type: {
+        type: 'string',
+        enum: ['vereinstreffen', 'sportveranstaltung', 'fanfahrt', 'social', 'sitzung', 'workshop', 'turnier', 'sonstiges']
+      },
+      sportBereich: {
+        type: 'string',
+        enum: ['league_of_legends', 'fussball', 'esports_allgemein', 'sonstiges']
+      },
+      status: {
+        type: 'string',
+        enum: ['entwurf', 'geplant', 'genehmigt', 'aktiv', 'abgeschlossen', 'abgesagt']
+      },
       isPublic: { type: 'boolean' },
       isConfidential: { type: 'boolean' },
       responsibleMemberId: { type: 'string' },
@@ -134,31 +289,6 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
     required: ['id', 'title', 'description', 'date', 'time', 'location', 'type', 'status', 'isPublic', 'isConfidential', 'responsibleMemberId', 'budgetUsed', 'createdAt', 'createdBy', 'updatedAt'],
   },
 
-  EventLocation: {
-    type: 'object',
-    properties: {
-      name: { type: 'string' },
-      address: { type: 'string' },
-      description: { type: 'string' },
-    },
-    required: ['name'],
-  },
-
-  EventType: {
-    type: 'string',
-    enum: ['vereinstreffen', 'sportveranstaltung', 'fanfahrt', 'social', 'sitzung', 'workshop', 'turnier', 'sonstiges'],
-  },
-
-  EventStatus: {
-    type: 'string',
-    enum: ['entwurf', 'geplant', 'genehmigt', 'aktiv', 'abgeschlossen', 'abgesagt'],
-  },
-
-  SportBereich: {
-    type: 'string',
-    enum: ['league_of_legends', 'fussball', 'esports_allgemein', 'sonstiges'],
-  },
-
   // ========== TASK ==========
   Task: {
     type: 'object',
@@ -166,13 +296,45 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
       id: { type: 'string' },
       titel: { type: 'string' },
       beschreibung: { type: 'string' },
-      context: { $ref: '#/components/schemas/TaskContext' },
+      context: {
+        type: 'object',
+        properties: {
+          type: {
+            type: 'string',
+            enum: ['event', 'team', 'general']
+          },
+          id: {
+            type: 'string',
+            nullable: true
+          },
+        },
+        required: ['type', 'id'],
+      },
       verantwortlichId: { type: 'string' },
       zugewiesenAn: { type: 'array', items: { type: 'string' } },
-      status: { $ref: '#/components/schemas/TaskStatus' },
-      prioritaet: { $ref: '#/components/schemas/TaskPriority' },
+      status: {
+        type: 'string',
+        enum: ['offen', 'in_bearbeitung', 'review', 'erledigt', 'blockiert']
+      },
+      prioritaet: {
+        type: 'string',
+        enum: ['niedrig', 'mittel', 'hoch', 'kritisch']
+      },
       frist: { type: 'string', format: 'date-time' },
-      materialien: { type: 'array', items: { $ref: '#/components/schemas/TaskMaterial' } },
+      materialien: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            menge: { type: 'number' },
+            einheit: { type: 'string' },
+            beschreibung: { type: 'string' },
+            besorgt: { type: 'boolean' },
+          },
+          required: ['name', 'menge', 'einheit', 'besorgt'],
+        }
+      },
       abhaengigVon: { type: 'array', items: { type: 'string' } },
       istStandardaufgabe: { type: 'boolean' },
       kategorie: { type: 'string' },
@@ -186,49 +348,24 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
     required: ['id', 'titel', 'context', 'zugewiesenAn', 'status', 'prioritaet', 'materialien', 'istStandardaufgabe', 'erstelltVon', 'erstelltAm', 'aktualisiertAm', 'geloescht'],
   },
 
-  TaskContext: {
-    type: 'object',
-    properties: {
-      type: { type: 'string', enum: ['event', 'team', 'general'] },
-      id: { type: 'string', nullable: true },
-    },
-    required: ['type', 'id'],
-  },
-
-  TaskStatus: {
-    type: 'string',
-    enum: ['offen', 'in_bearbeitung', 'review', 'erledigt', 'blockiert'],
-  },
-
-  TaskPriority: {
-    type: 'string',
-    enum: ['niedrig', 'mittel', 'hoch', 'kritisch'],
-  },
-
-  TaskMaterial: {
-    type: 'object',
-    properties: {
-      name: { type: 'string' },
-      menge: { type: 'number' },
-      einheit: { type: 'string' },
-      beschreibung: { type: 'string' },
-      besorgt: { type: 'boolean' },
-    },
-    required: ['name', 'menge', 'einheit', 'besorgt'],
-  },
-
   // ========== REQUESTS ==========
   CreateMemberRequest: {
     type: 'object',
     properties: {
-      memberType: { type: 'string', enum: ['member', 'creator', 'sponsor', 'partner'] },
+      memberType: {
+        type: 'string',
+        enum: ['member', 'creator', 'sponsor', 'partner']
+      },
       vorname: { type: 'string', minLength: 2 },
       nachname: { type: 'string', minLength: 2 },
       email: { type: 'string', format: 'email' },
       telefon: { type: 'string' },
       kuenstlername: { type: 'string' },
       portfolio: { type: 'string' },
-      passwordOption: { type: 'string', enum: ['none', 'generate', 'manual'] },
+      passwordOption: {
+        type: 'string',
+        enum: ['none', 'generate', 'manual']
+      },
       password: { type: 'string' },
       sendCredentials: { type: 'boolean' },
     },
@@ -245,9 +382,23 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
       mitgliedsnummer: { type: 'string' },
       istAktiv: { type: 'boolean' },
       geburtsdatum: { type: 'string', format: 'date' },
-      adresse: { $ref: '#/components/schemas/Adresse' },
+      adresse: {
+        type: 'object',
+        properties: {
+          strasse: { type: 'string' },
+          hausnummer: { type: 'string' },
+          plz: { type: 'string', pattern: '^\\d{5}$' },
+          stadt: { type: 'string' },
+        },
+      },
       iban: { type: 'string' },
-      notfallkontakt: { $ref: '#/components/schemas/Notfallkontakt' },
+      notfallkontakt: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          telefon: { type: 'string' },
+        },
+      },
     },
   },
 
@@ -259,8 +410,19 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
       shortDescription: { type: 'string' },
       date: { type: 'string', format: 'date' },
       time: { type: 'string' },
-      location: { $ref: '#/components/schemas/EventLocation' },
-      type: { $ref: '#/components/schemas/EventType' },
+      location: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          address: { type: 'string' },
+          description: { type: 'string' },
+        },
+        required: ['name'],
+      },
+      type: {
+        type: 'string',
+        enum: ['vereinstreffen', 'sportveranstaltung', 'fanfahrt', 'social', 'sitzung', 'workshop', 'turnier', 'sonstiges']
+      },
       responsibleMemberId: { type: 'string' },
       isPublic: { type: 'boolean' },
     },
@@ -272,12 +434,29 @@ export const domainSchemas: Record<string, OpenAPIV3.SchemaObject> = {
     properties: {
       titel: { type: 'string', minLength: 3, maxLength: 255 },
       beschreibung: { type: 'string' },
-      context_type: { type: 'string', enum: ['event', 'team', 'general'] },
+      context_type: {
+        type: 'string',
+        enum: ['event', 'team', 'general']
+      },
       context_id: { type: 'string' },
       verantwortlich_id: { type: 'string' },
-      prioritaet: { $ref: '#/components/schemas/TaskPriority' },
+      prioritaet: {
+        type: 'string',
+        enum: ['niedrig', 'mittel', 'hoch', 'kritisch']
+      },
       frist: { type: 'string', format: 'date-time' },
-      materialien: { type: 'array', items: { $ref: '#/components/schemas/TaskMaterial' } },
+      materialien: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            menge: { type: 'number' },
+            einheit: { type: 'string' },
+            beschreibung: { type: 'string' },
+          },
+        }
+      },
       abhaengig_von: { type: 'array', items: { type: 'string' } },
       kategorie: { type: 'string' },
     },

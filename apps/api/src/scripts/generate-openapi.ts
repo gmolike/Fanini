@@ -1,9 +1,13 @@
 // apps/api/src/scripts/generate-openapi.ts
 import { writeFileSync, mkdirSync } from 'fs';
 import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import type { OpenAPIV3 } from 'openapi-types';
 import { swaggerSpec } from '../config/swagger';
 import { domainSchemas } from '../config/swagger-schemas';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 /**
  * Generiert OpenAPI Schema für Frontend Type Generation
@@ -40,9 +44,5 @@ const generateOpenAPISchema = () => {
   }
 };
 
-// Execute if run directly
-if (require.main === module) {
-  generateOpenAPISchema();
-}
-
-export { generateOpenAPISchema };
+// Führe direkt aus
+generateOpenAPISchema();

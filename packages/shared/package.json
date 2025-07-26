@@ -30,9 +30,11 @@
     "clean": "rimraf dist src/generated"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.20",
+    "@types/lodash-es": "^4.17.12",
     "@types/node": "^24.0.0",
+    "lodash-es": "^4.17.21",
     "openapi-typescript": "^7.0.0",
+    "p-debounce": "^4.0.0",
     "prettier": "^3.0.0",
     "rimraf": "^6.0.0",
     "ts-to-zod": "^3.0.0",
@@ -40,7 +42,6 @@
     "typescript": "^5.7.0"
   },
   "dependencies": {
-    "chokidar": "^4.0.3",
-    "lodash": "^4.17.21"
+    "chokidar": "^4.0.3"
   }
 }

@@ -26,45 +26,45 @@ export type TaskPriority = 'niedrig' | 'mittel' | 'hoch' | 'kritisch';
 export type SichtbarkeitLevel = 'alle' | 'mitglieder' | 'vorstand' | 'niemand';
 
 // ========== SUB-TYPES ==========
-export type Adresse = {
+export interface Adresse {
   strasse: string;
   hausnummer: string;
   plz: string;
   stadt: string;
-};
+}
 
-export type Notfallkontakt = {
+export interface Notfallkontakt {
   name: string;
   telefon: string;
-};
+}
 
-export type Sichtbarkeit = {
+export interface Sichtbarkeit {
   email: SichtbarkeitLevel;
   telefon: SichtbarkeitLevel;
   profil: SichtbarkeitLevel;
-};
+}
 
-export type EventLocation = {
+export interface EventLocation {
   name: string;
   address?: string;
   description?: string;
-};
+}
 
-export type TaskContext = {
+export interface TaskContext {
   type: 'event' | 'team' | 'general';
   id: string | null;
-};
+}
 
-export type TaskMaterial = {
+export interface TaskMaterial {
   name: string;
   menge: number;
   einheit: string;
   beschreibung?: string;
   besorgt: boolean;
-};
+}
 
 // ========== USER & AUTH ==========
-export type User = {
+export interface User {
   id: string;
   email: string;
   vorname: string;
@@ -77,10 +77,10 @@ export type User = {
   erstelltAm: Date;
   aktualisiertAm: Date;
   letzterLogin?: Date;
-};
+}
 
 // ========== MEMBER ==========
-export type MemberListItem = {
+export interface MemberListItem {
   id: string;
   vorname: string;
   nachname: string;
@@ -94,9 +94,9 @@ export type MemberListItem = {
   profilbild?: string;
   letzteAktivitaet?: string;
   vollstaendigerName?: string;
-};
+}
 
-export type MemberDetail = MemberListItem & {
+export interface MemberDetail extends MemberListItem {
   adresse?: Adresse;
   notfallkontakt?: Notfallkontakt;
   iban?: string;
@@ -104,10 +104,10 @@ export type MemberDetail = MemberListItem & {
   sichtbarkeit?: Sichtbarkeit;
   createdAt: string;
   updatedAt: string;
-};
+}
 
 // ========== EVENT ==========
-export type Event = {
+export interface Event {
   id: string;
   title: string;
   description: string;
@@ -134,10 +134,10 @@ export type Event = {
   updatedBy?: string;
   approvedAt?: Date;
   approvedBy?: string;
-};
+}
 
 // ========== TASK ==========
-export type Task = {
+export interface Task {
   id: string;
   titel: string;
   beschreibung?: string;
@@ -157,10 +157,10 @@ export type Task = {
   erledigtAm?: Date;
   erledigtVon?: string;
   geloescht: boolean;
-};
+}
 
 // ========== REQUESTS ==========
-export type CreateMemberRequest = {
+export interface CreateMemberRequest {
   memberType: 'member' | 'creator' | 'sponsor' | 'partner';
   vorname: string;
   nachname: string;
@@ -171,9 +171,9 @@ export type CreateMemberRequest = {
   passwordOption: 'none' | 'generate' | 'manual';
   password?: string;
   sendCredentials: boolean;
-};
+}
 
-export type UpdateMemberRequest = {
+export interface UpdateMemberRequest {
   vorname?: string;
   nachname?: string;
   email?: string;
@@ -184,9 +184,9 @@ export type UpdateMemberRequest = {
   adresse?: Adresse;
   iban?: string;
   notfallkontakt?: Notfallkontakt;
-};
+}
 
-export type CreateEventRequest = {
+export interface CreateEventRequest {
   title: string;
   description: string;
   shortDescription?: string;
@@ -196,9 +196,9 @@ export type CreateEventRequest = {
   type: EventType;
   responsibleMemberId: string;
   isPublic?: boolean;
-};
+}
 
-export type CreateTaskRequest = {
+export interface CreateTaskRequest {
   titel: string;
   beschreibung?: string;
   context_type: 'event' | 'team' | 'general';
@@ -214,17 +214,17 @@ export type CreateTaskRequest = {
   }>;
   abhaengig_von?: string[];
   kategorie?: string;
-};
+}
 
 // ========== RESPONSES ==========
-export type ApiResponse<T = any> = {
+export interface ApiResponse<T = any> {
   success: boolean;
   data?: T;
   error?: string;
   meta?: Record<string, any>;
-};
+}
 
-export type PaginatedResponse<T = any> = {
+export interface PaginatedResponse<T = any> {
   data: T[];
   meta: {
     total: number;
@@ -233,7 +233,7 @@ export type PaginatedResponse<T = any> = {
     pages: number;
     filtered?: boolean;
   };
-};
+}
 `;
 
   // Output path

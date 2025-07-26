@@ -1,20 +1,19 @@
 // apps/web/src/entities/intern/member/model/types.ts
+// Importiere nur was du brauchst, nicht alles re-exportieren
 import type {
-  CreateMemberRequest,
-  Member,
-  MemberListItem,
-  MemberRole,
-  UpdateMemberRequest,
+  MemberDetail,
+  MemberListItem as SharedMemberListItem,
+  RoleName,
+  CreateMemberRequest as SharedCreateMemberRequest,
+  UpdateMemberRequest as SharedUpdateMemberRequest,
 } from '@faninitiative/shared';
 
-// Re-export shared types
-export type {
-  CreateMemberRequest,
-  Member,
-  MemberListItem,
-  MemberRole,
-  UpdateMemberRequest,
-} from '@faninitiative/shared';
+// Re-export mit besseren Namen
+export type Member = MemberDetail;
+export type MemberListItem = SharedMemberListItem;
+export type MemberRole = RoleName;
+export type CreateMemberRequest = SharedCreateMemberRequest;
+export type UpdateMemberRequest = SharedUpdateMemberRequest;
 
 // Frontend-specific extensions
 export type MemberFormData = CreateMemberRequest & {

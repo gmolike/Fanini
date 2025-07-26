@@ -19,10 +19,6 @@ export const refreshSchema = z.object({
   refreshToken: z.string().min(1, 'Refresh Token erforderlich'),
 });
 
-export const logoutSchema = z.object({
-  refreshToken: z.string().optional(),
-});
-
 // User Role Schema
 const userRoleSchema = z.object({
   id: z.string(),
@@ -39,30 +35,18 @@ const authUserSchema = z.object({
   rollen: z.array(userRoleSchema),
 });
 
-// Response Schemas
-export const loginResponseSchema = z.object({
-  success: z.literal(true),
-  result: z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
-    user: authUserSchema,
-  }),
-  timestamp: z.string(),
+// Response Data Schemas (das was im result Feld kommt)
+export const loginResponseDataSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
+  user: authUserSchema,
 });
 
-export const registerResponseSchema = z.object({
-  success: z.literal(true),
-  result: z.object({
-    message: z.string(),
-  }),
-  timestamp: z.string(),
+export const registerResponseDataSchema = z.object({
+  message: z.string(),
 });
 
-export const refreshResponseSchema = z.object({
-  success: z.literal(true),
-  result: z.object({
-    accessToken: z.string(),
-    refreshToken: z.string(),
-  }),
-  timestamp: z.string(),
+export const refreshResponseDataSchema = z.object({
+  accessToken: z.string(),
+  refreshToken: z.string(),
 });

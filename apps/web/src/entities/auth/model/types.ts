@@ -1,10 +1,10 @@
 // apps/web/src/entities/auth/model/types.ts
 import type {
-  loginResponseSchema,
+  loginResponseDataSchema,
   loginSchema,
-  refreshResponseSchema,
+  refreshResponseDataSchema,
   refreshSchema,
-  registerResponseSchema,
+  registerResponseDataSchema,
   registerSchema,
 } from './schemas';
 import type { z } from 'zod';
@@ -14,12 +14,12 @@ export type LoginRequest = z.infer<typeof loginSchema>;
 export type RegisterRequest = z.infer<typeof registerSchema>;
 export type RefreshRequest = z.infer<typeof refreshSchema>;
 
-// Response Types
-export type LoginResponse = z.infer<typeof loginResponseSchema>;
-export type RegisterResponse = z.infer<typeof registerResponseSchema>;
-export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
+// Response Data Types (das was im result Feld kommt)
+export type LoginResponse = z.infer<typeof loginResponseDataSchema>;
+export type RegisterResponse = z.infer<typeof registerResponseDataSchema>;
+export type RefreshResponse = z.infer<typeof refreshResponseDataSchema>;
 
-// User Types
+// Domain Types
 export type AuthUser = {
   id: string;
   email: string;
@@ -34,15 +34,14 @@ export type UserRole = {
   berechtigungen: string[];
 };
 
-// Token Types
 export type TokenPair = {
   accessToken: string;
   refreshToken: string;
 };
 
-// Session Types
-export type AuthSession = {
-  user: AuthUser;
-  tokens: TokenPair;
-  expiresAt: string;
-};
+// Constants
+export const AUTH_STORAGE_KEYS = {
+  ACCESS_TOKEN: 'access_token',
+  REFRESH_TOKEN: 'refresh_token',
+  USER: 'user',
+} as const;

@@ -1,40 +1,25 @@
 // apps/web/src/shared/api/client/apiClient.ts
-import { z } from 'zod';
 
 import { API_CONFIG } from '@/shared/api/config/constants';
-
-/**
- * API Error Schema
- * @description Schema für API Fehlerresponses
- */
-const apiErrorSchema = z.object({
-  message: z.string(),
-  code: z.string().optional(),
-  statusCode: z.number(),
-  details: z.record(z.unknown()).optional(),
-});
-
-/**
- * API Error Type
- * @description Type-Definition für API Fehler
- */
-export type ApiError = z.infer<typeof apiErrorSchema>;
+import type { ApiError, ApiResponse } from '@/shared/api/types/response';
 
 /**
  * Custom API Error Class
- * @description Erweiterte Error-Klasse für API-Fehler mit zusätzlichen Metadaten
+ * @description Erweiterte Error-Klasse für API-Fehler mit strukturierten Daten
  */
-export class ApiClientError extends Error implements ApiError {
-  code: string | undefined;
+export class ApiClientError extends Error {
+  code: string;
   statusCode: number;
-  details: Record<string, unknown> | undefined;
+  details?: Record<string, unknown>;
+  requestId?: string;
 
-  constructor(error: ApiError) {
+  constructor(error: ApiError, requestId?: string) {
     super(error.message);
     this.name = 'ApiClientError';
     this.code = error.code;
     this.statusCode = error.statusCode;
     this.details = error.details;
+    this.requestId = requestId;
   }
 }
 
@@ -52,22 +37,8 @@ export type RequestOptions = {
 };
 
 /**
- * API Response Type
- * @description Generischer Response-Wrapper
- */
-export type ApiResponse<T> = {
-  data: T;
-  meta?: {
-    page?: number;
-    limit?: number;
-    total?: number;
-    totalPages?: number;
-  };
-};
-
-/**
  * API Client Class
- * @description Zentrale Klasse für alle API-Kommunikation
+ * @description Zentrale Klasse für alle API-Kommunikation mit Response-Wrapper-Handling
  */
 class ApiClient {
   private authToken: string | null = null;
@@ -77,7 +48,7 @@ class ApiClient {
   constructor() {
     // Token aus localStorage laden falls vorhanden
     if (typeof window !== 'undefined') {
-      this.authToken = localStorage.getItem('authToken');
+      this.authToken = localStorage.getItem('access_token');
     }
   }
 
@@ -89,9 +60,9 @@ class ApiClient {
     this.authToken = token;
     if (typeof window !== 'undefined') {
       if (token) {
-        localStorage.setItem('authToken', token);
+        localStorage.setItem('access_token', token);
       } else {
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('access_token');
       }
     }
   }
@@ -182,41 +153,67 @@ class ApiClient {
   }
 
   /**
-   * Parst die Error Response
+   * Parst die Response gemäß dem API Response Format
    * @param response - Fetch Response
-   * @returns ApiError Objekt
+   * @returns Parsed Response Data
    */
-  private async parseErrorResponse(response: Response): Promise<ApiError> {
+  private async parseResponse<T>(response: Response): Promise<ApiResponse<T>> {
     try {
       const contentType = response.headers.get('content-type');
 
+      // 204 No Content
+      if (response.status === 204) {
+        return {
+          success: true,
+          result: {} as T,
+          timestamp: new Date().toISOString(),
+        };
+      }
+
       if (contentType?.includes('application/json')) {
-        const errorData = (await response.json()) as unknown;
-        return apiErrorSchema.parse(errorData);
+        const data = (await response.json()) as ApiResponse<T>;
+        return data;
       }
 
       // Fallback für nicht-JSON Responses
       const text = await response.text();
-      return {
-        message: text || response.statusText || 'Ein Fehler ist aufgetreten',
-        statusCode: response.status,
-        code: response.status.toString(),
-      };
+
+      // Erstelle ein strukturiertes Response-Objekt für nicht-JSON Responses
+      if (response.ok) {
+        return {
+          success: true,
+          result: text as unknown as T,
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        return {
+          success: false,
+          error: {
+            message: text || response.statusText || 'Ein Fehler ist aufgetreten',
+            code: 'UNKNOWN_ERROR',
+            statusCode: response.status,
+          },
+          timestamp: new Date().toISOString(),
+        };
+      }
     } catch (parseError) {
       // Log parse error in development
       if (import.meta.env.DEV) {
-        console.error('[ApiClient] Failed to parse error response:', parseError);
+        console.error('[ApiClient] Failed to parse response:', parseError);
       }
 
-      // Return fallback error
+      // Return error response
       return {
-        message: response.statusText || 'Ein Fehler ist aufgetreten',
-        statusCode: response.status,
-        code: response.status.toString(),
-        details: {
-          parseError:
-            parseError instanceof Error ? parseError.message : 'Failed to parse error response',
+        success: false,
+        error: {
+          message: 'Response konnte nicht verarbeitet werden',
+          code: 'PARSE_ERROR',
+          statusCode: response.status,
+          details: {
+            parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error',
+          },
         },
+        timestamp: new Date().toISOString(),
       };
     }
   }
@@ -246,7 +243,6 @@ class ApiClient {
    * @param options - Request Optionen
    * @returns Promise mit Response-Daten
    */
-  // eslint-disable-next-line sonarjs/cognitive-complexity
   private async request<T>(
     method: string,
     endpoint: string,
@@ -285,26 +281,15 @@ class ApiClient {
       // Response Interceptors anwenden
       response = this.applyResponseInterceptors(response);
 
-      // Error handling
-      if (!response.ok) {
-        const errorData = await this.parseErrorResponse(response);
-        throw new ApiClientError(errorData);
-      }
+      // Parse Response gemäß API Format
+      const apiResponse = await this.parseResponse<T>(response);
 
-      // 204 No Content
-      if (response.status === 204) {
-        return {} as T;
+      // Handle Response basierend auf success flag
+      if (apiResponse.success) {
+        return apiResponse.result;
+      } else {
+        throw new ApiClientError(apiResponse.error, apiResponse.requestId);
       }
-
-      // Parse JSON Response
-      const contentType = response.headers.get('content-type');
-      if (contentType?.includes('application/json')) {
-        return (await response.json()) as T;
-      }
-
-      // Fallback für nicht-JSON Responses
-      const text = await response.text();
-      return text as unknown as T;
     } catch (error) {
       clearTimeout(timeoutId);
 
@@ -433,12 +418,13 @@ class ApiClient {
 
       clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        const errorData = await this.parseErrorResponse(response);
-        throw new ApiClientError(errorData);
-      }
+      const apiResponse = await this.parseResponse<T>(response);
 
-      return (await response.json()) as T;
+      if (apiResponse.success) {
+        return apiResponse.result;
+      } else {
+        throw new ApiClientError(apiResponse.error, apiResponse.requestId);
+      }
     } catch (error) {
       clearTimeout(timeoutId);
 

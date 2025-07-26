@@ -1,86 +1,55 @@
-// apps/api/src/infrastructure/database/seed/seeders/00-cleanup.ts
-import { Pool } from "mysql2/promise";
+// seed/seeders/00-cleanup.ts
+import { Connection, PoolConnection } from 'mysql2/promise';
 
-export async function cleanDatabase(pool: Pool): Promise<void> {
-  console.log("\n🧹 Cleaning database...");
+const tables = [
+  'mitglied_rolle',
+  'event_teilnahmen',
+  'kommentare',
+  'benachrichtigungen',
+  'aufgaben',
+  'ausgaben',
+  'social_media_posts',
+  'werke',
+  'creators',
+  'tagesordnungspunkte',
+  'protokolle',
+  'email_vorlagen',
+  'dokumente',
+  'events',
+  'mitglieder',
+  'users',
+  'berechtigungen',
+  'rollen'
+] as const;
 
-  const tablesToClean = [
-    // Audit & Security (no dependencies)
-    'field_access_log',
-    'upload_logs',
-    'password_history',
-    'refresh_tokens',
+export const cleanup = async (connection: Connection | PoolConnection): Promise<void> => {
+  try {
+    await connection.beginTransaction();
 
-    // Approvals
-    'approval_notifications',
-    'approval_actions',
-    'approval_requests',
+    // Disable foreign key checks
+    await connection.execute('SET FOREIGN_KEY_CHECKS = 0');
 
-    // Communication
-    'newsletter_sections',
-    'newsletter_subscriptions',
-    'newsletters',
-    'faqs',
-
-    // Finance
-    'ausgaben',
-
-    // Creators
-    'creator_works',
-    'creator_types',
-    'creators_extended',
-    'creators',
-
-    // Documents
-    'document_tags',
-    'documents',
-
-    // Tasks
-    'task_audit_log',
-    'task_comments',
-    'task_assignments',
-    'tasks',
-
-    // Events
-    'event_audit_log',
-    'event_teilnahme',
-    'event_teilnahmen',
-    'events',
-
-    // Organization
-    'gremium_members',
-    'gremien',
-
-    // Members & Users
-    'member_visibility_overrides',
-    'role_permissions',
-    'user_roles',
-    'mitglieder',
-    'users',
-
-    // Base tables
-    'approval_rules',
-    'sensitive_fields',
-    'permissions',
-    'permission_groups',
-    'role_hierarchy',
-    'roles',
-    'settings'
-  ];
-
-  await pool.execute('SET FOREIGN_KEY_CHECKS = 0');
-
-  for (const table of tablesToClean) {
-    try {
-      await pool.execute(`TRUNCATE TABLE ${table}`);
-      console.log(`  ✓ ${table}`);
-    } catch (error: any) {
-      if (error.code !== 'ER_NO_SUCH_TABLE') {
-        console.warn(`  ⚠ ${table}: ${error.message}`);
+    // Truncate all tables
+    for (const table of tables) {
+      try {
+        await connection.execute(`TRUNCATE TABLE ${table}`);
+        console.log(`  ✓ Cleaned table: ${table}`);
+      } catch (error) {
+        console.log(`  ⚠️  Table ${table} might not exist, skipping...`);
+        console.error(error);
       }
     }
-  }
 
-  await pool.execute('SET FOREIGN_KEY_CHECKS = 1');
-  console.log("✅ Database cleaned\n");
-}
+    // Re-enable foreign key checks
+    await connection.execute('SET FOREIGN_KEY_CHECKS = 1');
+
+    await connection.commit();
+    console.log('✅ Database cleanup completed');
+  } catch (error) {
+    await connection.rollback();
+    console.error('❌ Cleanup failed:', error);
+    throw error;
+  }
+};
+
+export default cleanup;

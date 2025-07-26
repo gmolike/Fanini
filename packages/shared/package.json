@@ -20,10 +20,9 @@
   },
   "scripts": {
     "generate:api-schema": "cd ../../apps/api && pnpm tsx src/scripts/generate-openapi.ts",
-    "generate:types": "openapi-typescript src/generated/openapi.json -o src/generated/api-types.ts",
-    "generate:zod": "ts-to-zod src/generated/api-types.ts src/generated/api-schemas.ts --skipParseJSDoc",
-    "generate:watch": "tsx scripts/watch-types.ts",
-    "generate": "pnpm generate:api-schema && pnpm generate:types && pnpm generate:zod && pnpm format:generated",
+    "generate:types": "tsx scripts/generate-types-direct.ts",
+    "generate:zod": "echo 'Skipping Zod generation for now'",
+    "generate": "pnpm generate:types && pnpm format:generated",
     "format:generated": "prettier --write src/generated/**/*.ts",
     "build": "pnpm generate && tsc",
     "dev": "tsc --watch",

@@ -1,5 +1,5 @@
 // apps/api/src/presentation/helpers/responses/index.ts
-
-export * from './types';
-export * from './responseBuilder';
-export { withErrorHandling } from './errorHandler';
+export * from "./responseBuilder";
+export * from "./types";
+export { ERROR_CODES } from "./types";
+export type { ErrorCode } from "./types";

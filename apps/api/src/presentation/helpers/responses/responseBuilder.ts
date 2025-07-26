@@ -13,7 +13,7 @@ import type {
  * Response Builder für konsistente API Responses
  */
 export class ResponseBuilder {
-  private static requestId = () => randomUUID();
+  private static readonly requestId = () => randomUUID();
 
   /**
    * Success Response
@@ -180,7 +180,7 @@ export class ResponseBuilder {
   static accepted<TData>(data?: TData, taskId?: string): Response {
     const body: ApiResponse<TData | { taskId: string }> = {
       success: true,
-      result: data || { taskId: taskId || this.requestId() },
+      result: data ?? { taskId: taskId || this.requestId() },
       timestamp: new Date().toISOString(),
       requestId: this.requestId(),
       meta: {

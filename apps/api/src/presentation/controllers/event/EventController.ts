@@ -1,5 +1,9 @@
-// apps/api/src/presentation/controllers/event-controller.ts
-import { GetEventByIdUseCase, GetEventsUseCase } from "@/application/use-cases";
+// apps/api/src/presentation/controllers/event/EventController.ts
+import type {
+  GetEventByIdUseCase,
+  GetEventsUseCase,
+} from "@/application/use-cases";
+import { toPublicEventListItem } from "./dtos/public-event.dto";
 import { eventToJSON } from "@/domain/entities/Event";
 
 export type EventController = {
@@ -28,7 +32,7 @@ export const createEventController = (
    *           type: string
    *     responses:
    *       200:
-   *         description: Event-Liste
+   *         description: Event-Liste mit Meta-Informationen
    */
   getPublicEventList: async (req: Request) => {
     try {
@@ -36,6 +40,7 @@ export const createEventController = (
       const type = url.searchParams.get("type") || undefined;
       const sportBereich = url.searchParams.get("sportBereich") || undefined;
 
+      // Use Case liefert Domain Events
       const events = await getEventsUseCase.execute({
         filters: {
           status: "genehmigt",
@@ -45,15 +50,23 @@ export const createEventController = (
         },
       });
 
+      // Transformiere zu Public DTOs
+      const publicEvents = events.map(toPublicEventListItem);
+
+      // Public API Response ohne success flag
       return Response.json({
-        success: true,
-        data: events.map(eventToJSON),
-        count: events.length,
+        data: publicEvents,
+        meta: {
+          total: publicEvents.length,
+          page: 1,
+          limit: 20,
+          hasMore: false,
+        },
       });
     } catch (error) {
       console.error("Error fetching public events:", error);
       return Response.json(
-        { success: false, error: "Failed to fetch events" },
+        { error: "Failed to fetch events" },
         { status: 500 },
       );
     }
@@ -71,6 +84,11 @@ export const createEventController = (
    *         required: true
    *         schema:
    *           type: string
+   *     responses:
+   *       200:
+   *         description: Event-Details
+   *       404:
+   *         description: Event nicht gefunden
    */
   getPublicEventDetail: async (req: Request) => {
     try {
@@ -80,22 +98,17 @@ export const createEventController = (
       });
 
       if (!event) {
-        return Response.json(
-          { success: false, error: "Event not found" },
-          { status: 404 },
-        );
+        return Response.json({ error: "Event not found" }, { status: 404 });
       }
 
+      // TODO: Erstelle PublicEventDetailDto wenn Detail-View implementiert wird
+      // Vorerst nutzen wir eventToJSON
       return Response.json({
-        success: true,
         data: eventToJSON(event),
       });
     } catch (error) {
       console.error("Error fetching event details:", error);
-      return Response.json(
-        { success: false, error: "Failed to fetch event" },
-        { status: 500 },
-      );
+      return Response.json({ error: "Failed to fetch event" }, { status: 500 });
     }
   },
 });

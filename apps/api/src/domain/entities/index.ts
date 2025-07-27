@@ -1,4 +1,5 @@
 // apps/api/src/domain/entities/index.ts
+export * from "./AuditLog";
 export * from "./ApprovalRequest";
 export * from "./Ausgabe";
 export * from "./Benachrichtigung";

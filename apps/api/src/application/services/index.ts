@@ -6,3 +6,11 @@ export {
   type RefreshResult,
   type LogoutResult,
 } from "./AuthService";
+export {
+  type AuditLogService,
+  type LogActionParams,
+  type LogCreationParams,
+  type LogUpdateParams,
+  type LogDeletionParams,
+  createAuditLogService,
+} from "./AuditLogService";

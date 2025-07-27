@@ -7,14 +7,16 @@ export type {
 export type {
   IEventRepository,
   EventFilters,
-  EventAuditLogEntry, // Explizit mit neuem Namen
+  EventAuditLogEntry,
 } from "./IEventRepository";
 
 export type {
   ITaskRepository,
   TaskFilters,
-  TaskAuditLogEntry, // Explizit mit neuem Namen
+  TaskAuditLogEntry,
 } from "./ITaskRepository";
+export type { IAuditLogRepository, AuditLogFilters, AuditLogStats } from "./IAuditLogRepository";
+
 
 export type { IMemberRepository } from "./IMemberRepository";
 export type { ISettingsRepository } from "./ISettingsRepository";

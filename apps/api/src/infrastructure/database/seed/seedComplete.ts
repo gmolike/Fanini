@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const seeders: readonly string[] = [
   "00-cleanup",
   "01-seedRoles",
-  "17-seedPermissions", 
+  "17-seedPermissions",
   "02-seedUsers",
   "03-seedMembers",
   "16-seedMemberRoles",
@@ -27,6 +27,11 @@ const seeders: readonly string[] = [
   "13-seedProtocols",
   "14-seedEmailTemplates",
   "15-seedFAQ",
+  "18-seedApprovalSystem", // NEU
+  "19-seedSettings", // NEU
+  "20-seedGremien", // NEU
+  "21-seedTaskDetails", // NEU
+  "22-seedSecurityAndCompliance", // NEU
 ] as const;
 
 const runSeeders = async (): Promise<void> => {

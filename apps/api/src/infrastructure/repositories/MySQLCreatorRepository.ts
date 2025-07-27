@@ -1,5 +1,8 @@
 // apps/api/src/infrastructure/repositories/MySQLCreatorRepository.ts
-import type { ICreatorRepository, CreatorFilters } from "@/domain/repositories/ICreatorRepository";
+import type {
+  ICreatorRepository,
+  CreatorFilters,
+} from "@/domain/repositories/ICreatorRepository";
 import type { Creator, CreatorWork } from "@/domain/entities/Creator";
 import type { ApprovalRequest } from "@/domain/entities/ApprovalRequest";
 import type { MySQLConnection } from "./MySQLConnection";
@@ -7,14 +10,13 @@ import type { IApprovalRepository } from "@/domain/repositories/IApprovalReposit
 import { generateId } from "@faninitiative/shared";
 
 const camelToSnake = (str: string): string => {
-  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 };
 
 export const createMySQLCreatorRepository = (
   db: MySQLConnection,
-  approvalRepo: IApprovalRepository
+  approvalRepo: IApprovalRepository,
 ): ICreatorRepository => {
-
   const mapRowToCreator = (row: any): Creator => ({
     id: row.id,
     memberId: row.member_id,
@@ -25,19 +27,21 @@ export const createMySQLCreatorRepository = (
     portfolio: row.portfolio,
     isActive: Boolean(row.is_active),
     activeSince: row.active_since ? new Date(row.active_since) : undefined,
-    deactivatedAt: row.deactivated_at ? new Date(row.deactivated_at) : undefined,
+    deactivatedAt: row.deactivated_at
+      ? new Date(row.deactivated_at)
+      : undefined,
     socialMedia: {
       instagram: row.instagram,
       twitter: row.twitter,
       facebook: row.facebook,
       youtube: row.youtube,
       tiktok: row.tiktok,
-      website: row.website
+      website: row.website,
     },
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
     types: [],
-    works: []
+    works: [],
   });
 
   const mapRowToWork = (row: any): CreatorWork => ({
@@ -53,19 +57,19 @@ export const createMySQLCreatorRepository = (
     isPublic: Boolean(row.is_public),
     orderPosition: row.order_position,
     views: row.views || 0,
-    likes: row.likes || 0
+    likes: row.likes || 0,
   });
 
   const loadCreatorTypes = async (creatorId: string): Promise<string[]> => {
     const rows = await db.query<any[]>(
       `SELECT type FROM creator_types WHERE creator_id = ?`,
-      [creatorId]
+      [creatorId],
     );
-    return rows.map(row => row.type);
+    return rows.map((row) => row.type);
   };
 
   const findAllPublic = async (
-    filters?: CreatorFilters
+    filters?: CreatorFilters,
   ): Promise<Creator[]> => {
     let sql = `
       SELECT c.*,
@@ -97,17 +101,20 @@ export const createMySQLCreatorRepository = (
       params.push(searchTerm, searchTerm, searchTerm);
     }
 
-    sql += ' GROUP BY c.id ORDER BY c.artist_name';
+    sql += " GROUP BY c.id ORDER BY c.artist_name";
 
     const rows = await db.query<any[]>(sql, params);
 
     const creators = [];
     for (const row of rows) {
-      const creator = mapRowToCreator(row);
-      creator.types = await loadCreatorTypes(creator.id);
-      creator.metadata = {
-        workCount: row.work_count || 0,
-        memberName: `${row.member_vorname} ${row.member_nachname}`
+      const types = await loadCreatorTypes(row.id);
+      const creator = {
+        ...mapRowToCreator(row),
+        types,
+        metadata: {
+          workCount: row.work_count || 0,
+          memberName: `${row.member_vorname} ${row.member_nachname}`,
+        },
       };
       creators.push(creator);
     }
@@ -121,21 +128,25 @@ export const createMySQLCreatorRepository = (
        FROM creators c
        LEFT JOIN mitglieder m ON c.member_id = m.id
        WHERE c.id = ? AND c.is_active = 1`,
-      [id]
+      [id],
     );
 
     if (!row) return null;
 
-    const creator = mapRowToCreator(row);
-    creator.types = await loadCreatorTypes(creator.id);
-    creator.works = await findWorksByCreator(creator.id, true);
+    const creatorBase = mapRowToCreator(row);
+    const types = await loadCreatorTypes(creatorBase.id);
+    const works = await findWorksByCreator(creatorBase.id, true);
 
-    return creator;
+    return {
+      ...creatorBase,
+      types,
+      works,
+    };
   };
 
   const findAllInternal = async (
+    userId?: string,
     filters?: CreatorFilters,
-    userId?: string
   ): Promise<Creator[]> => {
     let sql = `
       SELECT c.*,
@@ -151,7 +162,7 @@ export const createMySQLCreatorRepository = (
     const params: any[] = [];
 
     if (filters?.istAktiv !== undefined) {
-      sql += ' AND c.is_active = ?';
+      sql += " AND c.is_active = ?";
       params.push(filters.istAktiv);
     }
 
@@ -173,18 +184,21 @@ export const createMySQLCreatorRepository = (
       params.push(searchTerm, searchTerm, searchTerm);
     }
 
-    sql += ' GROUP BY c.id ORDER BY c.created_at DESC';
+    sql += " GROUP BY c.id ORDER BY c.created_at DESC";
 
     const rows = await db.query<any[]>(sql, params);
 
     const creators = [];
     for (const row of rows) {
-      const creator = mapRowToCreator(row);
-      creator.types = await loadCreatorTypes(creator.id);
-      creator.metadata = {
-        workCount: row.work_count || 0,
-        memberName: `${row.member_vorname} ${row.member_nachname}`,
-        memberEmail: row.member_email
+      const baseCreator = mapRowToCreator(row);
+      const creator = {
+        ...baseCreator,
+        types: await loadCreatorTypes(baseCreator.id),
+        metadata: {
+          workCount: row.work_count || 0,
+          memberName: `${row.member_vorname} ${row.member_nachname}`,
+          memberEmail: row.member_email,
+        },
       };
       creators.push(creator);
     }
@@ -195,33 +209,37 @@ export const createMySQLCreatorRepository = (
   const findByMemberId = async (memberId: string): Promise<Creator | null> => {
     const [row] = await db.query<any[]>(
       `SELECT * FROM creators WHERE member_id = ?`,
-      [memberId]
+      [memberId],
     );
 
     if (!row) return null;
 
-    const creator = mapRowToCreator(row);
-    creator.types = await loadCreatorTypes(creator.id);
-    creator.works = await findWorksByCreator(creator.id);
+    const creatorBase = mapRowToCreator(row);
+    const types = await loadCreatorTypes(creatorBase.id);
+    const works = await findWorksByCreator(creatorBase.id);
 
-    return creator;
+    return {
+      ...creatorBase,
+      types,
+      works,
+    };
   };
 
   const create = async (
-    data: Omit<Creator, 'id' | 'aktivSeit'>,
-    userId: string
+    data: Omit<Creator, "id" | "aktivSeit">,
+    userId: string,
   ): Promise<Creator | ApprovalRequest> => {
     const id = generateId();
 
     // Creator accounts require approval
     const approvalRequest = await approvalRepo.createRequest({
-      requestType: 'creator_activation',
-      resourceType: 'creators',
+      requestType: "creator_activation",
+      resourceType: "creators",
       resourceId: id,
       requestedBy: userId,
       newData: data,
       changesSummary: `Neuer Creator Account: ${data.artistName}`,
-      priority: 'medium'
+      priority: "medium",
     });
 
     // Create inactive creator
@@ -245,17 +263,16 @@ export const createMySQLCreatorRepository = (
         data.socialMedia?.facebook,
         data.socialMedia?.youtube,
         data.socialMedia?.tiktok,
-        data.socialMedia?.website
-      ]
+        data.socialMedia?.website,
+      ],
     );
 
     // Add types
     if (data.types?.length) {
-      const typeValues = data.types.map(type => [id, type]);
-      await db.query(
-        `INSERT INTO creator_types (creator_id, type) VALUES ?`,
-        [typeValues]
-      );
+      const typeValues = data.types.map((type) => [id, type]);
+      await db.query(`INSERT INTO creator_types (creator_id, type) VALUES ?`, [
+        typeValues,
+      ]);
     }
 
     return approvalRequest;
@@ -264,7 +281,7 @@ export const createMySQLCreatorRepository = (
   const update = async (
     id: string,
     data: Partial<Creator>,
-    userId: string
+    userId: string,
   ): Promise<Creator> => {
     const flatData: Record<string, any> = {};
 
@@ -277,37 +294,44 @@ export const createMySQLCreatorRepository = (
 
     // Add other fields
     Object.entries(data).forEach(([key, value]) => {
-      if (!['id', 'memberId', 'types', 'works', 'socialMedia', 'createdAt', 'updatedAt'].includes(key)) {
+      if (
+        ![
+          "id",
+          "memberId",
+          "types",
+          "works",
+          "socialMedia",
+          "createdAt",
+          "updatedAt",
+        ].includes(key)
+      ) {
         flatData[camelToSnake(key)] = value;
       }
     });
 
     if (Object.keys(flatData).length > 0) {
       const fields = Object.keys(flatData)
-        .map(key => `${key} = ?`)
-        .join(', ');
+        .map((key) => `${key} = ?`)
+        .join(", ");
 
       const values = Object.values(flatData);
       values.push(id);
 
       await db.query(
         `UPDATE creators SET ${fields}, updated_at = NOW() WHERE id = ?`,
-        values
+        values,
       );
     }
 
     // Update types if provided
     if (data.types) {
-      await db.query(
-        `DELETE FROM creator_types WHERE creator_id = ?`,
-        [id]
-      );
+      await db.query(`DELETE FROM creator_types WHERE creator_id = ?`, [id]);
 
       if (data.types.length > 0) {
-        const typeValues = data.types.map(type => [id, type]);
+        const typeValues = data.types.map((type) => [id, type]);
         await db.query(
           `INSERT INTO creator_types (creator_id, type) VALUES ?`,
-          [typeValues]
+          [typeValues],
         );
       }
     }
@@ -320,7 +344,7 @@ export const createMySQLCreatorRepository = (
       `UPDATE creators
        SET is_active = 1, active_since = NOW()
        WHERE id = ?`,
-      [id]
+      [id],
     );
   };
 
@@ -329,13 +353,13 @@ export const createMySQLCreatorRepository = (
       `UPDATE creators
        SET is_active = 0, deactivated_at = NOW()
        WHERE id = ?`,
-      [id]
+      [id],
     );
   };
 
   const findWorksByCreator = async (
     creatorId: string,
-    isPublic?: boolean
+    isPublic?: boolean,
   ): Promise<CreatorWork[]> => {
     let sql = `
       SELECT * FROM creator_works
@@ -344,11 +368,11 @@ export const createMySQLCreatorRepository = (
     const params: any[] = [creatorId];
 
     if (isPublic !== undefined) {
-      sql += ' AND is_public = ?';
+      sql += " AND is_public = ?";
       params.push(isPublic);
     }
 
-    sql += ' ORDER BY order_position, created_at DESC';
+    sql += " ORDER BY order_position, created_at DESC";
 
     const rows = await db.query<any[]>(sql, params);
     return rows.map(mapRowToWork);
@@ -356,8 +380,8 @@ export const createMySQLCreatorRepository = (
 
   const addWork = async (
     creatorId: string,
-    work: Omit<CreatorWork, 'id' | 'erstelltAm'>,
-    userId: string
+    work: Omit<CreatorWork, "id" | "erstelltAm">,
+    userId: string,
   ): Promise<CreatorWork> => {
     const id = generateId();
 
@@ -375,13 +399,13 @@ export const createMySQLCreatorRepository = (
         work.fileUrl,
         work.thumbnailUrl,
         work.isPublic !== false,
-        work.orderPosition || 999
-      ]
+        work.orderPosition || 999,
+      ],
     );
 
     const [newWork] = await db.query<any[]>(
       `SELECT * FROM creator_works WHERE id = ?`,
-      [id]
+      [id],
     );
 
     return mapRowToWork(newWork);
@@ -390,44 +414,43 @@ export const createMySQLCreatorRepository = (
   const updateWork = async (
     workId: string,
     data: Partial<CreatorWork>,
-    userId: string
+    userId: string,
   ): Promise<CreatorWork> => {
     const fields = Object.keys(data)
-      .filter(key => !['id', 'creatorId', 'createdAt', 'views', 'likes'].includes(key))
-      .map(key => `${camelToSnake(key)} = ?`)
-      .join(', ');
+      .filter(
+        (key) =>
+          !["id", "creatorId", "createdAt", "views", "likes"].includes(key),
+      )
+      .map((key) => `${camelToSnake(key)} = ?`)
+      .join(", ");
 
     const values = Object.entries(data)
-      .filter(([key]) => !['id', 'creatorId', 'createdAt', 'views', 'likes'].includes(key))
+      .filter(
+        ([key]) =>
+          !["id", "creatorId", "createdAt", "views", "likes"].includes(key),
+      )
       .map(([_, value]) => value);
 
     values.push(workId);
 
-    await db.query(
-      `UPDATE creator_works SET ${fields} WHERE id = ?`,
-      values
-    );
+    await db.query(`UPDATE creator_works SET ${fields} WHERE id = ?`, values);
 
     const [updated] = await db.query<any[]>(
       `SELECT * FROM creator_works WHERE id = ?`,
-      [workId]
+      [workId],
     );
 
     return mapRowToWork(updated);
   };
 
   const deleteWork = async (workId: string, userId: string): Promise<void> => {
-    await db.query(
-      `DELETE FROM creator_works WHERE id = ?`,
-      [workId]
-    );
+    await db.query(`DELETE FROM creator_works WHERE id = ?`, [workId]);
   };
 
   const incrementViews = async (workId: string): Promise<void> => {
-    await db.query(
-      `UPDATE creator_works SET views = views + 1 WHERE id = ?`,
-      [workId]
-    );
+    await db.query(`UPDATE creator_works SET views = views + 1 WHERE id = ?`, [
+      workId,
+    ]);
   };
 
   return {
@@ -443,6 +466,6 @@ export const createMySQLCreatorRepository = (
     addWork,
     updateWork,
     deleteWork,
-    incrementViews
+    incrementViews,
   };
 };

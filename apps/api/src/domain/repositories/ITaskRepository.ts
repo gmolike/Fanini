@@ -1,3 +1,4 @@
+// apps/api/src/domain/repositories/ITaskRepository.ts
 import { Task, TaskStatus, TaskPriority } from "../entities/Task";
 import { TaskAssignment } from "../entities/TaskAssignment";
 import { TaskComment } from "../entities/TaskComment";
@@ -14,7 +15,7 @@ export type TaskFilters = {
   kategorie?: string;
 };
 
-export type AuditLogEntry = {
+export type TaskAuditLogEntry = {
   taskId: string;
   aktion: string;
   ausgefuehrtVon: string;
@@ -54,5 +55,5 @@ export interface ITaskRepository {
   getMyTasks(memberId: string): Promise<Task[]>;
 
   // Audit
-  createAuditLog(entry: AuditLogEntry): Promise<void>;
+  createAuditLog(entry: TaskAuditLogEntry): Promise<void>;
 }

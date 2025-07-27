@@ -14,9 +14,9 @@ export type EventFilters = {
   deputyId?: string;
 };
 
-export type AuditLogEntry = {
+export type EventAuditLogEntry = {
   eventId: string;
-  action: 'created' | 'updated' | 'status_changed' | 'deleted';
+  action: "created" | "updated" | "status_changed" | "deleted";
   fieldName: string | null;
   oldValue: string | null;
   newValue: string | null;
@@ -32,8 +32,15 @@ export interface IEventRepository {
   delete(id: string): Promise<void>;
 
   // Neue Methoden für Phase 2
-  updateWithAudit(event: Event, auditEntries: AuditLogEntry[]): Promise<Event>;
-  softDeleteWithAudit(id: string, deletedBy: string, auditEntry: AuditLogEntry): Promise<void>;
+  updateWithAudit(
+    event: Event,
+    auditEntries: EventAuditLogEntry[],
+  ): Promise<Event>;
+  softDeleteWithAudit(
+    id: string,
+    deletedBy: string,
+    auditEntry: EventAuditLogEntry,
+  ): Promise<void>;
   createStatusHistory(params: {
     eventId: string;
     oldStatus?: EventStatus;
@@ -42,31 +49,37 @@ export interface IEventRepository {
     comment?: string;
   }): Promise<void>;
 
-  getAuditLog(eventId: string): Promise<Array<{
-    action: string;
-    fieldName?: string;
-    oldValue?: string;
-    newValue?: string;
-    changedBy: string;
-    changedAt: Date;
-  }>>;
+  getAuditLog(eventId: string): Promise<
+    Array<{
+      action: string;
+      fieldName?: string;
+      oldValue?: string;
+      newValue?: string;
+      changedBy: string;
+      changedAt: Date;
+    }>
+  >;
 
   getParticipantCount(eventId: string): Promise<number>;
-  getParticipants(eventId: string): Promise<Array<{
-    id: string;
-    name: string;
-    status: string;
-    registeredAt: Date;
-  }>>;
-
-  getTaskStats(eventId: string): Promise<{ total: number; completed: number }>;
-  getTasks(eventId: string): Promise<Array<{
-    id: string;
-    title: string;
-    status: string;
-    assignee?: {
+  getParticipants(eventId: string): Promise<
+    Array<{
       id: string;
       name: string;
-    };
-  }>>;
+      status: string;
+      registeredAt: Date;
+    }>
+  >;
+
+  getTaskStats(eventId: string): Promise<{ total: number; completed: number }>;
+  getTasks(eventId: string): Promise<
+    Array<{
+      id: string;
+      title: string;
+      status: string;
+      assignee?: {
+        id: string;
+        name: string;
+      };
+    }>
+  >;
 }

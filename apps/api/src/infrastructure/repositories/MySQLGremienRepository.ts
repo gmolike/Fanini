@@ -1,8 +1,8 @@
 // apps/api/src/infrastructure/repositories/MySQLGremienRepository.ts
-import type { IGremienRepository, GremiumFilters } from "@/domain/repositories/IGremienRepository";
 import type { Gremium, GremiumMember } from "@/domain/entities/Gremium";
-import type { MySQLConnection } from "./MySQLConnection";
+import type { IGremienRepository } from "@/domain/repositories/IGremienRepository";
 import { generateId } from "@faninitiative/shared";
+import type { MySQLConnection } from "./MySQLConnection";
 
 // Helper function
 const camelToSnake = (str: string): string => {
@@ -55,6 +55,7 @@ export const createMySQLGremienRepository = (
     const gremien = rows.map(mapRowToGremium);
 
     // Load members for each gremium
+    const updatedGremien: Gremium[] = [];
     for (const gremium of gremien) {
       const memberRows = await db.query<any[]>(
         `SELECT id, gremium_id, name, role, image, description, order_position
@@ -64,15 +65,17 @@ export const createMySQLGremienRepository = (
         [gremium.id]
       );
 
-      gremium.members = memberRows.map(row => ({
+      const members = memberRows.map(row => ({
         ...mapRowToMember(row),
         // Öffentlich: keine Email/Telefon
         email: undefined,
         phone: undefined
       }));
+
+      updatedGremien.push({ ...gremium, members });
     }
 
-    return gremien;
+    return updatedGremien;
   };
 
   const findByTypePublic = async (type: string): Promise<Gremium | null> => {
@@ -93,13 +96,16 @@ export const createMySQLGremienRepository = (
       [gremium.id]
     );
 
-    gremium.members = memberRows.map(row => ({
-      ...mapRowToMember(row),
-      email: undefined,
-      phone: undefined
-    }));
+    const gremiumWithMembers = {
+      ...gremium,
+      members: memberRows.map(row => ({
+        ...mapRowToMember(row),
+        email: undefined,
+        phone: undefined
+      }))
+    };
 
-    return gremium;
+    return gremiumWithMembers;
   };
 
   const findAllInternal = async (userId: string): Promise<Gremium[]> => {
@@ -109,6 +115,7 @@ export const createMySQLGremienRepository = (
 
     const gremien = rows.map(mapRowToGremium);
 
+    const updatedGremien: Gremium[] = [];
     for (const gremium of gremien) {
       const memberRows = await db.query<any[]>(
         `SELECT * FROM gremium_members
@@ -117,10 +124,13 @@ export const createMySQLGremienRepository = (
         [gremium.id]
       );
 
-      gremium.members = memberRows.map(mapRowToMember);
+      updatedGremien.push({
+        ...gremium,
+        members: memberRows.map(mapRowToMember)
+      });
     }
 
-    return gremien;
+    return updatedGremien;
   };
 
   const findByIdInternal = async (id: string, userId: string): Promise<Gremium | null> => {
@@ -140,9 +150,12 @@ export const createMySQLGremienRepository = (
       [gremium.id]
     );
 
-    gremium.members = memberRows.map(mapRowToMember);
+    const gremiumWithMembers: Gremium = {
+      ...gremium,
+      members: memberRows.map(mapRowToMember)
+    };
 
-    return gremium;
+    return gremiumWithMembers;
   };
 
   const updateGremium = async (

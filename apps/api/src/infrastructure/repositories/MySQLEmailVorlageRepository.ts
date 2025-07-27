@@ -102,16 +102,17 @@ export const createMySQLEmailVorlageRepository = (
     userId: string
   ): Promise<EmailVorlage> => {
     // Update platzhalter if inhalt changes
+    let updateData = { ...data };
     if (data.inhalt) {
-      data.platzhalter = extractPlaceholders(data.inhalt);
+      updateData = { ...updateData, platzhalter: extractPlaceholders(data.inhalt) };
     }
 
-    const fields = Object.keys(data)
+    const fields = Object.keys(updateData)
       .filter(key => !['id', 'erstelltAm', 'aktualisiertAm'].includes(key))
       .map(key => `${camelToSnake(key)} = ?`)
       .join(', ');
 
-    const values = Object.entries(data)
+    const values = Object.entries(updateData)
       .filter(([key]) => !['id', 'erstelltAm', 'aktualisiertAm'].includes(key))
       .map(([key, value]) => {
         if (key === 'platzhalter') {

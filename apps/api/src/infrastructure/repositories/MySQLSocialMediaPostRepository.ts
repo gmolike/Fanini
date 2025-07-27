@@ -28,8 +28,8 @@ export const createMySQLSocialMediaPostRepository = (
   });
 
   const findAll = async (
+    userId?: string,
     filters?: SocialMediaFilters,
-    userId?: string
   ): Promise<SocialMediaPost[]> => {
     let sql = `
       SELECT p.*,

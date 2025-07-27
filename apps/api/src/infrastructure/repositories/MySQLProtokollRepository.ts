@@ -145,12 +145,15 @@ export const createMySQLProtokollRepository = (
       [id]
     );
 
-    protokoll.tagesordnungspunkte = punkteRows.map(row => ({
+    const tagesordnungspunkte = punkteRows.map(row => ({
       ...mapRowToTagesordnungspunkt(row),
       eingereichtVonName: `${row.eingereicht_vorname} ${row.eingereicht_nachname}`
     }));
 
-    return protokoll;
+    return {
+      ...protokoll,
+      tagesordnungspunkte
+    };
   };
 
   const create = async (

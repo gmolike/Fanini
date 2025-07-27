@@ -9,7 +9,7 @@ export interface DatabaseConfig {
 }
 
 export class MySQLConnection {
-  private pool: mysql.Pool;
+  private readonly pool: mysql.Pool;
 
   constructor(config: DatabaseConfig) {
     this.pool = mysql.createPool({

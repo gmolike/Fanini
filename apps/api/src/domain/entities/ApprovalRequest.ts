@@ -1,10 +1,19 @@
-// NEU: apps/api/src/domain/entities/ApprovalRequest.ts
+// apps/api/src/domain/entities/ApprovalRequest.ts
 export type ApprovalRequestType =
   | "member_edit"
   | "role_assignment"
   | "event_creation"
-  | "finance_expense";
-export type ApprovalStatus = "pending" | "approved" | "rejected" | "cancelled";
+  | "finance_expense"
+  | "finance_expense_edit"
+  | "creator_activation"
+  | "protokoll_edit";
+
+export type ApprovalStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "cancelled"
+  | "applied";
 export type ApprovalPriority = "low" | "medium" | "high" | "critical";
 
 export type ApprovalRequest = {

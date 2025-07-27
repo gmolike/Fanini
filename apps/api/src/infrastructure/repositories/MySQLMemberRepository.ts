@@ -1,149 +1,188 @@
-import { IMemberRepository } from "@/domain/repositories";
-import { BaseRepository } from "./BaseRepository";
-import { MySQLConnection } from "./MySQLConnection";
-
 // apps/api/src/infrastructure/repositories/MySQLMemberRepository.ts
-export class MySQLMemberRepository
-  extends BaseRepository<Member>
-  implements IMemberRepository
-{
-  constructor(db: MySQLConnection) {
-    super(db, "mitglieder");
-  }
-  findById(id: string): Promise<any | null> {
-    throw new Error("Method not implemented.");
-  }
-  update(id: string, data: any): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-  create(data: { user_id: string; vorname: string; nachname: string; email: string; telefon?: string; member_type: "easyverein" | "creator" | "sponsor" | "partner"; mitglied_seit: Date; ist_aktiv: boolean; }): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
-  createCreatorProfile(data: { member_id: string; kuenstlername: string; portfolio_link?: string; ist_aktiv: boolean; aktiv_seit: Date; }): Promise<any> {
-    throw new Error("Method not implemented.");
-  }
+import { IMemberRepository } from "@/domain/repositories/IMemberRepository";
+import { MySQLConnection } from "./MySQLConnection";
+import { generateId } from "@faninitiative/shared";
 
-  // Nutze View für vollständige Daten
-  async findAll(filters?: MemberFilters): Promise<MemberWithUser[]> {
+export class MySQLMemberRepository implements IMemberRepository {
+  constructor(private readonly db: MySQLConnection) {}
+
+  async findAll(filters?: {
+    active?: boolean;
+    search?: string;
+    roleId?: string;
+  }): Promise<any[]> {
     let sql = `
-      SELECT * FROM v_active_members
+      SELECT m.*,
+             u.email as auth_email,
+             u.role,
+             r.name as role_name
+      FROM mitglieder m
+      LEFT JOIN users u ON m.user_id = u.id
+      LEFT JOIN user_roles ur ON u.id = ur.user_id
+      LEFT JOIN roles r ON ur.role_id = r.id
       WHERE 1=1
     `;
     const params: any[] = [];
 
-    if (filters?.roleId) {
-      sql += " AND role_id = ?";
-      params.push(filters.roleId);
+    if (filters?.active !== undefined) {
+      sql += " AND m.ist_aktiv = ?";
+      params.push(filters.active);
     }
 
     if (filters?.search) {
       sql += ` AND (
-        vorname LIKE ? OR
-        nachname LIKE ? OR
-        auth_email LIKE ?
+        m.vorname LIKE ? OR
+        m.nachname LIKE ? OR
+        m.email LIKE ? OR
+        u.email LIKE ?
       )`;
-      const search = `%${filters.search}%`;
-      params.push(search, search, search);
+      const searchTerm = `%${filters.search}%`;
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
     }
+
+    if (filters?.roleId) {
+      sql += " AND ur.role_id = ?";
+      params.push(filters.roleId);
+    }
+
+    sql += " ORDER BY m.nachname, m.vorname";
 
     const rows = await this.db.query<any[]>(sql, params);
-    return rows.map(this.mapViewToMemberWithUser);
+    return rows.map(this.mapRowToMember);
   }
 
-  // Transactional Create mit User
-  async createWithUser(
-    userData: CreateUserData,
-    memberData: CreateMemberData,
-    createdByUserId: string,
-  ): Promise<MemberWithUser> {
-    const connection = await this.db.getConnection();
+  async findById(id: string): Promise<any> {
+    const [row] = await this.db.query<any[]>(
+      `SELECT m.*,
+              u.email as auth_email,
+              u.role,
+              r.name as role_name
+       FROM mitglieder m
+       LEFT JOIN users u ON m.user_id = u.id
+       LEFT JOIN user_roles ur ON u.id = ur.user_id
+       LEFT JOIN roles r ON ur.role_id = r.id
+       WHERE m.id = ?`,
+      [id],
+    );
 
-    try {
-      await connection.beginTransaction();
-
-      // 1. User erstellen
-      const userId = generateId("usr");
-      await connection.query(
-        `INSERT INTO users
-         (id, email, vorname, nachname, password_hash,
-          auth_source, ist_aktiv, role)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          userId,
-          userData.email,
-          userData.vorname,
-          userData.nachname,
-          userData.passwordHash,
-          userData.authSource || "local",
-          true,
-          "MITGLIED",
-        ],
-      );
-
-      // 2. Member erstellen
-      const memberId = generateId("mbr");
-      await connection.query(
-        `INSERT INTO mitglieder
-         (id, user_id, vorname, nachname, email,
-          member_type, mitglied_seit, ist_aktiv)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          memberId,
-          userId,
-          memberData.vorname,
-          memberData.nachname,
-          memberData.email,
-          memberData.memberType || "easyverein",
-          memberData.mitgliedSeit || new Date(),
-          true,
-        ],
-      );
-
-      // 3. Default Role zuweisen
-      await connection.query(
-        `INSERT INTO user_roles
-         (user_id, role_id, zugewiesen_von)
-         VALUES (?, ?, ?)`,
-        [userId, "role_mitglied", createdByUserId],
-      );
-
-      await connection.commit();
-
-      // Lade vollständige Daten
-      return await this.findById(memberId);
-    } catch (error) {
-      await connection.rollback();
-      throw error;
-    } finally {
-      connection.release();
-    }
+    return row ? this.mapRowToMember(row) : null;
   }
 
-  private mapViewToMemberWithUser(row: any): MemberWithUser {
+  async update(id: string, data: any): Promise<any> {
+    const fields = Object.keys(data)
+      .filter(
+        (key) =>
+          !["id", "user_id", "erstellt_am", "aktualisiert_am"].includes(key),
+      )
+      .map((key) => `${this.camelToSnake(key)} = ?`)
+      .join(", ");
+
+    const values = Object.entries(data)
+      .filter(
+        ([key]) =>
+          !["id", "user_id", "erstellt_am", "aktualisiert_am"].includes(key),
+      )
+      .map(([_, value]) => value);
+
+    values.push(id);
+
+    await this.db.query(
+      `UPDATE mitglieder SET ${fields}, aktualisiert_am = NOW() WHERE id = ?`,
+      values,
+    );
+
+    return this.findById(id);
+  }
+
+  async create(data: {
+    user_id: string;
+    vorname: string;
+    nachname: string;
+    email: string;
+    telefon?: string;
+    member_type: "easyverein" | "creator" | "sponsor" | "partner";
+    mitglied_seit: Date;
+    ist_aktiv: boolean;
+  }): Promise<any> {
+    const id = generateId("mbr");
+
+    await this.db.query(
+      `INSERT INTO mitglieder
+       (id, user_id, vorname, nachname, email, telefon,
+        member_type, mitglied_seit, ist_aktiv)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.user_id,
+        data.vorname,
+        data.nachname,
+        data.email,
+        data.telefon,
+        data.member_type,
+        data.mitglied_seit,
+        data.ist_aktiv,
+      ],
+    );
+
+    return this.findById(id);
+  }
+
+  async createCreatorProfile(data: {
+    member_id: string;
+    kuenstlername: string;
+    portfolio_link?: string;
+    ist_aktiv: boolean;
+    aktiv_seit: Date;
+  }): Promise<any> {
+    const id = generateId("crt");
+
+    await this.db.query(
+      `INSERT INTO creator_profiles
+       (id, member_id, kuenstlername, portfolio_link,
+        ist_aktiv, aktiv_seit)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        data.member_id,
+        data.kuenstlername,
+        data.portfolio_link,
+        data.ist_aktiv,
+        data.aktiv_seit,
+      ],
+    );
+
+    return { id, ...data };
+  }
+
+  private mapRowToMember(row: any): any {
     return {
-      // Member Daten
       id: row.id,
+      userId: row.user_id,
       vorname: row.vorname,
       nachname: row.nachname,
       email: row.email,
       telefon: row.telefon,
+      memberType: row.member_type,
+      mitgliedSeit: row.mitglied_seit ? new Date(row.mitglied_seit) : undefined,
       istAktiv: Boolean(row.ist_aktiv),
-
-      // User Daten aus View
-      user: {
-        id: row.user_id,
-        email: row.auth_email,
-        role: row.auth_role,
-        roleName: row.role_name,
-        hierarchieEbene: row.hierarchie_ebene,
-        letzterLogin: row.letzter_login,
-        mustChangePassword: Boolean(row.must_change_password),
-      },
-
-      // Metadaten
-      mitgliedSeit: row.mitglied_seit,
-      erstelltAm: row.erstellt_am,
-      aktualisiertAm: row.aktualisiert_am,
+      hatVertraulichkeitserklaerung: Boolean(
+        row.hat_vertraulichkeitserklaerung,
+      ),
+      profilbild: row.profilbild,
+      beschreibung: row.beschreibung,
+      sichtbarkeitEmail: row.sichtbarkeit_email,
+      sichtbarkeitTelefon: row.sichtbarkeit_telefon,
+      sichtbarkeitProfil: row.sichtbarkeit_profil,
+      erstelltAm: new Date(row.erstellt_am),
+      aktualisiertAm: new Date(row.aktualisiert_am),
+      // User Info
+      authEmail: row.auth_email,
+      role: row.role,
+      roleName: row.role_name,
     };
+  }
+
+  private camelToSnake(str: string): string {
+    return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
   }
 }

@@ -8,7 +8,7 @@ import { MySQLConnection } from './MySQLConnection';
  * @description Implementiert Stats-Datenzugriff für MySQL
  */
 export class MySQLStatsRepository implements IStatsRepository {
-  constructor(private db: MySQLConnection) {}
+  constructor(private readonly db: MySQLConnection) {}
 
   async getPublicStats(): Promise<Stats> {
     try {
@@ -27,7 +27,7 @@ export class MySQLStatsRepository implements IStatsRepository {
       const eventsPerYear = Number(eventsResult[0]?.count) || 0;
 
       // Founded year (aus Konfiguration oder erster Mitgliedseintrag)
-      const foundedYear = 2025; // TODO: Aus Settings-Tabelle holen
+      const foundedYear = 2025;
 
       // Passion percentage ist immer 100%
       const passionPercentage = 100;

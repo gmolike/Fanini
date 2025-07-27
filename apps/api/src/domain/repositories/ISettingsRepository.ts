@@ -1,18 +1,7 @@
 // apps/api/src/domain/repositories/ISettingsRepository.ts
-import { Settings } from "../entities/Settings";
+import type { Settings } from "@/domain/entities/Settings";
 
-/**
- * Settings Repository Interface
- * @description Definiert Methoden für Settings-Datenzugriff
- */
-export interface ISettingsRepository {
-  /**
-   * Holt die globalen Einstellungen
-   */
+export type ISettingsRepository = {
   getSettings(): Promise<Settings>;
-
-  /**
-   * Aktualisiert die globalen Einstellungen
-   */
-  updateSettings(settings: Partial<Settings>): Promise<Settings>;
+  updateSettings(data: Partial<Settings>, userId: string): Promise<Settings>;
 }

@@ -1,4 +1,4 @@
-// seed/generators/memberGenerator.ts
+// apps/api/src/infrastructure/database/seed/generators/memberGenerator.ts
 import { generateId, dateHelpers } from "../helpers";
 import * as bcrypt from "bcrypt";
 
@@ -61,7 +61,6 @@ const DESCRIPTIONS = [
   "Verantwortlich für die Vereinskommunikation.",
 ];
 
-// seed/generators/memberGenerator.ts
 export const generateMembers = async (count: number): Promise<any[]> => {
   const members = [];
   const defaultPassword = await bcrypt.hash("Mitglied2025!", 12);
@@ -86,7 +85,7 @@ export const generateMembers = async (count: number): Promise<any[]> => {
       hat_vertraulichkeitserklaerung: Math.random() > 0.2,
       mitglied_seit: dateHelpers.randomMemberSince(),
       beschreibung: i % 4 === 0 ? DESCRIPTIONS[i % DESCRIPTIONS.length] : null,
-      sichtbarkeit_email: ["oeffentlich", "intern", "privat"][i % 3], // Korrigierte Werte
+      sichtbarkeit_email: ["oeffentlich", "intern", "privat"][i % 3], // Korrigiert
       sichtbarkeit_telefon: "privat", // Korrigiert
       sichtbarkeit_profil: ["oeffentlich", "intern"][i % 2], // Korrigiert
       password_hash: defaultPassword,

@@ -1,4 +1,4 @@
-// seed/generators/eventGenerator.ts
+// apps/api/src/infrastructure/database/seed/generators/eventGenerator.ts
 import { dateHelpers, generateId, PREDEFINED_IDS } from "../helpers/index.js";
 
 type EventTemplate = {
@@ -27,7 +27,7 @@ const EVENT_TEMPLATES: readonly EventTemplate[] = [
     titel: "Auswärtsfahrt Union Berlin",
     beschreibung:
       "Gemeinsame Busfahrt zum Auswärtsspiel gegen Union Berlin. Abfahrt vom Vereinsheim.",
-    typ: "fanfahrt", // Korrekt
+    typ: "sportveranstaltung", // Korrigiert
     dauer: 360,
     istOeffentlich: true,
     budget: 1500,
@@ -46,7 +46,7 @@ const EVENT_TEMPLATES: readonly EventTemplate[] = [
     titel: "Heimspiel gegen Hertha BSC II",
     beschreibung:
       "Unterstützung unserer Mannschaft im Heimspiel. Treffpunkt: Fantreff am Stadion.",
-    typ: "sportveranstaltung", // Geändert von 'heimspiel'
+    typ: "sportveranstaltung", // Korrigiert
     dauer: 180,
     istOeffentlich: true,
     ort: {
@@ -65,7 +65,7 @@ const EVENT_TEMPLATES: readonly EventTemplate[] = [
     titel: "LoL Team Training Session",
     beschreibung:
       "Intensives Training für unser League of Legends Team. Fokus auf Teamfight-Koordination.",
-    typ: "workshop", // Geändert von 'training'
+    typ: "workshop", // Korrigiert
     sportbereich: "league_of_legends",
     dauer: 240,
     istOeffentlich: false,
@@ -105,7 +105,7 @@ const EVENT_TEMPLATES: readonly EventTemplate[] = [
     titel: "Jahreshauptversammlung 2025",
     beschreibung:
       "Wichtige Abstimmungen und Vorstandswahlen. Teilnahme nur für Mitglieder.",
-    typ: "sitzung", // Geändert von 'jahreshauptversammlung'
+    typ: "sitzung", // Korrigiert
     dauer: 180,
     istOeffentlich: false,
     ort: {
@@ -124,7 +124,7 @@ const EVENT_TEMPLATES: readonly EventTemplate[] = [
     titel: "Sommerfest 2025",
     beschreibung:
       "Großes Vereinsfest mit Grill, Musik und Aktivitäten für die ganze Familie.",
-    typ: "social", // Geändert von 'fest'
+    typ: "social", // Korrigiert
     dauer: 360,
     istOeffentlich: true,
     budget: 2000,
@@ -142,7 +142,7 @@ const EVENT_TEMPLATES: readonly EventTemplate[] = [
   {
     titel: "Weihnachtsfeier",
     beschreibung: "Gemütlicher Jahresausklang mit Glühwein und Lebkuchen.",
-    typ: "social", // Geändert von 'fest'
+    typ: "social", // Korrigiert
     dauer: 240,
     istOeffentlich: false,
     budget: 800,

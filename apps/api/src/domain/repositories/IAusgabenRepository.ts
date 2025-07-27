@@ -1,6 +1,7 @@
 // apps/api/src/domain/repositories/IAusgabenRepository.ts
 import type { Ausgabe } from "@/domain/entities/Ausgabe";
 import type { ApprovalRequest } from "@/domain/entities/ApprovalRequest";
+import { AusgabenYearlyStats } from "@/application/dto/finance";
 
 export type AusgabenFilters = {
   eventId?: string;
@@ -25,4 +26,8 @@ export type IAusgabenRepository = {
   delete(id: string, userId: string): Promise<void>;
   getTotalByEvent(eventId: string): Promise<number>;
   getTotalByCategory(eventId: string): Promise<Record<string, number>>;
+  getMonthlyTotal(year: number, month: number): Promise<number>;
+  getYearlyReport(year: number): Promise<AusgabenYearlyStats>;
+  searchByRechnungsnummer(nummer: string): Promise<Ausgabe[]>;
+  getBulkByIds(ids: string[]): Promise<Ausgabe[]>;
 };

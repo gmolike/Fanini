@@ -3,6 +3,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs/promises";
 
 const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
@@ -54,59 +55,73 @@ async function resetDatabase() {
     `docker exec ${CONTAINER_NAME} mysql -u ${DB_USER} -p${DB_PASSWORD} -e "CREATE DATABASE ${DB_NAME} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"`,
   );
 
-  // Kopiere die Migration-Datei in den Container und führe sie aus
-  await runMigrationViaFile();
+  // Run ALL migrations
+  await runAllMigrations();
 }
 
-async function runMigrationViaFile() {
-  console.log("🐳 Running Migration via file...");
+async function runAllMigrations() {
+  console.log("🐳 Running all migrations...");
 
-  const migrationPath = path.join(
-    __dirname,
-    "migrations",
-    "001_complete_schema.sql",
-  );
-  const containerPath = "/tmp/migration.sql";
+  const migrationsDir = path.join(__dirname, "migrations");
 
   try {
-    // Kopiere Datei in Container
-    console.log("📋 Copying migration file to container...");
-    await execAsync(
-      `docker cp "${migrationPath}" ${CONTAINER_NAME}:${containerPath}`,
-    );
+    // Get all SQL files in migrations directory
+    const files = await fs.readdir(migrationsDir);
+    const sqlFiles = files
+      .filter(file => file.endsWith(".sql"))
+      .sort(); // Sort to ensure correct order (001_, 002_, etc.)
 
-    // Führe Migration aus
-    console.log("🔄 Executing migration...");
+    console.log(`📁 Found ${sqlFiles.length} migration files`);
 
-    // Nutze sh -c für Windows-Kompatibilität
-    const command = `docker exec ${CONTAINER_NAME} sh -c "mysql -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${containerPath}"`;
+    for (const file of sqlFiles) {
+      console.log(`\n🔄 Running migration: ${file}`);
 
-    try {
-      const { stdout, stderr } = await execAsync(command, {
-        maxBuffer: 10 * 1024 * 1024,
-      });
+      const migrationPath = path.join(migrationsDir, file);
+      const containerPath = `/tmp/${file}`;
 
-      if (stdout) console.log(stdout);
-      if (stderr && !stderr.includes("Warning")) {
-        console.error("Migration warnings:", stderr);
-      }
+      try {
+        // Copy file to container
+        await execAsync(
+          `docker cp "${migrationPath}" ${CONTAINER_NAME}:${containerPath}`,
+        );
 
-      console.log("✅ Migration completed successfully!");
-    } catch (error: any) {
-      // Prüfe ob es nur Warnungen sind
-      if (error.stderr && error.stderr.includes("already exists")) {
-        console.log("⚠️  Some tables already exist, but migration completed");
-      } else {
-        throw error;
+        // Execute migration
+        const command = `docker exec ${CONTAINER_NAME} sh -c "mysql -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < ${containerPath}"`;
+
+        const { stdout, stderr } = await execAsync(command, {
+          maxBuffer: 10 * 1024 * 1024,
+        });
+
+        if (stdout) console.log(stdout);
+        if (stderr && !stderr.includes("Warning")) {
+          console.error("Migration warnings:", stderr);
+        }
+
+        console.log(`✅ ${file} completed successfully!`);
+
+        // Cleanup
+        await execAsync(`docker exec ${CONTAINER_NAME} rm ${containerPath}`);
+      } catch (error: any) {
+        // Check if it's just warnings
+        if (error.stderr && error.stderr.includes("already exists")) {
+          console.log(`⚠️  Some tables already exist in ${file}, but migration completed`);
+        } else {
+          console.error(`❌ ${file} failed:`, error);
+          throw error;
+        }
       }
     }
 
-    // Cleanup
-    await execAsync(`docker exec ${CONTAINER_NAME} rm ${containerPath}`);
+    console.log("\n✅ All migrations completed successfully!");
   } catch (error) {
     console.error("❌ Migration failed:", error);
     throw error;
   }
+}
+
+async function runMigrationViaFile() {
+  // This function is now replaced by runAllMigrations
+  await runAllMigrations();
 }
 
 async function runSeed() {
@@ -115,7 +130,6 @@ async function runSeed() {
   await waitForMySQL();
 
   try {
-    // Führe das Seed-Script lokal aus (nicht im Container)
     console.log("📦 Running seed script locally...");
 
     const seedCommand =
@@ -126,7 +140,7 @@ async function runSeed() {
       maxBuffer: 10 * 1024 * 1024,
       env: {
         ...process.env,
-        DB_HOST: "localhost", // Docker exposed port
+        DB_HOST: "localhost",
         DB_PORT: "3306",
         DB_USER: "fanini",
         DB_PASSWORD: "password",
@@ -140,64 +154,6 @@ async function runSeed() {
     console.log("✅ Seeding completed!");
   } catch (error) {
     console.error("❌ Seeding failed:", error);
-    throw error;
-  }
-}
-
-// Alternative: Einfachere direkte Methode
-async function runMigrationDirect() {
-  console.log("🐳 Running Migration directly...");
-
-  await waitForMySQL();
-
-  try {
-    // Lese SQL-Datei
-    const fs = await import("fs/promises");
-    const migrationPath = path.join(
-      __dirname,
-      "migrations",
-      "001_complete_schema.sql",
-    );
-    const sqlContent = await fs.readFile(migrationPath, "utf-8");
-
-    // Entferne die CREATE DATABASE und USE Statements
-    const cleanedSql = sqlContent
-      .split("\n")
-      .filter((line) => {
-        const upper = line.trim().toUpperCase();
-        return (
-          !upper.startsWith("CREATE DATABASE") &&
-          !upper.startsWith("USE ") &&
-          !upper.startsWith("--")
-        );
-      })
-      .join("\n");
-
-    // Schreibe bereinigte SQL in temporäre Datei
-    const tempPath = path.join(__dirname, "temp_migration.sql");
-    await fs.writeFile(tempPath, cleanedSql);
-
-    // Kopiere und führe aus
-    await execAsync(
-      `docker cp "${tempPath}" ${CONTAINER_NAME}:/tmp/clean_migration.sql`,
-    );
-
-    const { stdout, stderr } = await execAsync(
-      `docker exec ${CONTAINER_NAME} sh -c "mysql -u ${DB_USER} -p${DB_PASSWORD} ${DB_NAME} < /tmp/clean_migration.sql"`,
-      { maxBuffer: 10 * 1024 * 1024 },
-    );
-
-    if (stdout) console.log(stdout);
-
-    // Cleanup
-    await fs.unlink(tempPath);
-    await execAsync(
-      `docker exec ${CONTAINER_NAME} rm /tmp/clean_migration.sql`,
-    );
-
-    console.log("✅ Migration completed!");
-  } catch (error) {
-    console.error("❌ Migration failed:", error);
     throw error;
   }
 }
@@ -220,7 +176,7 @@ switch (command) {
     break;
 
   case "migrate":
-    runMigrationDirect()
+    runAllMigrations()
       .then(() => {
         console.log("✅ Migration completed!");
         process.exit(0);

@@ -1,4 +1,4 @@
-// seed/seeders/23-seedEventAuditLog.ts
+// apps/api/src/infrastructure/database/seed/seeders/23-seedEventAuditLog.ts
 import { Connection, PoolConnection } from "mysql2/promise";
 import { generateId, dateHelpers } from "../helpers/index.js";
 
@@ -33,7 +33,6 @@ const seedEventAuditLog = async (
         old_value: "entwurf",
         new_value: event.status,
         changed_by: userData[0].id,
-        changed_by_user_id: userData[0].id, // Diese Spalte existiert bereits
         ip_address: "192.168.1.1",
         user_agent: "Mozilla/5.0 Seed Script",
       });
@@ -48,20 +47,19 @@ const seedEventAuditLog = async (
           old_value: "1000",
           new_value: "1500",
           changed_by: userData[1].id,
-          changed_by_user_id: userData[1].id,
           ip_address: "192.168.1.2",
           user_agent: "Mozilla/5.0 Seed Script",
         });
       }
     }
 
-    // Insert audit entries - changed_by_user_id existiert bereits in der Tabelle
+    // Insert audit entries - NUR die existierenden Spalten verwenden
     for (const entry of auditEntries) {
       await connection.execute(
         `INSERT INTO event_audit_log
          (id, event_id, action, field_name, old_value, new_value,
-          changed_by, changed_by_user_id, ip_address, user_agent)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          changed_by, ip_address, user_agent)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           entry.id,
           entry.event_id,
@@ -70,7 +68,6 @@ const seedEventAuditLog = async (
           entry.old_value,
           entry.new_value,
           entry.changed_by,
-          entry.changed_by_user_id,
           entry.ip_address,
           entry.user_agent,
         ],

@@ -27,11 +27,12 @@ const seeders: readonly string[] = [
   "13-seedProtocols",
   "14-seedEmailTemplates",
   "15-seedFAQ",
-  "18-seedApprovalSystem", // NEU
-  "19-seedSettings", // NEU
-  "20-seedGremien", // NEU
-  "21-seedTaskDetails", // NEU
-  "22-seedSecurityAndCompliance", // NEU
+  "18-seedApprovalSystem",
+  "19-seedSettings",
+  "20-seedGremien",
+  "21-seedTaskDetails",
+  "22-seedSecurityAndCompliance",
+  "23-seedEventAuditLog",
 ] as const;
 
 const runSeeders = async (): Promise<void> => {

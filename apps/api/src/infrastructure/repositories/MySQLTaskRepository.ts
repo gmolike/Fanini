@@ -3,6 +3,7 @@ import type { Task, TaskContext } from "@/domain/entities/Task";
 import { BaseRepository } from "./BaseRepository";
 import { ITaskRepository } from "@/domain/repositories/ITaskRepository";
 import { MySQLConnection } from "./MySQLConnection";
+import { generateId } from "@faninitiative/shared";
 
 export class MySQLTaskRepository
   extends BaseRepository<Task>

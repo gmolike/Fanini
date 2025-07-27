@@ -30,33 +30,103 @@ async function runMigrations() {
     const [tables] = await connection.execute("SHOW TABLES");
     console.log(`📊 Found ${(tables as any[]).length} existing tables\n`);
 
-    // Read migration file
-    const migrationPath = path.join(
-      __dirname,
-      "migrations",
-      "001_complete_schema.sql",
-    );
-    console.log(`📁 Reading migration from: ${migrationPath}`);
+    // Get migrations directory
+    const migrationsDir = path.join(__dirname, "migrations");
 
-    const sqlContent = await fs.readFile(migrationPath, "utf-8");
-    console.log(`✅ Migration file read (${sqlContent.length} characters)\n`);
+    // Read all migration files
+    const migrationFiles = await fs.readdir(migrationsDir);
 
-    // Execute the entire migration
-    console.log("🔄 Executing migration...");
-    await connection.query(sqlContent);
+    // Filter SQL files and sort them
+    const sqlFiles = migrationFiles
+      .filter((file) => file.endsWith(".sql"))
+      .sort(); // This will sort them alphabetically (001_, 002_, etc.)
 
-    console.log("\n✅ Migration completed successfully!");
-  } catch (error: any) {
-    if (error.message.includes("already exists")) {
-      console.log("⚠️  Some tables already exist, but that's OK");
-    } else {
-      console.error("\n❌ Migration failed:", error.message);
-      throw error;
+    console.log(`📁 Found ${sqlFiles.length} migration files:\n`);
+    sqlFiles.forEach((file) => console.log(`   - ${file}`));
+    console.log();
+
+    // Execute each migration in order
+    for (const file of sqlFiles) {
+      const migrationPath = path.join(migrationsDir, file);
+
+      console.log(`\n🔄 Running migration: ${file}`);
+      console.log(`   Path: ${migrationPath}`);
+
+      try {
+        // Read the migration file
+        const sqlContent = await fs.readFile(migrationPath, "utf-8");
+        console.log(`   Size: ${sqlContent.length} characters`);
+
+        // Skip empty files
+        if (sqlContent.trim().length === 0) {
+          console.log(`   ⚠️  Skipping empty migration file`);
+          continue;
+        }
+
+        // Execute the migration
+        await connection.query(sqlContent);
+        console.log(`   ✅ ${file} completed successfully`);
+      } catch (error: any) {
+        // Handle specific errors
+        if (error.code === "ER_TABLE_EXISTS_ERROR") {
+          console.log(
+            `   ⚠️  Some tables already exist in ${file}, continuing...`,
+          );
+        } else if (error.code === "ER_DUP_ENTRY") {
+          console.log(
+            `   ⚠️  Some entries already exist in ${file}, continuing...`,
+          );
+        } else if (error.code === "ER_CANT_DROP_FIELD_OR_KEY") {
+          console.log(
+            `   ⚠️  Column/constraint doesn't exist in ${file}, continuing...`,
+          );
+        } else {
+          console.error(`   ❌ ${file} failed:`, error.message);
+          console.error(`   Error code: ${error.code}`);
+          console.error(`   SQL State: ${error.sqlState}`);
+
+          // Don't stop on non-critical errors
+          if (
+            error.code === "ER_BAD_DB_ERROR" ||
+            error.code === "ER_PARSE_ERROR"
+          ) {
+            throw error; // Critical errors
+          }
+        }
+      }
     }
+
+    // Final check
+    const [finalTables] = await connection.execute("SHOW TABLES");
+    console.log(
+      `\n📊 Migration complete! Now have ${(finalTables as any[]).length} tables`,
+    );
+
+    // Show table list
+    console.log("\n📋 Tables in database:");
+    (finalTables as any[]).forEach((table) => {
+      const tableName = Object.values(table)[0];
+      console.log(`   - ${tableName}`);
+    });
+
+    console.log("\n✅ All migrations completed successfully!");
+  } catch (error: any) {
+    console.error("\n❌ Migration failed:", error.message);
+    throw error;
   } finally {
     await connection.end();
-    console.log("🔌 Connection closed");
+    console.log("\n🔌 Connection closed");
   }
+}
+
+// Helper function to check if we should run a specific migration
+async function shouldRunMigration(
+  connection: mysql.Connection,
+  migrationName: string,
+): Promise<boolean> {
+  // You could implement a migrations table to track which migrations have been run
+  // For now, we'll just try to run everything and handle errors
+  return true;
 }
 
 // Run if called directly

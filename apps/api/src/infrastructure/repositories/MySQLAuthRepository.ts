@@ -1,46 +1,42 @@
-// infrastructure/repositories/MySQLAuthRepository.ts
-import { User, UserRole } from "@/domain/entities/User";
+import { User, UserRole } from "@/domain/entities";
 import { IAuthRepository } from "@/domain/repositories/IAuthRepository";
-import { MySQLConnection } from "./MySQLConnection";
 import { generateId } from "@faninitiative/shared";
+import { MySQLConnection } from "./MySQLConnection";
 
+// apps/api/src/infrastructure/repositories/MySQLAuthRepository.ts
 export class MySQLAuthRepository implements IAuthRepository {
   constructor(private readonly db: MySQLConnection) {}
 
-  // ===== USER METHODS =====
   async findUserByEmail(email: string): Promise<User | null> {
     const rows = await this.db.query<any[]>(
       "SELECT * FROM users WHERE email = ?",
-      [email],
+      [email]
     );
-
     return rows[0] ? this.mapToUser(rows[0]) : null;
   }
 
   async findUserByEasyVereinId(easyVereinId: string): Promise<User | null> {
     const rows = await this.db.query<any[]>(
       "SELECT * FROM users WHERE easyverein_id = ?",
-      [easyVereinId],
+      [easyVereinId]
     );
-
     return rows[0] ? this.mapToUser(rows[0]) : null;
   }
 
   async findUserById(id: string): Promise<User | null> {
     const rows = await this.db.query<any[]>(
       "SELECT * FROM users WHERE id = ?",
-      [id],
+      [id]
     );
-
     return rows[0] ? this.mapToUser(rows[0]) : null;
   }
 
   async createUser(
-    userData: Omit<User, "id" | "erstelltAm" | "aktualisiertAm">,
+    userData: Omit<User, "id" | "erstelltAm" | "aktualisiertAm">
   ): Promise<User> {
     const user: User = {
       ...userData,
-      id: generateId(),
+      id: generateId('usr'),
       erstelltAm: new Date(),
       aktualisiertAm: new Date(),
     };
@@ -62,7 +58,7 @@ export class MySQLAuthRepository implements IAuthRepository {
         user.istAktiv,
         user.erstelltAm,
         user.aktualisiertAm,
-      ],
+      ]
     );
 
     return user;
@@ -78,17 +74,17 @@ export class MySQLAuthRepository implements IAuthRepository {
 
     await this.db.query(
       `UPDATE users SET ${fields}, aktualisiert_am = NOW() WHERE id = ?`,
-      values,
+      values
     );
   }
 
   async updateLastLogin(userId: string): Promise<void> {
-    await this.db.query("UPDATE users SET letzter_login = NOW() WHERE id = ?", [
-      userId,
-    ]);
+    await this.db.query(
+      "UPDATE users SET letzter_login = NOW() WHERE id = ?",
+      [userId]
+    );
   }
 
-  // ===== ROLE METHODS =====
   async getUserRoles(userId: string): Promise<UserRole[]> {
     const rows = await this.db.query<any[]>(
       `SELECT r.*, GROUP_CONCAT(p.resource, '.', p.action) as permissions
@@ -98,7 +94,7 @@ export class MySQLAuthRepository implements IAuthRepository {
        LEFT JOIN permissions p ON rp.permission_id = p.id
        WHERE ur.user_id = ?
        GROUP BY r.id`,
-      [userId],
+      [userId]
     );
 
     return rows.map((row) => ({
@@ -111,29 +107,23 @@ export class MySQLAuthRepository implements IAuthRepository {
   async assignRole(
     userId: string,
     roleId: string,
-    assignedBy?: string,
+    assignedBy?: string
   ): Promise<void> {
     await this.db.query(
       `INSERT INTO user_roles (user_id, role_id, zugewiesen_von)
        VALUES (?, ?, ?)
        ON DUPLICATE KEY UPDATE zugewiesen_am = NOW()`,
-      [userId, roleId, assignedBy || userId],
+      [userId, roleId, assignedBy || userId]
     );
   }
 
-  /**
-   * Entfernt eine Rolle von einem User
-   * @param userId - Die User ID
-   * @param roleId - Die Rollen ID
-   */
   async removeRole(userId: string, roleId: string): Promise<void> {
     await this.db.query(
       "DELETE FROM user_roles WHERE user_id = ? AND role_id = ?",
-      [userId, roleId],
+      [userId, roleId]
     );
   }
 
-  // ===== REFRESH TOKEN METHODS =====
   async saveRefreshToken(params: {
     userId: string;
     token: string;
@@ -146,13 +136,13 @@ export class MySQLAuthRepository implements IAuthRepository {
        (id, user_id, token, expires_at, device_info, ip_address)
        VALUES (?, ?, ?, ?, ?, ?)`,
       [
-        generateId(),
+        generateId('rtk'),
         params.userId,
         params.token,
         params.expiresAt,
         params.deviceInfo || null,
         params.ipAddress || null,
-      ],
+      ]
     );
   }
 
@@ -165,7 +155,7 @@ export class MySQLAuthRepository implements IAuthRepository {
       `SELECT user_id, expires_at, revoked_at
        FROM refresh_tokens
        WHERE token = ?`,
-      [token],
+      [token]
     );
 
     if (rows.length === 0) return null;
@@ -182,23 +172,51 @@ export class MySQLAuthRepository implements IAuthRepository {
       `UPDATE refresh_tokens
        SET revoked_at = NOW(), revoked_by = ?
        WHERE token = ? AND revoked_at IS NULL`,
-      [revokedBy, token],
+      [revokedBy, token]
     );
   }
 
   async revokeAllUserRefreshTokens(
     userId: string,
-    revokedBy: string,
+    revokedBy: string
   ): Promise<void> {
     await this.db.query(
       `UPDATE refresh_tokens
        SET revoked_at = NOW(), revoked_by = ?
        WHERE user_id = ? AND revoked_at IS NULL`,
-      [revokedBy, userId],
+      [revokedBy, userId]
     );
   }
 
-  // ===== PRIVATE HELPER METHODS =====
+  async logPasswordAction(params: {
+    user_id: string;
+    action: "set" | "change" | "reset" | "expire";
+    performed_by: string;
+    expires_at?: Date;
+    temporary: boolean;
+    ip_address?: string;
+    user_agent?: string;
+  }): Promise<void> {
+    const id = generateId('pwh');
+
+    await this.db.query(
+      `INSERT INTO password_history
+       (id, user_id, action, performed_by, expires_at, temporary, ip_address, user_agent)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        params.user_id,
+        params.action,
+        params.performed_by,
+        params.expires_at || null,
+        params.temporary,
+        params.ip_address || null,
+        params.user_agent || null,
+      ]
+    );
+  }
+
+  // Private Helper Methods
   private mapToUser(row: any): User {
     return {
       id: row.id,
@@ -218,32 +236,5 @@ export class MySQLAuthRepository implements IAuthRepository {
 
   private camelToSnake(str: string): string {
     return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-  }
-  async logPasswordAction(params: {
-    user_id: string;
-    action: "set" | "change" | "reset" | "expire";
-    performed_by: string;
-    expires_at?: Date;
-    temporary: boolean;
-    ip_address?: string;
-    user_agent?: string;
-  }): Promise<void> {
-    const id = `pwh_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-
-    await this.db.query(
-      `INSERT INTO password_history
-       (id, user_id, action, performed_by, expires_at, temporary, ip_address, user_agent)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        id,
-        params.user_id,
-        params.action,
-        params.performed_by,
-        params.expires_at || null,
-        params.temporary,
-        params.ip_address || null,
-        params.user_agent || null,
-      ],
-    );
   }
 }

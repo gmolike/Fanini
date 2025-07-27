@@ -1,8 +1,11 @@
 // ID Generation
-export const generateId = (): string => {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+export const generateId = (prefix: string = ""): string => {
+  const timestamp = Date.now().toString(36);
+  const randomPart = Math.random().toString(36).substring(2, 9);
+  return prefix
+    ? `${prefix}_${timestamp}_${randomPart}`
+    : `${timestamp}_${randomPart}`;
 };
-
 // Date Formatting
 export const formatDate = (date: Date): string => {
   return new Intl.DateTimeFormat("de-DE").format(date);

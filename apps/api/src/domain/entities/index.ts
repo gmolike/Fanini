@@ -21,3 +21,4 @@ export * from "./TaskAssignment";
 export * from "./TaskComment";
 export * from "./UploadLog";
 export * from "./User";
+export * from "./Rolle";

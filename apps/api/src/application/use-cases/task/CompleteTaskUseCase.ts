@@ -9,7 +9,7 @@ import {
   createBusinessError
 } from "@/application/dto/common";
 import { IMemberRepository } from "@/domain/repositories";
-import { mapTaskToDetailDTO } from "./helpers";
+import { canChangeTaskStatus, mapTaskToDetailDTO } from "./helpers";
 
 /**
  * Complete Task Parameters

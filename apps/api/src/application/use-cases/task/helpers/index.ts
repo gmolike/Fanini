@@ -1,423 +1,597 @@
-// apps/api/src/application/use-cases/task/helpers/index.ts
-import type { Task, TaskStatus, TaskPriority } from "@/domain/entities/Task";
-import type { ITaskRepository } from "@/domain/repositories/ITaskRepository";
-import type { IMemberRepository } from "@/domain/repositories/IMemberRepository";
-import type { AuditLogService } from "@/application/services/AuditLogService";
+// features/task/helpers/index.ts
+
+import { Mitglied, Rolle } from "@/domain/entities";
+import type { AuditAction } from "@/domain/entities/AuditLog";
 import type {
-  TaskListDTO,
-  TaskDetailDTO,
-  TaskPermissionsDTO,
-  UserReferenceDTO,
-  TaskHistoryDTO,
-  TaskCommentDTO,
-  TaskDependencyDTO
-} from "@/application/dto/task";
+  Task,
+  TaskContext,
+  TaskMaterial,
+  TaskPriority,
+  TaskStatus,
+} from "@/domain/entities/Task";
+import type { TaskAssignment } from "@/domain/entities/TaskAssignment";
+import type { TaskComment } from "@/domain/entities/TaskComment";
 
 /**
- * Mappt eine Task zu einem Detail DTO
+ * DTO für Task-Details mit allen Relationen
  */
-export const mapTaskToDetailDTO = async (
-  task: Task,
-  userId: string,
-  userRole: string,
-  memberRepository: IMemberRepository,
-  taskRepository: ITaskRepository
-): Promise<TaskDetailDTO> => {
-  // Batch-Load aller benötigten Daten
-  const [
-    verantwortlicher,
-    assignees,
-    assignments,
-    comments,
-    dependencies,
-  ] = await Promise.all([
-    task.verantwortlichId
-      ? memberRepository.findById(task.verantwortlichId)
-      : null,
-    Promise.all(task.zugewiesenAn.map(id => memberRepository.findById(id))),
-    taskRepository.getAssignments(task.id),
-    taskRepository.getComments(task.id),
-    task.abhaengigVon
-      ? Promise.all(task.abhaengigVon.map(id => taskRepository.findById(id)))
-      : [],
-  ]);
-
-  // Comments mit Autor-Details
-  const kommentareWithAuthors: TaskCommentDTO[] = await Promise.all(
-    comments.map(async (comment) => {
-      const autor = await memberRepository.findById(comment.autorId);
-      return {
-        id: comment.id,
-        text: comment.text,
-        autor: {
-          id: comment.autorId,
-          name: autor ? `${autor.vorname} ${autor.nachname}` : "Unbekannt",
-          avatarUrl: autor?.profilbild,
-        },
-        erstelltAm: comment.erstelltAm.toISOString(),
-        erwaehntePersonen: comment.erwaehntePersonen.length > 0
-          ? await mapMemberReferences(comment.erwaehntePersonen, memberRepository)
-          : undefined,
-        istIntern: true,
-      };
-    })
-  );
-
-  // Dependencies mapping
-  const abhaengigVon: TaskDependencyDTO[] | undefined = dependencies.length > 0
-    ? dependencies
-        .filter(Boolean)
-        .map(dep => ({
-          taskId: dep!.id,
-          titel: dep!.titel,
-          status: dep!.status,
-          istErledigt: dep!.status === "erledigt",
-          blockiertAktuell: dep!.status !== "erledigt",
-        }))
-    : undefined;
-
-  const dto: TaskDetailDTO = {
-    id: task.id,
-    titel: task.titel,
-    beschreibung: task.beschreibung,
-    status: task.status,
-    prioritaet: task.prioritaet,
-    frist: task.frist?.toISOString(),
-    context: {
-      type: task.context.type,
-      id: task.context.id || undefined,
-      name: await resolveContextName(task.context),
-    },
-    verantwortlicher: verantwortlicher
-      ? {
-          id: verantwortlicher.id,
-          name: `${verantwortlicher.vorname} ${verantwortlicher.nachname}`,
-          avatarUrl: verantwortlicher.profilbild,
-        }
-      : undefined,
-    zugewiesenePersonen: assignees
-      .filter(Boolean)
-      .map(a => ({
-        id: a.id,
-        name: `${a.vorname} ${a.nachname}`,
-        avatarUrl: a.profilbild,
-      })),
-    materialien: task.materialien,
-    abhaengigVon,
-    istStandardaufgabe: task.istStandardaufgabe,
-    kategorie: task.kategorie,
-    kommentare: kommentareWithAuthors,
-    history: [], // TODO: Implement history loading
-    metadata: {
-      erstelltAm: task.erstelltAm.toISOString(),
-      aktualisiertAm: task.aktualisiertAm.toISOString(),
-      erledigtAm: task.erledigtAm?.toISOString(),
-      erledigtVon: task.erledigtVon
-        ? await mapUserReference(task.erledigtVon, memberRepository)
-        : undefined,
-      versionsnummer: 1,
-    },
-    permissions: getTaskPermissions(task, userId, userRole),
-  };
-
-  return dto;
+export type TaskDetailDTO = {
+  id: string;
+  titel: string;
+  beschreibung?: string;
+  context: TaskContext;
+  verantwortlichId?: string;
+  zugewiesenAn: string[];
+  zugewiesenePersonen?: MitgliedSummaryDTO[]; // Erweitert für CompleteTask
+  status: TaskStatus;
+  prioritaet: TaskPriority;
+  frist?: Date;
+  materialien: TaskMaterial[];
+  abhaengigVon?: string[];
+  istStandardaufgabe: boolean;
+  kategorie?: string;
+  erstelltVon: string;
+  erstelltAm: Date;
+  aktualisiertAm: Date;
+  erledigtAm?: Date;
+  erledigtVon?: string;
+  geloescht: boolean;
+  kommentare?: TaskCommentDTO[]; // Erweitert für CompleteTask
+  history?: TaskHistoryEntry[]; // Erweitert für CompleteTask
+  metadata?: TaskMetadata; // Erweitert für CompleteTask
+  permissions?: TaskPermissions; // Erweitert für CompleteTask
 };
 
 /**
- * Mappt Tasks zu List DTOs
+ * DTO für Task-Listen-Ansicht
  */
-export const mapTasksToListDTOs = async (
-  tasks: Task[],
+export type TaskListDTO = {
+  id: string;
+  titel: string;
+  status: TaskStatus;
+  prioritaet: TaskPriority;
+  frist?: Date;
+  verantwortlichName?: string;
+  zugewieseneAnzahl: number;
+  istUeberfaellig: boolean;
+  context: TaskContext;
+};
+
+/**
+ * Mitglied Summary für Task-Zuweisungen
+ */
+export type MitgliedSummaryDTO = {
+  id: string;
+  vorname: string;
+  nachname: string;
+  profilbild?: string;
+};
+
+/**
+ * Task Kommentar DTO
+ */
+export type TaskCommentDTO = {
+  id: string;
+  text: string;
+  autorId: string;
+  autorName: string;
+  erstelltAm: Date;
+  erwaehntePersonen: string[];
+};
+
+/**
+ * Task History Entry
+ */
+export type TaskHistoryEntry = {
+  timestamp: Date;
+  aktion: string;
+  durchgefuehrtVon: string;
+  aenderungen?: Record<string, any>;
+};
+
+/**
+ * Task Metadata
+ */
+export type TaskMetadata = {
+  erstellerName?: string;
+  verantwortlicherName?: string;
+  contextName?: string;
+  abhaengigeTaskTitel?: string[];
+};
+
+/**
+ * Task Permissions für aktuellen User
+ */
+export type TaskPermissions = {
+  kannBearbeiten: boolean;
+  kannLoeschen: boolean;
+  kannStatusAendern: boolean;
+  kannZuweisen: boolean;
+  kannKommentieren: boolean;
+};
+
+/**
+ * DTO für Task-Zusammenfassung
+ */
+export type TaskSummaryDTO = {
+  id: string;
+  titel: string;
+  status: TaskStatus;
+  prioritaet: TaskPriority;
+  frist?: Date;
+  context: TaskContext;
+};
+
+/**
+ * Parameter Types für Use Cases
+ */
+export type GetTasksByPersonParams = {
+  personId: string;
+};
+
+export type GetTasksByTeamParams = {
+  teamId: string;
+};
+
+export type GetTasksByEventParams = {
+  eventId: string;
+};
+
+export type UpdateTaskParams = {
+  taskId: string;
+  titel?: string;
+  beschreibung?: string;
+  status?: TaskStatus;
+  prioritaet?: TaskPriority;
+  frist?: Date;
+  zugewiesenAn?: string[];
+  materialien?: TaskMaterial[];
+};
+
+export type CompleteTaskParams = {
+  taskId: string;
+  kommentar?: string;
+  actualHours?: number;
+  userId: string;
+  userRole: Rolle[];
+  userName: string;
+};
+
+/**
+ * Result Types für Use Cases
+ */
+export type GetTasksByPersonResult = {
+  tasks: TaskDetailDTO[];
+  total: number;
+};
+
+export type GetTasksByTeamResult = {
+  tasks: TaskDetailDTO[];
+  total: number;
+};
+
+export type GetTasksByEventResult = {
+  tasks: TaskDetailDTO[];
+  total: number;
+};
+
+export type CompleteTaskResult = {
+  success: boolean;
+  task?: TaskDetailDTO;
+  error?: ErrorDTO;
+};
+
+export type ErrorDTO = {
+  code: string;
+  message: string;
+  details?: any;
+};
+
+/**
+ * Use Case Type Definitionen
+ */
+export type GetTasksByPersonUseCase = (
+  params: GetTasksByPersonParams,
+) => Promise<GetTasksByPersonResult>;
+export type GetTasksByTeamUseCase = (
+  params: GetTasksByTeamParams,
+) => Promise<GetTasksByTeamResult>;
+export type GetTasksByEventUseCase = (
+  params: GetTasksByEventParams,
+) => Promise<GetTasksByEventResult>;
+
+/**
+ * Task Repository Interface
+ */
+export type TaskRepository = {
+  getTasksByPerson: (personId: string) => Promise<Task[]>;
+  getTasksByTeam: (teamId: string) => Promise<Task[]>;
+  getTasksByEvent: (eventId: string) => Promise<Task[]>;
+  getTaskById: (taskId: string) => Promise<Task | null>;
+  updateTask: (taskId: string, updates: Partial<Task>) => Promise<Task>;
+  getTaskComments: (taskId: string) => Promise<TaskComment[]>;
+  getTaskAssignments: (taskId: string) => Promise<TaskAssignment[]>;
+  getAllTasks: () => Promise<Task[]>;
+  findById: (taskId: string) => Promise<Task | null>;
+};
+
+/**
+ * Member Repository Interface
+ */
+export type MemberRepository = {
+  findById: (memberId: string) => Promise<Mitglied | null>;
+  findByIds: (memberIds: string[]) => Promise<Mitglied[]>;
+};
+
+/**
+ * Audit Log Service Interface
+ */
+export type AuditLogService = {
+  log: (params: any) => Promise<void>;
+};
+
+/**
+ * Überprüft, ob ein Benutzer den Task-Status ändern darf
+ * @param task - Die zu überprüfende Aufgabe
+ * @param userId - Die ID des Benutzers
+ * @param userRoles - Die Rollen des Benutzers
+ * @returns true wenn der Status geändert werden darf
+ */
+export const canChangeTaskStatus = (
+  task: Task,
   userId: string,
-  userRole: string,
-  memberRepository: IMemberRepository,
-  taskRepository: ITaskRepository,
-  blockedTaskIds: Set<string>
-): Promise<TaskListDTO[]> => {
-  return Promise.all(
-    tasks.map(async (task) => {
-      const [verantwortlicher, assignees, ersteller] = await Promise.all([
-        task.verantwortlichId
-          ? memberRepository.findById(task.verantwortlichId)
-          : null,
-        Promise.all(task.zugewiesenAn.map(id => memberRepository.findById(id))),
-        memberRepository.findById(task.erstelltVon),
-      ]);
-
-      const dto: TaskListDTO = {
-        id: task.id,
-        titel: task.titel,
-        beschreibung: task.beschreibung,
-        status: task.status,
-        prioritaet: task.prioritaet,
-        frist: task.frist?.toISOString(),
-        kategorie: task.kategorie,
-        context: {
-          type: task.context.type,
-          id: task.context.id || undefined,
-          name: await resolveContextName(task.context),
-        },
-        verantwortlicher: verantwortlicher
-          ? {
-              id: verantwortlicher.id,
-              name: `${verantwortlicher.vorname} ${verantwortlicher.nachname}`,
-              avatarUrl: verantwortlicher.profilbild,
-            }
-          : undefined,
-        zugewiesenePersonen: assignees
-          .filter(Boolean)
-          .map(a => ({
-            id: a.id,
-            name: `${a.vorname} ${a.nachname}`,
-            avatarUrl: a.profilbild,
-          })),
-        istStandardaufgabe: task.istStandardaufgabe,
-        materialienStatus: task.materialien.length > 0
-          ? {
-              total: task.materialien.length,
-              besorgt: task.materialien.filter(m => m.besorgt).length,
-            }
-          : undefined,
-        abhaengigVon: task.abhaengigVon,
-        istBlockiert: blockedTaskIds.has(task.id),
-        erstelltVon: {
-          id: ersteller?.id || task.erstelltVon,
-          name: ersteller
-            ? `${ersteller.vorname} ${ersteller.nachname}`
-            : "Unbekannt",
-        },
-        erstelltAm: task.erstelltAm.toISOString(),
-        aktualisiertAm: task.aktualisiertAm.toISOString(),
-        completionPercentage: calculateCompletionPercentage(task),
-        permissions: getTaskPermissions(task, userId, userRole),
-      };
-
-      return dto;
-    })
+  userRoles: Rolle[],
+): boolean => {
+  // Admins und Vorstände dürfen immer ändern
+  const hasAdminRole = userRoles.some(
+    (role) => role.name === "ADMIN" || role.name === "VORSTAND",
   );
+  if (hasAdminRole) return true;
+
+  // Beirat darf Status ändern
+  const hasBeiratRole = userRoles.some((role) => role.name === "BEIRAT");
+  if (hasBeiratRole) return true;
+
+  // Team Event bei Event-Kontext
+  if (task.context.type === "event") {
+    const hasTeamEventRole = userRoles.some(
+      (role) => role.name === "TEAM_EVENT",
+    );
+    if (hasTeamEventRole) return true;
+  }
+
+  // Verantwortlicher darf Status ändern
+  if (task.verantwortlichId === userId) return true;
+
+  // Zugewiesene Personen dürfen bestimmte Status ändern
+  if (task.zugewiesenAn?.includes(userId)) {
+    // Zugewiesene dürfen nur auf in_bearbeitung oder review setzen
+    return task.status === "offen" || task.status === "in_bearbeitung";
+  }
+
+  return false;
+};
+
+/**
+ * Mappt eine Task-Entität zu einem DetailDTO
+ * @param task - Die Task-Entität
+ * @returns Das gemappte TaskDetailDTO
+ */
+export const mapTaskToDetailDTO = (task: Task): TaskDetailDTO => {
+  return {
+    id: task.id,
+    titel: task.titel,
+    beschreibung: task.beschreibung,
+    context: task.context,
+    verantwortlichId: task.verantwortlichId,
+    zugewiesenAn: task.zugewiesenAn,
+    status: task.status,
+    prioritaet: task.prioritaet,
+    frist: task.frist,
+    materialien: task.materialien,
+    abhaengigVon: task.abhaengigVon,
+    istStandardaufgabe: task.istStandardaufgabe,
+    kategorie: task.kategorie,
+    erstelltVon: task.erstelltVon,
+    erstelltAm: task.erstelltAm,
+    aktualisiertAm: task.aktualisiertAm,
+    erledigtAm: task.erledigtAm,
+    erledigtVon: task.erledigtVon,
+    geloescht: task.geloescht,
+  };
+};
+
+/**
+ * Mappt eine Task-Entität zu einem ListDTO
+ * @param task - Die Task-Entität
+ * @param verantwortlicherName - Optional: Name des Verantwortlichen
+ * @returns Das gemappte TaskListDTO
+ */
+export const mapTaskToListDTO = (
+  task: Task,
+  verantwortlicherName?: string,
+): TaskListDTO => {
+  const today = new Date();
+  const istUeberfaellig = task.frist
+    ? new Date(task.frist) < today && task.status !== "erledigt"
+    : false;
+
+  return {
+    id: task.id,
+    titel: task.titel,
+    status: task.status,
+    prioritaet: task.prioritaet,
+    frist: task.frist,
+    verantwortlicherName,
+    zugewieseneAnzahl: task.zugewiesenAn.length,
+    istUeberfaellig,
+    context: task.context,
+  };
+};
+
+/**
+ * Mappt mehrere Tasks zu ListDTOs
+ * @param tasks - Array von Tasks
+ * @param mitgliederMap - Optional: Map von Mitglied-IDs zu Namen
+ * @returns Array von TaskListDTOs
+ */
+export const mapTasksToListDTOs = (
+  tasks: Task[],
+  mitgliederMap?: Map<string, string>,
+): TaskListDTO[] => {
+  return tasks.map((task) => {
+    const verantwortlicherName =
+      task.verantwortlichId && mitgliederMap
+        ? mitgliederMap.get(task.verantwortlichId)
+        : undefined;
+
+    return mapTaskToListDTO(task, verantwortlicherName);
+  });
+};
+
+/**
+ * Mappt eine Task-Entität zu einem SummaryDTO
+ * @param task - Die Task-Entität
+ * @returns Das gemappte TaskSummaryDTO
+ */
+export const mapTaskToSummaryDTO = (task: Task): TaskSummaryDTO => {
+  return {
+    id: task.id,
+    titel: task.titel,
+    status: task.status,
+    prioritaet: task.prioritaet,
+    frist: task.frist,
+    context: task.context,
+  };
 };
 
 /**
  * Identifiziert blockierte Tasks
+ * @param tasks - Array von Tasks
+ * @param allTasks - Optional: Alle Tasks für Abhängigkeitsprüfung
+ * @returns Array von blockierten Task-IDs
  */
-export const identifyBlockedTasks = async (
+export const identifyBlockedTasks = (
   tasks: Task[],
-  taskRepository: ITaskRepository
-): Promise<Set<string>> => {
-  const blockedTaskIds = new Set<string>();
+  allTasks?: Task[],
+): string[] => {
+  const blockedIds: string[] = [];
 
-  for (const task of tasks) {
-    if (await isTaskBlocked(task, taskRepository)) {
-      blockedTaskIds.add(task.id);
+  tasks.forEach((task) => {
+    // Explizit blockierte Tasks
+    if (task.status === "blockiert") {
+      blockedIds.push(task.id);
+      return;
     }
-  }
 
-  return blockedTaskIds;
-};
+    // Implizit blockierte durch Abhängigkeiten
+    if (task.abhaengigVon && task.abhaengigVon.length > 0 && allTasks) {
+      const isBlocked = task.abhaengigVon.some((depId) => {
+        const depTask = allTasks.find((t) => t.id === depId);
+        return depTask && depTask.status !== "erledigt";
+      });
 
-/**
- * Prüft ob eine Task blockiert ist
- */
-export const isTaskBlocked = async (
-  task: Task,
-  taskRepository: ITaskRepository
-): Promise<boolean> => {
-  if (!task.abhaengigVon || task.abhaengigVon.length === 0) return false;
-
-  const dependencies = await Promise.all(
-    task.abhaengigVon.map(id => taskRepository.findById(id))
-  );
-
-  return dependencies.some(dep => dep && dep.status !== "erledigt");
-};
-
-/**
- * Berechnet Task Permissions
- */
-export const getTaskPermissions = (
-  task: Task,
-  userId: string,
-  userRole: string
-): TaskPermissionsDTO => {
-  const isAssigned = task.zugewiesenAn.includes(userId);
-  const isResponsible = task.verantwortlichId === userId;
-  const isCreator = task.erstelltVon === userId;
-  const isLeadership = ["VORSTAND", "BEIRAT", "ADMIN"].includes(userRole);
-
-  return {
-    canEdit: isAssigned || isResponsible || isCreator || isLeadership,
-    canDelete: (isCreator && task.status === "offen") || userRole === "ADMIN",
-    canChangeStatus: isAssigned || isResponsible || isLeadership,
-    canAssign: isResponsible || isLeadership,
-    canComment: true,
-    canViewDetails: true,
-  };
-};
-
-/**
- * Mappt Member References
- */
-export const mapMemberReferences = async (
-  memberIds: string[],
-  memberRepository: IMemberRepository
-): Promise<UserReferenceDTO[]> => {
-  const members = await Promise.all(
-    memberIds.map(id => memberRepository.findById(id))
-  );
-
-  return members
-    .filter(Boolean)
-    .map(m => ({
-      id: m!.id,
-      name: `${m!.vorname} ${m!.nachname}`,
-      avatarUrl: m!.profilbild,
-    }));
-};
-
-/**
- * Mappt User Reference
- */
-export const mapUserReference = async (
-  userId: string,
-  memberRepository: IMemberRepository
-): Promise<UserReferenceDTO> => {
-  const member = await memberRepository.findById(userId);
-  return {
-    id: userId,
-    name: member ? `${member.vorname} ${member.nachname}` : "Unbekannt",
-    avatarUrl: member?.profilbild,
-  };
-};
-
-/**
- * Löst Context Namen auf
- */
-export const resolveContextName = async (
-  context: { type: string; id: string | null }
-): Promise<string | undefined> => {
-  // TODO: Implement actual resolution
-  if (context.type === "event" && context.id) {
-    return `Event ${context.id}`;
-  }
-  if (context.type === "team" && context.id) {
-    return `Team ${context.id}`;
-  }
-  return undefined;
-};
-
-/**
- * Berechnet Completion Percentage
- */
-export const calculateCompletionPercentage = (task: Task): number => {
-  const statusWeights = {
-    offen: 0,
-    in_bearbeitung: 50,
-    review: 90,
-    erledigt: 100,
-    blockiert: 0,
-  };
-
-  return statusWeights[task.status] || 0;
-};
-
-/**
- * Filter Tasks
- */
-export const applyTaskFilters = async (
-  tasks: Task[],
-  filters: any,
-  taskRepository: ITaskRepository
-): Promise<Task[]> => {
-  let filteredTasks = [...tasks];
-
-  if (filters.status && filters.status.length > 0) {
-    filteredTasks = filteredTasks.filter(t =>
-      filters.status!.includes(t.status)
-    );
-  }
-
-  if (filters.priority && filters.priority.length > 0) {
-    filteredTasks = filteredTasks.filter(t =>
-      filters.priority!.includes(t.prioritaet)
-    );
-  }
-
-  if (!filters.includeCompleted) {
-    filteredTasks = filteredTasks.filter(t => t.status !== "erledigt");
-  }
-
-  if (filters.context) {
-    filteredTasks = filteredTasks.filter(t => t.context.type === filters.context);
-  }
-
-  if (filters.dueDateFrom || filters.dueDateTo) {
-    filteredTasks = filteredTasks.filter(t => {
-      if (!t.frist) return false;
-      const dueDate = new Date(t.frist);
-      if (filters.dueDateFrom && dueDate < new Date(filters.dueDateFrom)) return false;
-      if (filters.dueDateTo && dueDate > new Date(filters.dueDateTo)) return false;
-      return true;
-    });
-  }
-
-  return filteredTasks;
-};
-
-/**
- * Create Task Summary
- */
-export const createTaskSummary = (
-  tasks: Task[],
-  blockedTaskIds: Set<string>
-): any => {
-  const now = new Date();
-  const inThreeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-
-  return {
-    total: tasks.length,
-    byStatus: {
-      offen: tasks.filter(t => t.status === "offen").length,
-      in_bearbeitung: tasks.filter(t => t.status === "in_bearbeitung").length,
-      review: tasks.filter(t => t.status === "review").length,
-      erledigt: tasks.filter(t => t.status === "erledigt").length,
-      blockiert: tasks.filter(t => t.status === "blockiert").length,
-    },
-    overdue: tasks.filter(t =>
-      t.frist && new Date(t.frist) < now && t.status !== "erledigt"
-    ).length,
-    dueSoon: tasks.filter(t =>
-      t.frist &&
-      new Date(t.frist) >= now &&
-      new Date(t.frist) <= inThreeDays &&
-      t.status !== "erledigt"
-    ).length,
-    blocked: blockedTaskIds.size,
-  };
-};
-
-/**
- * Sort Tasks by Priority and Deadline
- */
-export const sortTasksByPriorityAndDeadline = (
-  tasks: Task[],
-  blockedTaskIds: Set<string>
-): Task[] => {
-  return [...tasks].sort((a, b) => {
-    // Blockierte Tasks zuletzt
-    const aBlocked = blockedTaskIds.has(a.id);
-    const bBlocked = blockedTaskIds.has(b.id);
-    if (aBlocked && !bBlocked) return 1;
-    if (!aBlocked && bBlocked) return -1;
-
-    // Priorität
-    const priorityOrder = { kritisch: 0, hoch: 1, mittel: 2, niedrig: 3 };
-    const prioDiff = priorityOrder[a.prioritaet] - priorityOrder[b.prioritaet];
-    if (prioDiff !== 0) return prioDiff;
-
-    // Frist
-    if (a.frist && b.frist) {
-      return a.frist.getTime() - b.frist.getTime();
+      if (isBlocked) {
+        blockedIds.push(task.id);
+      }
     }
-    return a.frist ? -1 : 1;
   });
+
+  return blockedIds;
+};
+
+/**
+ * Filtert überfällige Tasks
+ * @param tasks - Array von Tasks
+ * @returns Array von überfälligen Tasks
+ */
+export const getOverdueTasks = (tasks: Task[]): Task[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return tasks.filter((task) => {
+    if (!task.frist || task.status === "erledigt" || task.geloescht) {
+      return false;
+    }
+    const fristDate = new Date(task.frist);
+    fristDate.setHours(0, 0, 0, 0);
+    return fristDate < today;
+  });
+};
+
+/**
+ * Factory für GetTasksByPerson UseCase
+ * @param repository - Task Repository
+ * @returns UseCase Funktion
+ */
+export const createGetTasksByPersonUseCase = (
+  repository: TaskRepository,
+): GetTasksByPersonUseCase => {
+  return async (params: GetTasksByPersonParams) => {
+    const tasks = await repository.getTasksByPerson(params.personId);
+    const activeTasks = tasks.filter((t) => !t.geloescht);
+    return {
+      tasks: activeTasks.map(mapTaskToDetailDTO),
+      total: activeTasks.length,
+    };
+  };
+};
+
+/**
+ * Factory für GetTasksByTeam UseCase
+ * @param repository - Task Repository
+ * @returns UseCase Funktion
+ */
+export const createGetTasksByTeamUseCase = (
+  repository: TaskRepository,
+): GetTasksByTeamUseCase => {
+  return async (params: GetTasksByTeamParams) => {
+    const tasks = await repository.getTasksByTeam(params.teamId);
+    const activeTasks = tasks.filter((t) => !t.geloescht);
+    return {
+      tasks: activeTasks.map(mapTaskToDetailDTO),
+      total: activeTasks.length,
+    };
+  };
+};
+
+/**
+ * Factory für GetTasksByEvent UseCase
+ * @param repository - Task Repository
+ * @returns UseCase Funktion
+ */
+export const createGetTasksByEventUseCase = (
+  repository: TaskRepository,
+): GetTasksByEventUseCase => {
+  return async (params: GetTasksByEventParams) => {
+    const tasks = await repository.getTasksByEvent(params.eventId);
+    const activeTasks = tasks.filter((t) => !t.geloescht);
+    return {
+      tasks: activeTasks.map(mapTaskToDetailDTO),
+      total: activeTasks.length,
+    };
+  };
+};
+
+/**
+ * Sortiert Tasks nach Priorität und Frist
+ * @param tasks - Array von Tasks
+ * @returns Sortiertes Array
+ */
+export const sortTasksByPriority = (
+  tasks: TaskDetailDTO[],
+): TaskDetailDTO[] => {
+  const priorityOrder: Record<TaskPriority, number> = {
+    kritisch: 0,
+    hoch: 1,
+    mittel: 2,
+    niedrig: 3,
+  };
+
+  return [...tasks].sort((a, b) => {
+    // Erst nach Priorität
+    const priorityDiff =
+      priorityOrder[a.prioritaet] - priorityOrder[b.prioritaet];
+    if (priorityDiff !== 0) return priorityDiff;
+
+    // Dann nach Frist (frühere zuerst)
+    if (a.frist && b.frist) {
+      return new Date(a.frist).getTime() - new Date(b.frist).getTime();
+    }
+    if (a.frist) return -1;
+    if (b.frist) return 1;
+
+    // Zuletzt nach Erstellungsdatum
+    return new Date(a.erstelltAm).getTime() - new Date(b.erstelltAm).getTime();
+  });
+};
+
+/**
+ * Gruppiert Tasks nach Status
+ * @param tasks - Array von Tasks
+ * @returns Gruppierte Tasks
+ */
+export const groupTasksByStatus = (
+  tasks: TaskDetailDTO[],
+): Record<TaskStatus, TaskDetailDTO[]> => {
+  const groups: Partial<Record<TaskStatus, TaskDetailDTO[]>> = {};
+
+  tasks.forEach((task) => {
+    if (!groups[task.status]) {
+      groups[task.status] = [];
+    }
+    groups[task.status]!.push(task);
+  });
+
+  return groups as Record<TaskStatus, TaskDetailDTO[]>;
+};
+
+/**
+ * Berechnet Task-Statistiken
+ * @param tasks - Array von Tasks
+ * @returns Statistik-Objekt
+ */
+export const calculateTaskStats = (tasks: TaskDetailDTO[]) => {
+  const total = tasks.length;
+  const byStatus = groupTasksByStatus(tasks);
+
+  return {
+    total,
+    offen: byStatus["offen"]?.length || 0,
+    inBearbeitung: byStatus["in_bearbeitung"]?.length || 0,
+    review: byStatus["review"]?.length || 0,
+    erledigt: byStatus["erledigt"]?.length || 0,
+    blockiert: byStatus["blockiert"]?.length || 0,
+    überfällig: getOverdueTasks(tasks as any).length,
+  };
+};
+
+/**
+ * Filtert Tasks nach Context-Typ
+ * @param tasks - Array von Tasks
+ * @param contextType - Der Context-Typ
+ * @returns Gefilterte Tasks
+ */
+export const filterTasksByContextType = (
+  tasks: TaskDetailDTO[],
+  contextType: "event" | "team" | "general",
+): TaskDetailDTO[] => {
+  return tasks.filter((task) => task.context.type === contextType);
+};
+
+/**
+ * Prüft ob Task Materialien benötigt
+ * @param task - Task
+ * @returns true wenn unbeschaffte Materialien vorhanden
+ */
+export const taskNeedsMaterials = (task: Task): boolean => {
+  return task.materialien.some((material) => !material.besorgt);
+};
+
+/**
+ * Erstellt Audit-Log-Eintrag für Task-Änderung
+ * @param task - Task
+ * @param action - Durchgeführte Aktion
+ * @param userId - Benutzer-ID
+ * @param changes - Änderungen
+ * @returns Audit-Log-Parameter
+ */
+export const createTaskAuditParams = (
+  task: Task,
+  action: AuditAction,
+  userId: string,
+  changes?: Array<{ field: string; oldValue: any; newValue: any }>,
+) => {
+  return {
+    userId,
+    action,
+    entityType: "task" as const,
+    entityId: task.id,
+    entityName: task.titel,
+    changes,
+    metadata: {
+      context: task.context,
+      prioritaet: task.prioritaet,
+    },
+  };
 };

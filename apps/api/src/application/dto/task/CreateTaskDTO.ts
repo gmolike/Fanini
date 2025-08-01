@@ -1,5 +1,5 @@
 // apps/api/src/application/dto/task/CreateTaskDTO.ts
-import type { TaskPriority, TaskMaterial } from "@/domain/entities/Task";
+import type { TaskPriority, TaskMaterial, TaskStatus } from "@/domain/entities/Task";
 
 /**
  * Create Task DTO

@@ -50,16 +50,14 @@ export const mapTaskToListDTO = async (
     memberRepository.findById(task.erstelltVon),
   ]);
 
-  // Berechne ob Task überfällig ist
-  const istUeberfaellig = task.frist
-    ? new Date(task.frist) < new Date() && task.status !== "erledigt"
-    : false;
-
   // Erstelle Permissions
   const permissions: TaskPermissionsDTO = {
     canEdit: canEditTask(task, userId, userRole),
     canDelete: canDeleteTask(task, userId, userRole),
     canChangeStatus: canChangeTaskStatus(task, userId, userRole),
+    canAssign: canAssignTask(task, userId, userRole),
+    canComment: true,
+    canViewDetails: true,
   };
 
   return {
@@ -80,7 +78,7 @@ export const mapTaskToListDTO = async (
     ) as UserReferenceDTO[],
     istStandardaufgabe: task.istStandardaufgabe,
     istBlockiert: istBlockiert ?? task.status === "blockiert",
-    istUeberfaellig,
+    // istUeberfaellig entfernt - nicht in TaskListDTO
     erstelltVon: {
       id: task.erstelltVon,
       name: ersteller
@@ -151,11 +149,12 @@ export const mapTaskToDetailDTO = async (
     memberRepository,
   );
 
-  // Erstelle Abhängigkeiten-DTOs
+  // Erstelle Abhängigkeiten-DTOs mit korrekter Struktur inkl. status
   const abhaengigVon: TaskDependencyDTO[] | undefined = task.abhaengigVon
     ? dependentTasks.map((depTask, index) => ({
         taskId: task.abhaengigVon![index],
         titel: depTask?.titel || "Unbekannte Aufgabe",
+        status: depTask?.status || "offen", // Status hinzugefügt
         istErledigt: depTask?.status === "erledigt",
         blockiertAktuell: depTask?.status !== "erledigt",
       }))
@@ -168,12 +167,8 @@ export const mapTaskToDetailDTO = async (
     canChangeStatus: canChangeTaskStatus(task, userId, userRole),
     canAssign: canAssignTask(task, userId, userRole),
     canComment: true,
+    canViewDetails: true,
   };
-
-  // Berechne ob Task überfällig ist
-  const istUeberfaellig = task.frist
-    ? new Date(task.frist) < new Date() && task.status !== "erledigt"
-    : false;
 
   return {
     id: task.id,
@@ -203,7 +198,7 @@ export const mapTaskToDetailDTO = async (
     aktualisiertAm: task.aktualisiertAm.toISOString(),
     erledigtAm: task.erledigtAm?.toISOString(),
     erledigtVon: task.erledigtVon,
-    istUeberfaellig,
+    // istUeberfaellig entfernt - prüfe ob es in TaskDetailDTO existiert
     kommentare,
     permissions,
   };

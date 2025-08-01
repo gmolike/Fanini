@@ -1,10 +1,11 @@
 // apps/api/src/infrastructure/di/slices/eventSlice.ts
-import { createGetEventsUseCase } from "@/application/use-cases";
-import { createGetEventByIdUseCase } from "@/application/use-cases/event/GetEventById";
+import {
+  createGetPublicEventsUseCase,
+  createGetPublicEventByIdUseCase,
+} from "@/application/use-cases/event";
 import { createMySQLEventRepository } from "@/infrastructure/repositories/MySQLEventRepository";
 import { createEventController } from "@/presentation/controllers/event/EventController";
 import { Container } from "../container";
-
 
 export const registerEventSlice = (container: Container) => {
   // Repository
@@ -14,20 +15,21 @@ export const registerEventSlice = (container: Container) => {
   });
 
   // Use Cases
-  container.register("GetEventsUseCase", () => {
+  container.register("GetPublicEventsUseCase", () => {
     const repo = container.get("EventRepository");
-    return createGetEventsUseCase(repo);
+    return createGetPublicEventsUseCase(repo);
   });
 
-  container.register("GetEventByIdUseCase", () => {
+  container.register("GetPublicEventByIdUseCase", () => {
     const repo = container.get("EventRepository");
-    return createGetEventByIdUseCase(repo);
+    const taskRepo = container.get("TaskRepository");
+    return createGetPublicEventByIdUseCase(repo, taskRepo);
   });
 
   // Controller
   container.register("EventController", () => {
-    const getEvents = container.get("GetEventsUseCase");
-    const getEventById = container.get("GetEventByIdUseCase");
-    return createEventController(getEvents, getEventById);
+    const getPublicEvents = container.get("GetPublicEventsUseCase");
+    const getPublicEventById = container.get("GetPublicEventByIdUseCase");
+    return createEventController(getPublicEvents, getPublicEventById);
   });
 };

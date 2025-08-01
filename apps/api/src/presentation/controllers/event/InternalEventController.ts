@@ -1,16 +1,14 @@
 // apps/api/src/presentation/controllers/event/InternalEventController.ts
-import { z } from "zod";
-import type {
-  CreateEventUseCase,
-  UpdateEventUseCase,
-  DeleteEventUseCase,
-  ChangeEventStatusUseCase,
-  GetInternalEventsUseCase,
-  GetInternalEventByIdUseCase,
-} from "@/application/use-cases/event";
 import { EventStatus } from "@/domain/entities/Event";
+import {
+  created,
+  error,
+  notFound,
+  success
+} from "@/presentation/helpers/responses";
+import { withErrorHandling } from "@/presentation/helpers/responses/errorHandler";
+import z from "zod";
 
-// Validation Schemas
 const createEventSchema = z.object({
   titel: z.string().min(3).max(255),
   beschreibung: z.string().min(10),
@@ -64,422 +62,138 @@ const changeStatusSchema = z.object({
   ]),
   kommentar: z.string().optional(),
 });
-
 export class InternalEventController {
   constructor(
-    private readonly createEventUseCase: CreateEventUseCase,
-    private readonly updateEventUseCase: UpdateEventUseCase,
-    private readonly deleteEventUseCase: DeleteEventUseCase,
-    private readonly changeEventStatusUseCase: ChangeEventStatusUseCase,
-    private readonly getInternalEventsUseCase: GetInternalEventsUseCase,
-    private readonly getInternalEventByIdUseCase: GetInternalEventByIdUseCase,
+    private readonly createEventUseCase: any,
+    private readonly updateEventUseCase: any,
+    private readonly getInternalEventsUseCase: any,
+    private readonly getInternalEventByIdUseCase: any,
   ) {}
 
   /**
-   * @swagger
-   * /api/internal/events:
-   *   post:
-   *     summary: Event erstellen
-   *     tags: ["📅 Events"]
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/CreateEvent'
-   *     responses:
-   *       201:
-   *         description: Event erfolgreich erstellt
-   *       400:
-   *         description: Validierungsfehler
-   *       403:
-   *         description: Keine Berechtigung
+   * Create event
    */
-  async createEvent(req: Request): Promise<Response> {
-    try {
-      const body = await req.json();
-      const validated = createEventSchema.parse(body);
-      const { userId, userRole } = req as any;
+  createEvent = withErrorHandling(async (req: Request) => {
+    const body = await req.json();
+    const validated = createEventSchema.parse(body);
+    const { userId, userRole, userName } = req as any;
 
-      const event = await this.createEventUseCase.execute({
-        ...validated,
-        userId,
-        userRole,
+    const result = await this.createEventUseCase.execute({
+      data: validated,
+      userId,
+      userRole,
+      userName,
+      context: {
         ipAddress: req.headers.get("x-forwarded-for") || undefined,
         userAgent: req.headers.get("user-agent") || undefined,
-      });
+      },
+    });
 
-      return Response.json({ success: true, data: event }, { status: 201 });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return Response.json(
-          { success: false, errors: error.errors },
-          { status: 400 },
-        );
-      }
-      if (error instanceof Error) {
-        return Response.json(
-          { success: false, error: error.message },
-          { status: error.message.includes("Berechtigung") ? 403 : 400 },
-        );
-      }
-      return Response.json(
-        { success: false, error: "Event creation failed" },
-        { status: 500 },
+    if (!result.success) {
+      return error(
+        result.error.message,
+        result.error.code,
+        result.error.statusCode,
       );
     }
-  }
+
+    return created(
+      {
+        eventId: result.eventId,
+        requiresApproval: result.requiresApproval,
+      },
+      `/api/internal/events/${result.eventId}`,
+    );
+  });
 
   /**
-   * @swagger
-   * /api/internal/events/{id}:
-   *   put:
-   *     summary: Event aktualisieren
-   *     tags: ["📅 Events"]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             $ref: '#/components/schemas/UpdateEvent'
-   *     responses:
-   *       200:
-   *         description: Event erfolgreich aktualisiert
-   *       403:
-   *         description: Keine Berechtigung
-   *       404:
-   *         description: Event nicht gefunden
+   * Update event
    */
-  async updateEvent(req: Request): Promise<Response> {
-    try {
-      const { params } = req as any;
-      const body = await req.json();
-      const validated = updateEventSchema.parse(body);
-      const { userId, userRole } = req as any;
+  updateEvent = withErrorHandling(async (req: Request) => {
+    const { params } = req as any;
+    const body = await req.json();
+    const validated = updateEventSchema.parse(body);
+    const { userId, userRole, userName } = req as any;
 
-      const event = await this.updateEventUseCase.execute({
-        id: params.id,
-        data: validated,
-        userId,
-        userRole,
+    const result = await this.updateEventUseCase.execute({
+      id: params.id,
+      data: validated,
+      userId,
+      userRole,
+      userName,
+      context: {
         ipAddress: req.headers.get("x-forwarded-for") || undefined,
         userAgent: req.headers.get("user-agent") || undefined,
-      });
+      },
+    });
 
-      return Response.json({ success: true, data: event });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return Response.json(
-          { success: false, errors: error.errors },
-          { status: 400 },
-        );
-      }
-      if (error instanceof Error) {
-        const status = error.message.includes("nicht gefunden")
-          ? 404
-          : error.message.includes("Berechtigung")
-            ? 403
-            : 400;
-        return Response.json(
-          { success: false, error: error.message },
-          { status },
-        );
-      }
-      return Response.json(
-        { success: false, error: "Event update failed" },
-        { status: 500 },
+    if (!result.success) {
+      return error(
+        result.error.message,
+        result.error.code,
+        result.error.statusCode,
       );
     }
-  }
+
+    return success({
+      modifiedFields: result.modifiedFields,
+      requiresApproval: result.requiresApproval,
+      approvalRequestId: result.approvalRequestId,
+    });
+  });
 
   /**
-   * @swagger
-   * /api/internal/events/{id}:
-   *   delete:
-   *     summary: Event löschen (Soft Delete)
-   *     tags: ["📅 Events"]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Event erfolgreich gelöscht
-   *       403:
-   *         description: Keine Berechtigung
-   *       404:
-   *         description: Event nicht gefunden
+   * Get internal events
    */
-  async deleteEvent(req: Request): Promise<Response> {
-    try {
-      const { params } = req as any;
-      const { userId, userRole } = req as any;
+  getInternalEvents = withErrorHandling(async (req: Request) => {
+    const url = new URL(req.url);
+    const { userId, userRole } = req as any;
 
-      await this.deleteEventUseCase.execute({
-        id: params.id,
-        userId,
-        userRole,
-        ipAddress: req.headers.get("x-forwarded-for") || undefined,
-        userAgent: req.headers.get("user-agent") || undefined,
-      });
-
-      return Response.json({
-        success: true,
-        message: "Event erfolgreich gelöscht",
-      });
-    } catch (error) {
-      if (error instanceof Error) {
-        const status = error.message.includes("nicht gefunden")
-          ? 404
-          : error.message.includes("Berechtigung")
-            ? 403
-            : 400;
-        return Response.json(
-          { success: false, error: error.message },
-          { status },
-        );
-      }
-      return Response.json(
-        { success: false, error: "Event deletion failed" },
-        { status: 500 },
-      );
-    }
-  }
-
-  /**
-   * @swagger
-   * /api/internal/events/{id}/status:
-   *   patch:
-   *     summary: Event-Status ändern
-   *     tags: ["📅 Events"]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - status
-   *             properties:
-   *               status:
-   *                 type: string
-   *                 enum: [entwurf, geplant, genehmigt, aktiv, abgeschlossen, abgesagt]
-   *               kommentar:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Status erfolgreich geändert
-   *       403:
-   *         description: Keine Berechtigung für diese Status-Änderung
-   */
-  async changeEventStatus(req: Request): Promise<Response> {
-    try {
-      const { params } = req as any;
-      const body = await req.json();
-      const validated = changeStatusSchema.parse(body);
-      const { userId, userRole } = req as any;
-
-      const event = await this.changeEventStatusUseCase.execute({
-        id: params.id,
-        ...validated,
-        userId,
-        userRole,
-        ipAddress: req.headers.get("x-forwarded-for") || undefined,
-        userAgent: req.headers.get("user-agent") || undefined,
-      });
-
-      return Response.json({ success: true, data: event });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return Response.json(
-          { success: false, errors: error.errors },
-          { status: 400 },
-        );
-      }
-      if (error instanceof Error) {
-        const status = error.message.includes("nicht gefunden")
-          ? 404
-          : error.message.includes("Berechtigung")
-            ? 403
-            : 400;
-        return Response.json(
-          { success: false, error: error.message },
-          { status },
-        );
-      }
-      return Response.json(
-        { success: false, error: "Status change failed" },
-        { status: 500 },
-      );
-    }
-  }
-
-  /**
-   * @swagger
-   * /api/internal/events/list:
-   *   get:
-   *     summary: Erweiterte Event-Liste (intern)
-   *     tags: ["📅 Events"]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: query
-   *         name: status
-   *         schema:
-   *           type: string
-   *       - in: query
-   *         name: includeDeleted
-   *         schema:
-   *           type: boolean
-   *       - in: query
-   *         name: responsibleId
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Event-Liste mit erweiterten Daten
-   */
-  async getInternalEvents(req: Request): Promise<Response> {
-    try {
-      const url = new URL(req.url);
-      const { userId, userRole } = req as any;
-
-      // Status-Parameter validieren und casten
-      const statusParam = url.searchParams.get("status");
-      let status: EventStatus | undefined;
-
-      if (statusParam) {
-        const validStatuses: EventStatus[] = [
-          "entwurf",
-          "geplant",
-          "genehmigt",
-          "aktiv",
-          "abgeschlossen",
-          "abgesagt",
-        ];
-
-        if (validStatuses.includes(statusParam as EventStatus)) {
-          status = statusParam as EventStatus;
-        } else {
-          return Response.json(
-            {
-              success: false,
-              error: `Invalid status: ${statusParam}. Valid values are: ${validStatuses.join(", ")}`,
-            },
-            { status: 400 },
-          );
-        }
-      }
-
-      const filters = {
-        status,
-        includeDeleted: url.searchParams.get("includeDeleted") === "true",
-        responsibleId: url.searchParams.get("responsibleId") || undefined,
-        deputyId: url.searchParams.get("deputyId") || undefined,
+    const params = {
+      userId,
+      userRole,
+      filters: {
+        status: url.searchParams.get("status") as EventStatus | undefined,
         type: url.searchParams.get("type") || undefined,
         sportBereich: url.searchParams.get("sportBereich") || undefined,
-        fromDate: url.searchParams.get("fromDate")
-          ? new Date(url.searchParams.get("fromDate")!)
-          : undefined,
-        toDate: url.searchParams.get("toDate")
-          ? new Date(url.searchParams.get("toDate")!)
-          : undefined,
-      };
+        fromDate: url.searchParams.get("fromDate") || undefined,
+        toDate: url.searchParams.get("toDate") || undefined,
+        responsibleId: url.searchParams.get("responsibleId") || undefined,
+        search: url.searchParams.get("search") || undefined,
+        includeDeleted: url.searchParams.get("includeDeleted") === "true",
+        onlyMyEvents: url.searchParams.get("onlyMyEvents") === "true",
+      },
+      pagination: {
+        page: parseInt(url.searchParams.get("page") || "1"),
+        pageSize: parseInt(url.searchParams.get("pageSize") || "20"),
+      },
+    };
 
-      const events = await this.getInternalEventsUseCase.execute({
-        filters,
-        userId,
-        userRole,
-      });
+    const result = await this.getInternalEventsUseCase.execute(params);
 
-      return Response.json({
-        success: true,
-        data: events,
-        count: events.length,
-      });
-    } catch (error) {
-      console.error("Error fetching internal events:", error);
-      return Response.json(
-        { success: false, error: "Failed to fetch events" },
-        { status: 500 },
-      );
-    }
-  }
+    return success({
+      items: result.items,
+      pagination: result.pagination,
+    });
+  });
+
   /**
-   * @swagger
-   * /api/internal/events/{id}:
-   *   get:
-   *     summary: Event-Details mit allen Relationen
-   *     tags: ["📅 Events"]
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - in: path
-   *         name: id
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Vollständige Event-Details
-   *       403:
-   *         description: Keine Berechtigung
-   *       404:
-   *         description: Event nicht gefunden
+   * Get internal event by ID
    */
-  async getInternalEventById(req: Request): Promise<Response> {
-    try {
-      const { params } = req as any;
-      const { userId, userRole } = req as any;
+  getInternalEventById = withErrorHandling(async (req: Request) => {
+    const { params } = req as any;
+    const { userId, userRole } = req as any;
 
-      const event = await this.getInternalEventByIdUseCase.execute({
-        id: params.id,
-        userId,
-        userRole,
-      });
+    const event = await this.getInternalEventByIdUseCase.execute({
+      id: params.id,
+      userId,
+      userRole,
+    });
 
-      if (!event) {
-        return Response.json(
-          { success: false, error: "Event nicht gefunden" },
-          { status: 404 },
-        );
-      }
-
-      return Response.json({ success: true, data: event });
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("Berechtigung")) {
-        return Response.json(
-          { success: false, error: error.message },
-          { status: 403 },
-        );
-      }
-      console.error("Error fetching event details:", error);
-      return Response.json(
-        { success: false, error: "Failed to fetch event" },
-        { status: 500 },
-      );
+    if (!event) {
+      return notFound("Event", params.id);
     }
-  }
+
+    return success(event);
+  });
 }

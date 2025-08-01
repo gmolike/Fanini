@@ -16,7 +16,7 @@ export class MemberRouter extends BaseRouter {
     this.addRoute({
       method: "GET",
       path: "/api/members",
-      handler: protectedController.getMembers.bind(protectedController), 
+      handler: protectedController.getMembers.bind(protectedController),
       middlewares: [
         authMiddleware,
         createPermissionMiddleware(this.container, "member.read"),

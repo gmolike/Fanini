@@ -1,15 +1,13 @@
 // apps/api/src/infrastructure/di/slices/authSlice.ts
 import { AuthService } from "@/application/services/AuthService";
-import type {
-  LoginUseCase,
-  RefreshTokenUseCase,
-} from "@/application/use-cases/auth";
 import { createPermissionService } from "@/domain/services/PermissionService";
-import { MySQLAuthRepository } from "@/infrastructure/repositories/MySQLAuthRepository";
+import {
+  MySQLAuthRepository,
+  MySQLPermissionRepository,
+} from "@/infrastructure/repositories";
 import { AuthController } from "@/presentation/controllers/auth/AuthController";
-import type { Container } from "../container";
-import { MySQLPermissionRepository } from "@/infrastructure/repositories";
 import { createGetUserPermissionsUseCase } from "@/application/use-cases/auth/GetUserPermissionsUseCase";
+import type { Container } from "../container";
 
 export const registerAuthSlice = (container: Container): void => {
   console.log("🔐 Registering Auth slice...");
@@ -20,7 +18,12 @@ export const registerAuthSlice = (container: Container): void => {
     return new MySQLAuthRepository(db);
   });
 
-  // Auth Service
+  container.register("PermissionRepository", () => {
+    const db = container.get("Database");
+    return new MySQLPermissionRepository(db);
+  });
+
+  // Services
   container.register("AuthService", () => {
     const authRepo = container.get("AuthRepository");
     const easyVereinConfig = {
@@ -32,46 +35,22 @@ export const registerAuthSlice = (container: Container): void => {
     return new AuthService(authRepo, easyVereinConfig, jwtSecret);
   });
 
-  // Use Cases
-  container.register("LoginUseCase", (): LoginUseCase => {
-    const authService = container.get("AuthService");
-    return {
-      execute: (params) => authService.login(params.email, params.password),
-    };
-  });
-
-  container.register("RefreshTokenUseCase", (): RefreshTokenUseCase => {
-    const authService = container.get("AuthService");
-    return {
-      execute: (params) => authService.refreshToken(params.refreshToken),
-    };
-  });
-
-  container.register("PermissionRepository", () => {
-    const db = container.get("Database");
-    return new MySQLPermissionRepository(db);
-  });
-
   container.register("PermissionService", () => {
     return createPermissionService();
   });
 
+  // Use Cases
   container.register("GetUserPermissionsUseCase", () => {
     const authRepo = container.get("AuthRepository");
-    const permissionRepo = container.get("PermissionRepository"); // Zweiter Parameter!
+    const permissionRepo = container.get("PermissionRepository");
     return createGetUserPermissionsUseCase(authRepo, permissionRepo);
   });
 
-  // Controller - HIER IST WAHRSCHEINLICH DAS PROBLEM
+  // Controller - direkt mit AuthService
   container.register("AuthController", () => {
-    const loginUseCase = container.get("LoginUseCase");
-    const refreshTokenUseCase = container.get("RefreshTokenUseCase");
+    const authService = container.get("AuthService");
     const authRepository = container.get("AuthRepository");
-    return new AuthController(
-      loginUseCase,
-      refreshTokenUseCase,
-      authRepository,
-    );
+    return new AuthController(authService, authRepository);
   });
 
   console.log("✅ Auth slice registered successfully");

@@ -1,94 +1,62 @@
-import type {
-  GetMembersUseCase,
-  UpdateMemberUseCase,
-} from "@/application/use-cases";
+// apps/api/src/presentation/controllers/member/MemberController.ts
+import { z } from "zod";
+import { success, error, notFound } from "@/presentation/helpers/responses";
+import { withErrorHandling } from "@/presentation/helpers/responses/errorHandler";
 
-export class MemberController {
-  constructor(
-    private getMembersUseCase: GetMembersUseCase,
-    private updateMemberUseCase: UpdateMemberUseCase,
-  ) {}
+const getMembersQuerySchema = z.object({
+  active: z.coerce.boolean().optional(),
+  search: z.string().optional(),
+  roleId: z.string().optional(),
+});
 
-/**
- * @swagger
- * /api/members:
- *   get:
- *     summary: Liste aller Mitglieder
- *     tags: ["👥 Members"]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: active
- *         schema:
- *           type: boolean
- *         description: Nur aktive Mitglieder
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Suche nach Name oder Email
- *     responses:
- *       200:
- *         description: Mitgliederliste
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Member'
- */
-async getMembers(req: Request): Promise<Response> {    try {
-      const members = await this.getMembersUseCase.execute();
-      return Response.json({
-        success: true,
-        data: members,
-      });
-    } catch (error) {
-      return Response.json(
-        { success: false, error: "Failed to fetch members" },
-        { status: 500 },
-      );
+export type MemberController = {
+  getMembers: (req: Request) => Promise<Response>;
+  getMember: (req: Request) => Promise<Response>;
+};
+
+export const createMemberController = (
+  getPublicMembersUseCase: any,
+  getMemberByIdUseCase: any,
+): MemberController => ({
+  /**
+   * Get public members list
+   */
+  getMembers: withErrorHandling(async (req: Request) => {
+    const url = new URL(req.url);
+    const query = Object.fromEntries(url.searchParams);
+    const validated = getMembersQuerySchema.parse(query);
+
+    const result = await getPublicMembersUseCase.execute({
+      filters: {
+        search: validated.search,
+        role: validated.roleId,
+      },
+    });
+
+    return success({
+      data: result.items,
+      meta: {
+        total: result.pagination.totalItems,
+        page: result.pagination.page,
+        limit: result.pagination.pageSize,
+      },
+    });
+  }),
+
+  /**
+   * Get member by ID
+   */
+  getMember: withErrorHandling(async (req: Request) => {
+    const { params } = req as any;
+
+    const result = await getMemberByIdUseCase.execute({
+      id: params.id,
+    });
+
+    if (!result) {
+      return notFound("Member", params.id);
     }
-  }
 
-/**
- * @swagger
- * /api/members/{id}:
- *   get:
- *     summary: Mitglied-Details
- *     tags: ["👥 Members"]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Mitglied gefunden
- *       404:
- *         description: Mitglied nicht gefunden
- */
-async getMember(req: Request): Promise<Response> {    try {
-      const { params } = req as any;
-      // TODO: Implement single member fetch
-      return Response.json({
-        success: true,
-        data: { id: params.id, name: "Test Member" },
-      });
-    } catch (error) {
-      return Response.json(
-        { success: false, error: "Failed to fetch member" },
-        { status: 500 },
-      );
-    }
-  }
-}
+    return success(result);
+  }),
+});

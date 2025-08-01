@@ -1,8 +1,5 @@
 // apps/api/src/presentation/controllers/event/EventController.ts
-import type {
-  GetEventByIdUseCase,
-  GetEventsUseCase,
-} from "@/application/use-cases";
+import type { Event } from "@/domain/entities/Event";
 import { toPublicEventListItem } from "./dtos/public-event.dto";
 import { eventToJSON } from "@/domain/entities/Event";
 
@@ -12,55 +9,32 @@ export type EventController = {
 };
 
 export const createEventController = (
-  getEventsUseCase: GetEventsUseCase,
-  getEventByIdUseCase: GetEventByIdUseCase,
+  getPublicEventsUseCase: any, // GetPublicEventsUseCase
+  getPublicEventByIdUseCase: any, // GetPublicEventByIdUseCase
 ): EventController => ({
   /**
-   * @swagger
-   * /api/public/event/list:
-   *   get:
-   *     summary: Liste öffentlicher Events
-   *     tags: ["🌐 Public Events"]
-   *     parameters:
-   *       - in: query
-   *         name: type
-   *         schema:
-   *           type: string
-   *       - in: query
-   *         name: sportBereich
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Event-Liste mit Meta-Informationen
+   * Get public event list
    */
   getPublicEventList: async (req: Request) => {
     try {
       const url = new URL(req.url);
-      const type = url.searchParams.get("type") || undefined;
-      const sportBereich = url.searchParams.get("sportBereich") || undefined;
 
-      // Use Case liefert Domain Events
-      const events = await getEventsUseCase.execute({
+      const params = {
         filters: {
-          status: "genehmigt",
-          isPublic: true,
-          type,
-          sportBereich,
+          type: url.searchParams.get("type") || undefined,
+          sportBereich: url.searchParams.get("sportBereich") || undefined,
         },
-      });
+      };
 
-      // Transformiere zu Public DTOs
-      const publicEvents = events.map(toPublicEventListItem);
+      const result = await getPublicEventsUseCase.execute(params);
 
-      // Public API Response ohne success flag
       return Response.json({
-        data: publicEvents,
+        data: result.items,
         meta: {
-          total: publicEvents.length,
-          page: 1,
-          limit: 20,
-          hasMore: false,
+          total: result.pagination.totalItems,
+          page: result.pagination.page,
+          limit: result.pagination.pageSize,
+          hasMore: result.pagination.hasNext,
         },
       });
     } catch (error) {
@@ -73,38 +47,21 @@ export const createEventController = (
   },
 
   /**
-   * @swagger
-   * /api/public/event/{eventId}:
-   *   get:
-   *     summary: Öffentliche Event-Details
-   *     tags: ["🌐 Public Events"]
-   *     parameters:
-   *       - in: path
-   *         name: eventId
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Event-Details
-   *       404:
-   *         description: Event nicht gefunden
+   * Get public event detail
    */
   getPublicEventDetail: async (req: Request) => {
     try {
       const { params } = req as any;
-      const event = await getEventByIdUseCase.execute({
+      const result = await getPublicEventByIdUseCase.execute({
         id: params.eventId,
       });
 
-      if (!event) {
+      if (!result) {
         return Response.json({ error: "Event not found" }, { status: 404 });
       }
 
-      // TODO: Erstelle PublicEventDetailDto wenn Detail-View implementiert wird
-      // Vorerst nutzen wir eventToJSON
       return Response.json({
-        data: eventToJSON(event),
+        data: result,
       });
     } catch (error) {
       console.error("Error fetching event details:", error);

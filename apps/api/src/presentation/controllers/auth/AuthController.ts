@@ -8,10 +8,6 @@ import {
 } from "@/presentation/helpers/responses";
 import { withErrorHandling } from "@/presentation/helpers/responses/errorHandler";
 import { ERROR_CODES } from "@/presentation/helpers/responses/types";
-import type {
-  LoginUseCase,
-  RefreshTokenUseCase,
-} from "@/application/use-cases/auth";
 import type { IAuthRepository } from "@/domain/repositories/IAuthRepository";
 
 // Schema Definitionen
@@ -42,42 +38,21 @@ const logoutSchema = z.object({
  */
 export class AuthController {
   constructor(
-    private readonly loginUseCase: LoginUseCase,
-    private readonly refreshTokenUseCase: RefreshTokenUseCase,
-    private readonly authRepository?: IAuthRepository,
+    private readonly authService: any, // AuthService direkt nutzen
+    private readonly authRepository: IAuthRepository,
   ) {}
 
   /**
-   * @swagger
-   * /api/auth/login:
-   *   post:
-   *     summary: Benutzer anmelden
-   *     tags: ["🔐 Auth"]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - email
-   *               - password
-   *             properties:
-   *               email:
-   *                 type: string
-   *                 format: email
-   *               password:
-   *                 type: string
-   *                 minLength: 6
+   * Login endpoint
    */
   login = withErrorHandling(async (req: Request) => {
     const body = await req.json();
     const validated = loginSchema.parse(body);
 
-    const result = await this.loginUseCase.execute({
-      email: validated.email,
-      password: validated.password,
-    });
+    const result = await this.authService.login(
+      validated.email,
+      validated.password,
+    );
 
     if (!result.success) {
       return error(
@@ -95,11 +70,7 @@ export class AuthController {
   });
 
   /**
-   * @swagger
-   * /api/auth/register:
-   *   post:
-   *     summary: Neuen Benutzer registrieren
-   *     tags: ["🔐 Auth"]
+   * Register endpoint
    */
   register = withErrorHandling(async (req: Request) => {
     const body = await req.json();
@@ -116,17 +87,13 @@ export class AuthController {
   });
 
   /**
-   * @swagger
-   * /api/auth/refresh:
-   *   post:
-   *     summary: Access Token erneuern
-   *     tags: ["🔐 Auth"]
+   * Refresh token endpoint
    */
   refresh = withErrorHandling(async (req: Request) => {
     const body = await req.json();
     const { refreshToken } = refreshSchema.parse(body);
 
-    const result = await this.refreshTokenUseCase.execute({ refreshToken });
+    const result = await this.authService.refreshToken(refreshToken);
 
     if (!result.success) {
       return error(
@@ -143,13 +110,7 @@ export class AuthController {
   });
 
   /**
-   * @swagger
-   * /api/auth/logout:
-   *   post:
-   *     summary: Benutzer abmelden
-   *     tags: ["🔐 Auth"]
-   *     security:
-   *       - bearerAuth: []
+   * Logout endpoint
    */
   logout = withErrorHandling(async (req: Request) => {
     const userId = (req as any).userId;
@@ -168,12 +129,10 @@ export class AuthController {
       // Body ist optional, Fehler ignorieren
     }
 
-    if (this.authRepository) {
-      if (refreshToken) {
-        await this.authRepository.revokeRefreshToken(refreshToken, userId);
-      } else {
-        await this.authRepository.revokeAllUserRefreshTokens(userId, userId);
-      }
+    if (refreshToken) {
+      await this.authRepository.revokeRefreshToken(refreshToken, userId);
+    } else {
+      await this.authRepository.revokeAllUserRefreshTokens(userId, userId);
     }
 
     return success({

@@ -5,7 +5,7 @@ import type { IMemberRepository } from "@/domain/repositories/IMemberRepository"
 import type { TaskListDTO } from "@/application/dto/task";
 import { createNotFoundError } from "@/application/dto/common";
 import { TaskStatus, Task } from "@/domain/entities";
-import { identifyBlockedTasks } from "./helpers";
+import { identifyBlockedTasks, mapTasksToListDTOs } from "./helpers";
 
 /**
  * Get Tasks By Event Parameters

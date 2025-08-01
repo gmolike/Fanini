@@ -7,7 +7,7 @@ import type {
   TaskDependencyDTO,
   TaskPermissionsDTO,
 } from "@/application/dto/task";
-import type { Task } from "@/domain/entities/Task";
+import type { Task, TaskStatus } from "@/domain/entities/Task";
 import type { TaskComment } from "@/domain/entities/TaskComment";
 import type { IMemberRepository } from "@/domain/repositories/IMemberRepository";
 import type { ITaskRepository } from "@/domain/repositories/ITaskRepository";
@@ -60,6 +60,9 @@ export const mapTaskToListDTO = async (
     canViewDetails: true,
   };
 
+  // Berechne Completion Percentage basierend auf Status
+  const completionPercentage = calculateTaskCompletion(task.status);
+
   return {
     id: task.id,
     titel: task.titel,
@@ -78,7 +81,6 @@ export const mapTaskToListDTO = async (
     ) as UserReferenceDTO[],
     istStandardaufgabe: task.istStandardaufgabe,
     istBlockiert: istBlockiert ?? task.status === "blockiert",
-    // istUeberfaellig entfernt - nicht in TaskListDTO
     erstelltVon: {
       id: task.erstelltVon,
       name: ersteller
@@ -86,34 +88,11 @@ export const mapTaskToListDTO = async (
         : "Unbekannt",
     },
     erstelltAm: task.erstelltAm.toISOString(),
+    aktualisiertAm: task.aktualisiertAm.toISOString(), // Hinzugefügt
+    completionPercentage, // Hinzugefügt
     context: convertTaskContext(task.context),
     permissions,
   };
-};
-
-/**
- * Mappt mehrere Tasks zu ListDTOs
- */
-export const mapTasksToListDTOs = async (
-  tasks: Task[],
-  userId: string,
-  userRole: string,
-  memberRepository: IMemberRepository,
-  taskRepository: ITaskRepository,
-  blockedTaskIds?: string[],
-): Promise<TaskListDTO[]> => {
-  return Promise.all(
-    tasks.map((task) =>
-      mapTaskToListDTO(
-        task,
-        userId,
-        userRole,
-        memberRepository,
-        taskRepository,
-        blockedTaskIds?.includes(task.id),
-      ),
-    ),
-  );
 };
 
 /**
@@ -154,7 +133,7 @@ export const mapTaskToDetailDTO = async (
     ? dependentTasks.map((depTask, index) => ({
         taskId: task.abhaengigVon![index],
         titel: depTask?.titel || "Unbekannte Aufgabe",
-        status: depTask?.status || "offen", // Status hinzugefügt
+        status: depTask?.status || "offen",
         istErledigt: depTask?.status === "erledigt",
         blockiertAktuell: depTask?.status !== "erledigt",
       }))
@@ -194,14 +173,55 @@ export const mapTaskToDetailDTO = async (
     abhaengigVon,
     istStandardaufgabe: task.istStandardaufgabe,
     kategorie: task.kategorie,
-    erstelltAm: task.erstelltAm.toISOString(),
-    aktualisiertAm: task.aktualisiertAm.toISOString(),
-    erledigtAm: task.erledigtAm?.toISOString(),
-    erledigtVon: task.erledigtVon,
-    // istUeberfaellig entfernt - prüfe ob es in TaskDetailDTO existiert
     kommentare,
     permissions,
+    history: [],
+    metadata: {
+      erstelltAm: task.erstelltAm.toISOString(),
+      aktualisiertAm: task.aktualisiertAm.toISOString(),
+      versionsnummer: 1,
+    },
   };
+};
+
+/**
+ * Berechnet den Completion Percentage basierend auf dem Status
+ */
+const calculateTaskCompletion = (status: TaskStatus): number => {
+  const statusToCompletion: Record<TaskStatus, number> = {
+    offen: 0,
+    in_bearbeitung: 50,
+    review: 90,
+    erledigt: 100,
+    blockiert: 0,
+  };
+
+  return statusToCompletion[status] || 0;
+};
+
+/**
+ * Mappt mehrere Tasks zu ListDTOs
+ */
+export const mapTasksToListDTOs = async (
+  tasks: Task[],
+  userId: string,
+  userRole: string,
+  memberRepository: IMemberRepository,
+  taskRepository: ITaskRepository,
+  blockedTaskIds?: string[],
+): Promise<TaskListDTO[]> => {
+  return Promise.all(
+    tasks.map((task) =>
+      mapTaskToListDTO(
+        task,
+        userId,
+        userRole,
+        memberRepository,
+        taskRepository,
+        blockedTaskIds?.includes(task.id),
+      ),
+    ),
+  );
 };
 
 /**

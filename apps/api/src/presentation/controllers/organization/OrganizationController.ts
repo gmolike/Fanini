@@ -1,127 +1,78 @@
-// src/presentation/controllers/organization/OrganizationController.ts
-export class OrganizationController {
+// apps/api/src/presentation/controllers/organization/OrganizationController.ts
+import { success } from "@/presentation/helpers/responses";
+import { withErrorHandling } from "@/presentation/helpers/responses/errorHandler";
+
+export type OrganizationController = {
+  getPublicInfo: (req: Request) => Promise<Response>;
+  getPublicOrganizationDocuments: (req: Request) => Promise<Response>;
+  getPublicGremiumDetail: (req: Request) => Promise<Response>;
+  getPublicFAQ: (req: Request) => Promise<Response>;
+  getTeamHistoryYears: (req: Request) => Promise<Response>;
+  getTeamHistoryByYear: (req: Request) => Promise<Response>;
+};
+
+export const createOrganizationController = (): OrganizationController => ({
   /**
-   * @swagger
-   * /api/public/organization/structure:
-   *   get:
-   *     summary: Vereinsstruktur
-   *     tags: ["🌐 Public Organization"]
-   *     responses:
-   *       200:
-   *         description: Organisationsstruktur
+   * Get public organization info
    */
-  async getPublicInfo(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getPublicInfo: withErrorHandling(async (req: Request) => {
+    return success({
       data: {
         name: "Faninitiative Spandau e.V.",
         founded: "2025",
-        members: 42,
+        members: 72,
         description: "Fanverein der Eintracht Spandau",
       },
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/organization/documents:
-   *   get:
-   *     summary: Vereinsdokumente
-   *     tags: ["🌐 Public Organization"]
-   *     responses:
-   *       200:
-   *         description: Dokumentenliste
+   * Get public organization documents
    */
-  async getPublicOrganizationDocuments(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getPublicOrganizationDocuments: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
       message: "Organization documents coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/organization/gremien/{gremiumId}:
-   *   get:
-   *     summary: Gremium Details
-   *     tags: ["🌐 Public Organization"]
-   *     parameters:
-   *       - in: path
-   *         name: gremiumId
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Gremium gefunden
+   * Get public gremium detail
    */
-  async getPublicGremiumDetail(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getPublicGremiumDetail: withErrorHandling(async (req: Request) => {
+    return success({
       data: null,
       message: "Gremium details coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/faq:
-   *   get:
-   *     summary: Häufig gestellte Fragen
-   *     tags: ["🌐 Public Organization"]
-   *     responses:
-   *       200:
-   *         description: FAQ-Liste
+   * Get public FAQ
    */
-  async getPublicFAQ(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getPublicFAQ: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
       message: "FAQ coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/team-history/years:
-   *   get:
-   *     summary: Verfügbare Jahre der Team-Historie
-   *     tags: ["🌐 Public Organization"]
-   *     responses:
-   *       200:
-   *         description: Liste der Jahre
+   * Get team history years
    */
-  async getTeamHistoryYears(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getTeamHistoryYears: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
       message: "Team history coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/team-history/{year}:
-   *   get:
-   *     summary: Team-Historie für ein Jahr
-   *     tags: ["🌐 Public Organization"]
-   *     parameters:
-   *       - in: path
-   *         name: year
-   *         required: true
-   *         schema:
-   *           type: integer
-   *           example: 2024
-   *     responses:
-   *       200:
-   *         description: Historie des Jahres
+   * Get team history by year
    */
-  async getTeamHistoryByYear(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getTeamHistoryByYear: withErrorHandling(async (req: Request) => {
+    return success({
       data: null,
       message: "Team history coming soon",
     });
-  }
-}
+  }),
+});

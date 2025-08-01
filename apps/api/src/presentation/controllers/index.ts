@@ -1,10 +1,21 @@
+// apps/api/src/presentation/controllers/index.ts
 export { AuthController } from "./auth/AuthController";
-export { CreatorController } from "./creator/CreatorController";
+export { createCreatorController } from "./creator/CreatorController";
+export type { CreatorController } from "./creator/CreatorController";
+export { createEventController } from "./event/EventController";
 export type { EventController } from "./event/EventController";
-export { DocumentController } from "./document/DocumentController";
-export { MemberController } from "./member/MemberController";
-export { NewsletterController } from "./newsletter/NewsletterController";
-export { OrganizationController } from "./organization/OrganizationController";
-export { StatsController } from "./stats/StatsController";
+export { createDocumentController } from "./document/DocumentController";
+export type { DocumentController } from "./document/DocumentController";
+export { createMemberController } from "./member/MemberController";
+export type { MemberController } from "./member/MemberController";
+export { createNewsletterController } from "./newsletter/NewsletterController";
+export type { NewsletterController } from "./newsletter/NewsletterController";
+export { createOrganizationController } from "./organization/OrganizationController";
+export type { OrganizationController } from "./organization/OrganizationController";
+export { createStatsController } from "./stats/StatsController";
+export type { StatsController } from "./stats/StatsController";
+export { createTaskController } from "./task/TaskController";
+export type { TaskController } from "./task/TaskController";
 export { InternalEventController } from "./event/InternalEventController";
-export { TaskController } from "./task/TaskController";
+export { LocalMemberController } from "./member/LocalMemberController";
+export { ProtectedMemberController } from "./member/ProtectedMemberController";

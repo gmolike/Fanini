@@ -1,10 +1,10 @@
-// src/infrastructure/di/slices/statsSlice.ts
-import { Container } from "../container";
+// apps/api/src/infrastructure/di/slices/statsSlice.ts
+import type { Container } from "../container";
 import { GetPublicStatsUseCase } from "@/application/use-cases/stats";
-import { StatsController } from "@/presentation/controllers";
+import { createStatsController } from "@/presentation/controllers/stats/StatsController";
 import { MySQLStatsRepository } from "@/infrastructure/repositories/MySQLStatsRepository";
 
-export const registerStatsSlice = (container: Container) => {
+export const registerStatsSlice = (container: Container): void => {
   container.register("StatsRepository", () => {
     const db = container.get("Database");
     return new MySQLStatsRepository(db);
@@ -17,6 +17,6 @@ export const registerStatsSlice = (container: Container) => {
 
   container.register("StatsController", () => {
     const getPublicStats = container.get("GetPublicStatsUseCase");
-    return new StatsController(getPublicStats);
+    return createStatsController(getPublicStats);
   });
 };

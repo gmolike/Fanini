@@ -1,121 +1,52 @@
-// src/presentation/controllers/creator/CreatorController.ts
-export class CreatorController {
+// apps/api/src/presentation/controllers/creator/CreatorController.ts
+import { success } from "@/presentation/helpers/responses";
+import { withErrorHandling } from "@/presentation/helpers/responses/errorHandler";
+
+export type CreatorController = {
+  getPublicCreatorList: (req: Request) => Promise<Response>;
+  getPublicCreatorDetail: (req: Request) => Promise<Response>;
+  getPublicGallery: (req: Request) => Promise<Response>;
+  getPublicCreatorWorks: (req: Request) => Promise<Response>;
+};
+
+export const createCreatorController = (): CreatorController => ({
   /**
-   * @swagger
-   * /api/public/creators/list:
-   *   get:
-   *     summary: Liste aller Creator
-   *     tags: ["🌐 Public Creators"]
-   *     responses:
-   *       200:
-   *         description: Creator-Liste
-   *         content:
-   *           application/json:
-   *             schema:
-   *               type: object
-   *               properties:
-   *                 success:
-   *                   type: boolean
-   *                 data:
-   *                   type: array
-   *                   items:
-   *                     type: object
-   *                     properties:
-   *                       id:
-   *                         type: string
-   *                       kuenstlername:
-   *                         type: string
-   *                       profiltext:
-   *                         type: string
-   *                       istAktiv:
-   *                         type: boolean
+   * Get public creator list
    */
-  async getPublicCreatorList(req: Request): Promise<Response> {    return Response.json({
-      success: true,
+  getPublicCreatorList: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
       message: "Creator feature coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/creators/{creatorId}:
-   *   get:
-   *     summary: Creator-Profil Details
-   *     tags: ["🌐 Public Creators"]
-   *     parameters:
-   *       - in: path
-   *         name: creatorId
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Creator gefunden
-   *       404:
-   *         description: Creator nicht gefunden
+   * Get public creator detail
    */
-  async getPublicCreatorDetail(req: Request): Promise<Response> {    return Response.json({
-      success: true,
+  getPublicCreatorDetail: withErrorHandling(async (req: Request) => {
+    return success({
       data: null,
       message: "Creator feature coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/creators/gallery:
-   *   get:
-   *     summary: Öffentliche Galerie aller Werke
-   *     tags: ["🌐 Public Creators"]
-   *     parameters:
-   *       - in: query
-   *         name: type
-   *         schema:
-   *           type: string
-   *           enum: [BILD, VIDEO, AUDIO, TEXT]
-   *         description: Filter nach Werktyp
-   *     responses:
-   *       200:
-   *         description: Galerie-Inhalte
+   * Get public gallery
    */
-  async getPublicGallery(req: Request): Promise<Response> {    return Response.json({
-      success: true,
+  getPublicGallery: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
       message: "Gallery feature coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/creators/{creatorId}/works:
-   *   get:
-   *     summary: Werke eines Creators
-   *     tags: ["🌐 Public Creators"]
-   *     parameters:
-   *       - in: path
-   *         name: creatorId
-   *         required: true
-   *         schema:
-   *           type: string
-   *       - in: query
-   *         name: page
-   *         schema:
-   *           type: integer
-   *           default: 1
-   *       - in: query
-   *         name: limit
-   *         schema:
-   *           type: integer
-   *           default: 10
-   *     responses:
-   *       200:
-   *         description: Werke mit Pagination
+   * Get creator works
    */
-  async getPublicCreatorWorks(req: Request): Promise<Response> {    return Response.json({
-      success: true,
+  getPublicCreatorWorks: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
       message: "Creator works feature coming soon",
     });
-  }
-}
+  }),
+});

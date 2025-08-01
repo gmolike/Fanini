@@ -1,10 +1,9 @@
-// src/infrastructure/di/slices/creatorSlice.ts
-import { Container } from "../container";
-import { CreatorController } from "@/presentation/controllers";
+// apps/api/src/infrastructure/di/slices/creatorSlice.ts
+import type { Container } from "../container";
+import { createCreatorController } from "@/presentation/controllers/creator/CreatorController";
 
-export const registerCreatorSlice = (container: Container) => {
-  // Temporär - wird später implementiert
+export const registerCreatorSlice = (container: Container): void => {
   container.register("CreatorController", () => {
-    return new CreatorController();
+    return createCreatorController();
   });
 };

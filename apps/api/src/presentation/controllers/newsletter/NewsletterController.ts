@@ -1,137 +1,86 @@
-// src/presentation/controllers/newsletter/NewsletterController.ts
-export class NewsletterController {
+// apps/api/src/presentation/controllers/newsletter/NewsletterController.ts
+import { z } from "zod";
+import { success, created } from "@/presentation/helpers/responses";
+import { withErrorHandling } from "@/presentation/helpers/responses/errorHandler";
+
+const subscribeSchema = z.object({
+  email: z.string().email(),
+  vorname: z.string().min(2),
+  nachname: z.string().optional(),
+});
+
+const confirmSchema = z.object({
+  token: z.string(),
+});
+
+const unsubscribeSchema = z.object({
+  email: z.string().email(),
+  token: z.string(),
+});
+
+export type NewsletterController = {
+  subscribe: (req: Request) => Promise<Response>;
+  confirmSubscription: (req: Request) => Promise<Response>;
+  unsubscribe: (req: Request) => Promise<Response>;
+  getPublicNewsletterList: (req: Request) => Promise<Response>;
+  getPublicNewsletterDetail: (req: Request) => Promise<Response>;
+};
+
+export const createNewsletterController = (): NewsletterController => ({
   /**
-   * @swagger
-   * /api/public/newsletter/subscribe:
-   *   post:
-   *     summary: Newsletter abonnieren
-   *     tags: ["🌐 Public Newsletter"]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - email
-   *               - vorname
-   *             properties:
-   *               email:
-   *                 type: string
-   *                 format: email
-   *               vorname:
-   *                 type: string
-   *               nachname:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Erfolgreich abonniert
+   * Subscribe to newsletter
    */
-  async subscribe(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
-      message: "Newsletter subscribe feature coming soon",
+  subscribe: withErrorHandling(async (req: Request) => {
+    const body = await req.json();
+    const validated = subscribeSchema.parse(body);
+
+    return created({
+      message:
+        "Registration successful. Please check your email to verify your subscription.",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/newsletter/confirm:
-   *   post:
-   *     summary: Newsletter-Anmeldung bestätigen
-   *     tags: ["🌐 Public Newsletter"]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - token
-   *             properties:
-   *               token:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Bestätigung erfolgreich
+   * Confirm subscription
    */
-  async confirmSubscription(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  confirmSubscription: withErrorHandling(async (req: Request) => {
+    const body = await req.json();
+    const validated = confirmSchema.parse(body);
+
+    return success({
       message: "Newsletter confirm feature coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/newsletter/unsubscribe:
-   *   post:
-   *     summary: Newsletter abbestellen
-   *     tags: ["🌐 Public Newsletter"]
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - email
-   *               - token
-   *             properties:
-   *               email:
-   *                 type: string
-   *               token:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Erfolgreich abgemeldet
+   * Unsubscribe from newsletter
    */
-  async unsubscribe(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  unsubscribe: withErrorHandling(async (req: Request) => {
+    const body = await req.json();
+    const validated = unsubscribeSchema.parse(body);
+
+    return success({
       message: "Newsletter unsubscribe feature coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/newsletter/list:
-   *   get:
-   *     summary: Newsletter-Archiv
-   *     tags: ["🌐 Public Newsletter"]
-   *     responses:
-   *       200:
-   *         description: Newsletter-Liste
+   * Get newsletter list
    */
-  async getPublicNewsletterList(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getPublicNewsletterList: withErrorHandling(async (req: Request) => {
+    return success({
       data: [],
-      message: "Newsletter List feature coming soon",
+      message: "Newsletter list feature coming soon",
     });
-  }
+  }),
 
   /**
-   * @swagger
-   * /api/public/newsletter/{newsletterId}:
-   *   get:
-   *     summary: Newsletter Details
-   *     tags: ["🌐 Public Newsletter"]
-   *     parameters:
-   *       - in: path
-   *         name: newsletterId
-   *         required: true
-   *         schema:
-   *           type: string
-   *     responses:
-   *       200:
-   *         description: Newsletter gefunden
+   * Get newsletter detail
    */
-  async getPublicNewsletterDetail(req: Request): Promise<Response> {
-    return Response.json({
-      success: true,
+  getPublicNewsletterDetail: withErrorHandling(async (req: Request) => {
+    return success({
       data: null,
-      message: "Newsletter Detail feature coming soon",
+      message: "Newsletter detail feature coming soon",
     });
-  }
-}
+  }),
+});

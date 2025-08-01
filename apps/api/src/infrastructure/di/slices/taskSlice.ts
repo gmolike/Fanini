@@ -1,4 +1,5 @@
-import { Container } from "../container";
+// apps/api/src/infrastructure/di/slices/taskSlice.ts
+import type { Container } from "../container";
 import {
   CreateTaskUseCase,
   UpdateTaskUseCase,
@@ -20,9 +21,9 @@ import {
   UnassignMemberUseCase,
 } from "@/application/use-cases/task";
 import { MySQLTaskRepository } from "@/infrastructure/repositories/MySQLTaskRepository";
-import { TaskController } from "@/presentation/controllers/task/TaskController";
+import { createTaskController } from "@/presentation/controllers/task/TaskController";
 
-export const registerTaskSlice = (container: Container) => {
+export const registerTaskSlice = (container: Container): void => {
   // Repository
   container.register("TaskRepository", () => {
     const db = container.get("Database");
@@ -91,6 +92,7 @@ export const registerTaskSlice = (container: Container) => {
     const taskRepo = container.get("TaskRepository");
     return new GetMyTasksUseCase(taskRepo);
   });
+
   // Weitere Use Cases
   container.register("UnassignMemberUseCase", () => {
     const taskRepo = container.get("TaskRepository");
@@ -137,7 +139,7 @@ export const registerTaskSlice = (container: Container) => {
     return new NotifyTaskAssigneesUseCase(taskRepo);
   });
 
-  // Controller
+  // Controller - mit Factory Function
   container.register("TaskController", () => {
     const createTask = container.get("CreateTaskUseCase");
     const updateTask = container.get("UpdateTaskUseCase");
@@ -150,7 +152,7 @@ export const registerTaskSlice = (container: Container) => {
     const getTasksByEvent = container.get("GetTasksByEventUseCase");
     const getMyTasks = container.get("GetMyTasksUseCase");
 
-    return new TaskController(
+    return createTaskController(
       createTask,
       updateTask,
       deleteTask,

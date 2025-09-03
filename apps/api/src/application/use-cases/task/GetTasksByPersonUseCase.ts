@@ -1,208 +1,95 @@
-// apps/api/src/application/use-cases/task/GetTasksByTeamUseCase.ts
+// apps/api/src/application/use-cases/task/GetTasksByPersonUseCase.ts
 import type { ITaskRepository } from "@/domain/repositories/ITaskRepository";
 import type { IMemberRepository } from "@/domain/repositories/IMemberRepository";
-import type { AuditLogService } from "@/application/services/AuditLogService";
-import type { TaskListDTO, TaskReportDTO } from "@/application/dto/task";
-import type { Task, TaskStatus } from "@/domain/entities/Task";
-import { createPermissionError } from "@/application/dto/common";
-import { identifyBlockedTasks, mapTasksToListDTOs } from "./helpers";
+import type { TaskListItemDTO, TaskStatsDTO } from "@/application/dto/task";
+import { mapTasksToListItems } from "./mappers/TaskMapper";
+import { calculateTaskStats } from "./helpers/TaskStatsCalculator";
+import { TaskPermissionService } from "@/application/services/TaskPermissionService";
 
 /**
- * Get Tasks By Team Parameters
+ * Get Tasks By Person Use Case
  */
-export type GetTasksByTeamParams = {
-  readonly teamId: string;
+export type GetTasksByPersonUseCase = {
+  execute: (params: GetTasksByPersonParams) => Promise<GetTasksByPersonResult>;
+};
+
+export type GetTasksByPersonParams = {
+  readonly personId: string;
   readonly userId: string;
   readonly userRole: string;
-  readonly filters?: {
-    readonly status?: TaskStatus[];
-    readonly assigneeId?: string;
-    readonly includeCompleted?: boolean;
-  };
+  readonly includeCompleted?: boolean;
+};
+
+export type GetTasksByPersonResult = {
+  readonly success: boolean;
+  readonly tasks?: ReadonlyArray<TaskListItemDTO>;
+  readonly stats?: TaskStatsDTO;
+  readonly error?: string;
+};
+
+export type TaskSummaryDTO = {
+  readonly total: number;
+  readonly asVerantwortlicher: number;
+  readonly asZugewiesener: number;
+  readonly asErsteller: number;
 };
 
 /**
- * Get Tasks By Team Result
+ * Factory für GetTasksByPersonUseCase
  */
-export type GetTasksByTeamResult = {
-  readonly items: TaskListDTO[];
-  readonly report: TaskReportDTO;
-};
-
-/**
- * Get Tasks By Team Use Case
- * @description Lädt alle Tasks eines Teams
- */
-export type GetTasksByTeamUseCase = {
-  execute: (params: GetTasksByTeamParams) => Promise<GetTasksByTeamResult>;
-};
-
-export const createGetTasksByTeamUseCase = (
+export const createGetTasksByPersonUseCase = (
   taskRepository: ITaskRepository,
   memberRepository: IMemberRepository,
-  auditLogService: AuditLogService,
-): GetTasksByTeamUseCase => ({
-  execute: async ({ teamId, userId, userRole, filters = {} }) => {
-    // 1. Berechtigungsprüfung für spezielle Teams
-    const restrictedTeams = ["TEAM_VORSTAND", "TEAM_BEIRAT"];
-    if (restrictedTeams.includes(teamId)) {
-      const canViewRestrictedTeams = ["VORSTAND", "BEIRAT", "ADMIN"].includes(
+  taskPermissionService: TaskPermissionService,
+): GetTasksByPersonUseCase => ({
+  execute: async ({ personId, userId, userRole, includeCompleted = false }) => {
+    try {
+      // 1. Berechtigung prüfen
+      const canViewOthersTasks = ["ADMIN", "VORSTAND", "BEIRAT"].includes(
         userRole,
       );
-      if (!canViewRestrictedTeams) {
-        throw createPermissionError(`Tasks von ${teamId} anzeigen`);
+      if (personId !== userId && !canViewOthersTasks) {
+        return {
+          success: false,
+          error: "Keine Berechtigung für diese Ansicht",
+        };
       }
-    }
 
-    // 2. Tasks laden
-    const allTasks = await taskRepository.getTasksByTeam(teamId);
+      // 2. Tasks abrufen
+      const tasks = await taskRepository.getTasksByMember(personId);
 
-    // 3. Filter anwenden
-    let filteredTasks = allTasks;
+      // 3. Filter anwenden
+      const filteredTasks = includeCompleted
+        ? tasks
+        : tasks.filter((t) => t.status !== "erledigt");
 
-    if (filters.status && filters.status.length > 0) {
-      filteredTasks = filteredTasks.filter((t) =>
-        filters.status!.includes(t.status),
+      // 4. Nur sichtbare Tasks
+      const visibleTasks = filteredTasks.filter((task) =>
+        taskPermissionService.canViewTask(task, userId, userRole),
       );
+
+      // 5. Zu DTOs mappen
+      const taskItems = await mapTasksToListItems(visibleTasks, {
+        userId,
+        userRole,
+        memberRepository,
+        taskRepository,
+      });
+
+      // 6. Statistiken
+      const stats = calculateTaskStats(visibleTasks);
+
+      return {
+        success: true,
+        tasks: taskItems,
+        stats,
+      };
+    } catch (error) {
+      console.error("GetTasksByPersonUseCase error:", error);
+      return {
+        success: false,
+        error: "Fehler beim Abrufen der persönlichen Tasks",
+      };
     }
-
-    if (filters.assigneeId) {
-      filteredTasks = filteredTasks.filter((t) =>
-        t.zugewiesenAn.includes(filters.assigneeId!),
-      );
-    }
-
-    if (!filters.includeCompleted) {
-      filteredTasks = filteredTasks.filter((t) => t.status !== "erledigt");
-    }
-
-    // 4. Blockierte Tasks identifizieren
-    const blockedTaskIds = await identifyBlockedTasks(
-      filteredTasks,
-      taskRepository,
-    );
-
-    // 5. Zu DTOs mappen
-    const items = await mapTasksToListDTOs(
-      filteredTasks,
-      userId,
-      userRole,
-      memberRepository,
-      taskRepository,
-      blockedTaskIds,
-    );
-
-    // 6. Report erstellen
-    const report = await createTaskReport(
-      filteredTasks,
-      teamId,
-      userId,
-      memberRepository,
-    );
-
-    // 7. Audit Log
-    await auditLogService.logAction({
-      userId,
-      action: "viewed",
-      entityType: "task",
-      entityId: "team-tasks",
-      metadata: {
-        context: "team",
-        teamId,
-        taskCount: items.length,
-        filters,
-      },
-    });
-
-    return { items, report };
   },
 });
-
-const createTaskReport = async (
-  tasks: Task[],
-  teamId: string,
-  userId: string,
-  memberRepository: IMemberRepository,
-): Promise<TaskReportDTO> => {
-  const now = new Date();
-  const inThreeDays = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-
-  // Assignee Statistiken
-  const assigneeMap = new Map<
-    string,
-    { taskCount: number; completedCount: number }
-  >();
-
-  for (const task of tasks) {
-    for (const assigneeId of task.zugewiesenAn) {
-      const stats = assigneeMap.get(assigneeId) || {
-        taskCount: 0,
-        completedCount: 0,
-      };
-      stats.taskCount++;
-      if (task.status === "erledigt") {
-        stats.completedCount++;
-      }
-      assigneeMap.set(assigneeId, stats);
-    }
-  }
-
-  // Assignee Details laden
-  const assigneeStats = await Promise.all(
-    Array.from(assigneeMap.entries()).map(async ([assigneeId, stats]) => {
-      const member = await memberRepository.findById(assigneeId);
-      return {
-        userId: assigneeId,
-        name: member ? `${member.vorname} ${member.nachname}` : "Unbekannt",
-        taskCount: stats.taskCount,
-        completedCount: stats.completedCount,
-      };
-    }),
-  );
-
-  return {
-    context: {
-      type: "team",
-      id: teamId,
-      name: `Team ${teamId}`, // TODO: Team-Namen auflösen
-    },
-    summary: {
-      total: tasks.length,
-      open: tasks.filter((t) => t.status === "offen").length,
-      inProgress: tasks.filter((t) => t.status === "in_bearbeitung").length,
-      review: tasks.filter((t) => t.status === "review").length,
-      completed: tasks.filter((t) => t.status === "erledigt").length,
-      blocked: tasks.filter((t) => t.status === "blockiert").length,
-    },
-    byPriority: {
-      niedrig: tasks.filter((t) => t.prioritaet === "niedrig").length,
-      mittel: tasks.filter((t) => t.prioritaet === "mittel").length,
-      hoch: tasks.filter((t) => t.prioritaet === "hoch").length,
-      kritisch: tasks.filter((t) => t.prioritaet === "kritisch").length,
-    },
-    overdueCount: tasks.filter(
-      (t) => t.frist && new Date(t.frist) < now && t.status !== "erledigt",
-    ).length,
-    dueSoonCount: tasks.filter(
-      (t) =>
-        t.frist &&
-        new Date(t.frist) >= now &&
-        new Date(t.frist) <= inThreeDays &&
-        t.status !== "erledigt",
-    ).length,
-    assigneeStats,
-    categoryBreakdown: tasks.reduce(
-      (acc, task) => {
-        if (task.kategorie) {
-          acc[task.kategorie] = (acc[task.kategorie] || 0) + 1;
-        }
-        return acc;
-      },
-      {} as Record<string, number>,
-    ),
-    metadata: {
-      generatedAt: new Date().toISOString(),
-      generatedBy: userId,
-    },
-  };
-};

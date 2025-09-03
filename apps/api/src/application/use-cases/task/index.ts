@@ -1,5 +1,4 @@
 // apps/api/src/application/use-cases/task/index.ts
-
 // CRUD Operations
 export { createCreateTaskUseCase } from "./CreateTaskUseCase";
 export type {
@@ -28,6 +27,14 @@ export type {
   GetTaskByIdResult,
   GetTaskByIdUseCase,
 } from "./GetTaskByIdUseCase";
+
+// NEU: GetTasks Use Case
+export { createGetTasksUseCase } from "./GetTasksUseCase";
+export type {
+  GetTasksParams,
+  GetTasksResult,
+  GetTasksUseCase,
+} from "./GetTasksUseCase";
 
 // Task Lists
 export { createGetTasksByPersonUseCase } from "./GetTasksByPersonUseCase";
@@ -82,7 +89,3 @@ export type {
   AddTaskCommentResult,
   AddTaskCommentUseCase,
 } from "./AddTaskCommentUseCase";
-
-// Helpers
-export * from "./helpers";
-

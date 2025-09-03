@@ -1,51 +1,80 @@
+// apps/api/src/domain/entities/Task.ts
 import { generateId } from "@faninitiative/shared";
 
+/**
+ * Task Context definiert den Kontext einer Aufgabe
+ * @property type - Der Typ des Kontexts (event, team, general)
+ * @property id - Die ID des zugehörigen Kontexts (null bei general)
+ */
 export type TaskContext = {
-  type: 'event' | 'team' | 'general';
-  id: string | null;
+  readonly type: "event" | "team" | "general";
+  readonly id: string | null;
 };
 
-export type TaskPriority = 'niedrig' | 'mittel' | 'hoch' | 'kritisch';
-export type TaskStatus = 'offen' | 'in_bearbeitung' | 'review' | 'erledigt' | 'blockiert';
+/**
+ * Task Priority Level
+ */
+export type TaskPriority = "niedrig" | "mittel" | "hoch" | "kritisch";
 
+/**
+ * Task Status im Workflow
+ */
+export type TaskStatus =
+  | "offen"
+  | "in_bearbeitung"
+  | "review"
+  | "erledigt"
+  | "blockiert";
+
+/**
+ * Material das für eine Task benötigt wird
+ */
 export type TaskMaterial = {
-  name: string;
-  menge: number;
-  einheit: string;
-  beschreibung?: string;
-  besorgt: boolean;
+  readonly name: string;
+  readonly menge: number;
+  readonly einheit: string;
+  readonly beschreibung?: string;
+  readonly besorgt: boolean;
+  readonly besorgtVon?: string;
+  readonly besorgtAm?: Date;
 };
 
+/**
+ * Task Entity - Zentrale Aufgaben-Entität
+ */
 export type Task = {
-  id: string;
-  titel: string;
-  beschreibung?: string;
-  context: TaskContext;
-  verantwortlichId?: string;
-  zugewiesenAn: string[];
-  status: TaskStatus;
-  prioritaet: TaskPriority;
-  frist?: Date;
-  materialien: TaskMaterial[];
-  abhaengigVon?: string[];
-  istStandardaufgabe: boolean;
-  kategorie?: string;
-  erstelltVon: string;
-  erstelltAm: Date;
-  aktualisiertAm: Date;
-  erledigtAm?: Date;
-  erledigtVon?: string;
-  geloescht: boolean;
+  readonly id: string;
+  readonly titel: string;
+  readonly beschreibung?: string;
+  readonly context: TaskContext;
+  readonly verantwortlichId?: string;
+  readonly zugewiesenAn: ReadonlyArray<string>;
+  readonly status: TaskStatus;
+  readonly prioritaet: TaskPriority;
+  readonly frist?: Date;
+  readonly materialien: ReadonlyArray<TaskMaterial>;
+  readonly abhaengigVon?: ReadonlyArray<string>;
+  readonly istStandardaufgabe: boolean;
+  readonly kategorie?: string;
+  readonly erstelltVon: string;
+  readonly erstelltAm: Date;
+  readonly aktualisiertAm: Date;
+  readonly erledigtAm?: Date;
+  readonly erledigtVon?: string;
+  readonly geloescht: boolean;
 };
 
+/**
+ * Factory-Funktion zum Erstellen einer neuen Task
+ */
 export const createTask = (params: {
-  titel: string;
-  beschreibung?: string;
-  context: TaskContext;
-  verantwortlichId?: string;
-  prioritaet?: TaskPriority;
-  frist?: Date;
-  erstelltVon: string;
+  readonly titel: string;
+  readonly beschreibung?: string;
+  readonly context: TaskContext;
+  readonly verantwortlichId?: string;
+  readonly prioritaet?: TaskPriority;
+  readonly frist?: Date;
+  readonly erstelltVon: string;
 }): Task => {
   const now = new Date();
   return {
@@ -55,8 +84,8 @@ export const createTask = (params: {
     context: params.context,
     verantwortlichId: params.verantwortlichId,
     zugewiesenAn: params.verantwortlichId ? [params.verantwortlichId] : [],
-    status: 'offen',
-    prioritaet: params.prioritaet || 'mittel',
+    status: "offen",
+    prioritaet: params.prioritaet || "mittel",
     frist: params.frist,
     materialien: [],
     abhaengigVon: undefined,
@@ -67,39 +96,56 @@ export const createTask = (params: {
     aktualisiertAm: now,
     erledigtAm: undefined,
     erledigtVon: undefined,
-    geloescht: false
+    geloescht: false,
   };
 };
 
+/**
+ * Business Rule: Kann Task von User bearbeitet werden?
+ */
 export const canTaskBeEditedBy = (task: Task, userId: string): boolean => {
-  return task.verantwortlichId === userId ||
-         task.zugewiesenAn.includes(userId) ||
-         task.erstelltVon === userId;
+  return (
+    task.verantwortlichId === userId ||
+    task.zugewiesenAn.includes(userId) ||
+    task.erstelltVon === userId
+  );
 };
 
-export const isTaskBlocked = (task: Task, allTasks: Task[]): boolean => {
+/**
+ * Business Rule: Ist Task blockiert durch Abhängigkeiten?
+ */
+export const isTaskBlocked = (
+  task: Task,
+  allTasks: ReadonlyArray<Task>,
+): boolean => {
   if (!task.abhaengigVon || task.abhaengigVon.length === 0) return false;
 
-  const dependencies = allTasks.filter(t => task.abhaengigVon!.includes(t.id));
-  return dependencies.some(dep => dep.status !== 'erledigt');
+  const dependencies = allTasks.filter((t) =>
+    task.abhaengigVon!.includes(t.id),
+  );
+  return dependencies.some((dep) => dep.status !== "erledigt");
 };
 
-export const taskToJSON = (task: Task) => ({
-  id: task.id,
-  titel: task.titel,
-  beschreibung: task.beschreibung,
-  context: task.context,
-  verantwortlichId: task.verantwortlichId,
-  zugewiesenAn: task.zugewiesenAn,
-  status: task.status,
-  prioritaet: task.prioritaet,
-  frist: task.frist?.toISOString(),
-  materialien: task.materialien,
-  abhaengigVon: task.abhaengigVon,
-  istStandardaufgabe: task.istStandardaufgabe,
-  kategorie: task.kategorie,
-  erstelltAm: task.erstelltAm.toISOString(),
-  aktualisiertAm: task.aktualisiertAm.toISOString(),
-  erledigtAm: task.erledigtAm?.toISOString(),
-  erledigtVon: task.erledigtVon
-});
+/**
+ * Status-Übergänge im Workflow
+ */
+export const TASK_STATUS_TRANSITIONS: Record<
+  TaskStatus,
+  ReadonlyArray<TaskStatus>
+> = {
+  offen: ["in_bearbeitung", "blockiert"],
+  in_bearbeitung: ["review", "blockiert", "offen"],
+  review: ["erledigt", "in_bearbeitung", "blockiert"],
+  erledigt: [],
+  blockiert: ["offen", "in_bearbeitung"],
+} as const;
+
+/**
+ * Prüft ob Status-Übergang erlaubt ist
+ */
+export const isStatusTransitionAllowed = (
+  from: TaskStatus,
+  to: TaskStatus,
+): boolean => {
+  return TASK_STATUS_TRANSITIONS[from].includes(to);
+};

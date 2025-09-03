@@ -2,8 +2,7 @@
 import type { TaskPriority, TaskMaterial, TaskStatus } from "@/domain/entities/Task";
 
 /**
- * Create Task DTO
- * @description Daten für Task-Erstellung
+ * DTO für Task-Erstellung
  */
 export type CreateTaskDTO = {
   readonly titel: string;
@@ -13,57 +12,50 @@ export type CreateTaskDTO = {
     readonly id?: string;
   };
   readonly verantwortlichId?: string;
-  readonly zugewiesenAn?: string[];
+  readonly zugewiesenAn?: ReadonlyArray<string>;
   readonly prioritaet: TaskPriority;
   readonly frist?: string;
-  readonly materialien?: Omit<TaskMaterial, "besorgt">[];
-  readonly abhaengigVon?: string[];
+  readonly materialien?: ReadonlyArray<
+    Omit<TaskMaterial, "besorgt" | "besorgtVon" | "besorgtAm">
+  >;
+  readonly abhaengigVon?: ReadonlyArray<string>;
   readonly kategorie?: string;
   readonly istStandardaufgabe?: boolean;
 };
 
 /**
- * Update Task DTO
- * @description Daten für Task-Aktualisierung
+ * DTO für Task-Aktualisierung
  */
-export type UpdateTaskDTO = {
-  readonly titel?: string;
-  readonly beschreibung?: string;
-  readonly verantwortlichId?: string;
-  readonly prioritaet?: TaskPriority;
-  readonly frist?: string;
-  readonly kategorie?: string;
-  readonly changeComment?: string;
-};
+export type UpdateTaskDTO = Partial<{
+  readonly titel: string;
+  readonly beschreibung: string;
+  readonly verantwortlichId: string;
+  readonly prioritaet: TaskPriority;
+  readonly frist: string;
+  readonly kategorie: string;
+}>;
 
 /**
- * Bulk Assign Tasks DTO
- * @description Mehrfach-Zuweisung von Tasks
- */
-export type BulkAssignTasksDTO = {
-  readonly taskIds: string[];
-  readonly assignTo?: string[];
-  readonly removeFrom?: string[];
-  readonly comment?: string;
-};
-
-/**
- * Task Status Change DTO
- * @description Status-Änderung mit Begründung
+ * DTO für Status-Änderung
  */
 export type ChangeTaskStatusDTO = {
   readonly status: TaskStatus;
   readonly comment?: string;
-  readonly actualHours?: number; // Bei Abschluss
+  readonly actualHours?: number;
 };
 
 /**
- * Task Material Update DTO
- * @description Material-Status aktualisieren
+ * DTO für Task-Zuweisung
  */
-export type UpdateTaskMaterialDTO = {
-  readonly materialIndex: number;
-  readonly besorgt: boolean;
-  readonly besorgtVon?: string;
-  readonly kommentar?: string;
+export type AssignTaskDTO = {
+  readonly memberIds: ReadonlyArray<string>;
+  readonly comment?: string;
+};
+
+/**
+ * DTO für Kommentar
+ */
+export type AddCommentDTO = {
+  readonly text: string;
+  readonly erwaehntePersonen?: ReadonlyArray<string>;
 };

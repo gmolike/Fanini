@@ -1,28 +1,26 @@
 // apps/api/src/infrastructure/di/slices/taskSlice.ts
 import type { Container } from "../container";
 import {
-  CreateTaskUseCase,
-  UpdateTaskUseCase,
-  DeleteTaskUseCase,
-  GetTaskByIdUseCase,
-  GetTasksUseCase,
-  ChangeTaskStatusUseCase,
-  AssignTaskUseCase,
-  AddTaskCommentUseCase,
-  GetTasksByEventUseCase,
-  GetMyTasksUseCase,
-  BlockTaskUseCase,
-  CompleteTaskUseCase,
-  CreateTaskFromTemplateUseCase,
-  GetTaskCommentsUseCase,
-  GetTasksByMemberUseCase,
-  GetTasksByTeamUseCase,
-  NotifyTaskAssigneesUseCase,
-  UnassignMemberUseCase,
+  createCreateTaskUseCase,
+  createUpdateTaskUseCase,
+  createDeleteTaskUseCase,
+  createGetTaskByIdUseCase,
+  createGetTasksUseCase,
+  createGetTasksByPersonUseCase,
+  createGetTasksByTeamUseCase,
+  createGetTasksByEventUseCase,
+  createChangeTaskStatusUseCase,
+  createAssignTaskUseCase,
+  createAddTaskCommentUseCase,
+  createCompleteTaskUseCase,
 } from "@/application/use-cases/task";
 import { MySQLTaskRepository } from "@/infrastructure/repositories/MySQLTaskRepository";
 import { createTaskController } from "@/presentation/controllers/task/TaskController";
+import { createTaskPermissionService } from "@/application/services/TaskPermissionService";
 
+/**
+ * Registriert alle Task-bezogenen Dependencies
+ */
 export const registerTaskSlice = (container: Container): void => {
   // Repository
   container.register("TaskRepository", () => {
@@ -30,139 +28,129 @@ export const registerTaskSlice = (container: Container): void => {
     return new MySQLTaskRepository(db);
   });
 
+  // Services
+  container.register("TaskPermissionService", () => {
+    return createTaskPermissionService();
+  });
+
   // Use Cases
+  registerTaskUseCases(container);
+
+  // Controller
+  container.register("TaskController", () => {
+    return createTaskController(
+      container.get("CreateTaskUseCase"),
+      container.get("UpdateTaskUseCase"),
+      container.get("GetTaskByIdUseCase"),
+      container.get("GetTasksUseCase"),
+      container.get("ChangeTaskStatusUseCase"),
+    );
+  });
+};
+
+/**
+ * Registriert alle Task Use Cases
+ */
+const registerTaskUseCases = (container: Container): void => {
+  // CRUD Use Cases
   container.register("CreateTaskUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const memberRepo = container.get("MemberRepository");
-    const permissionService = container.get("PermissionService");
-    return new CreateTaskUseCase(taskRepo, memberRepo, permissionService);
+    return createCreateTaskUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("AuditLogService"),
+    );
   });
 
   container.register("UpdateTaskUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const memberRepo = container.get("MemberRepository");
-    const permissionService = container.get("PermissionService");
-    return new UpdateTaskUseCase(taskRepo, memberRepo, permissionService);
+    return createUpdateTaskUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+      container.get("AuditLogService"),
+    );
   });
 
   container.register("DeleteTaskUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new DeleteTaskUseCase(taskRepo, permissionService);
+    return createDeleteTaskUseCase(
+      container.get("TaskRepository"),
+      container.get("TaskPermissionService"),
+      container.get("AuditLogService"),
+    );
   });
 
   container.register("GetTaskByIdUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const memberRepo = container.get("MemberRepository");
-    const permissionService = container.get("PermissionService");
-    return new GetTaskByIdUseCase(taskRepo, memberRepo, permissionService);
+    return createGetTaskByIdUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+    );
   });
 
   container.register("GetTasksUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new GetTasksUseCase(taskRepo, permissionService);
+    return createGetTasksUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+    );
   });
 
-  container.register("ChangeTaskStatusUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new ChangeTaskStatusUseCase(taskRepo, permissionService);
-  });
-
-  container.register("AssignTaskUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const memberRepo = container.get("MemberRepository");
-    const permissionService = container.get("PermissionService");
-    return new AssignTaskUseCase(taskRepo, memberRepo, permissionService);
-  });
-
-  container.register("AddTaskCommentUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const memberRepo = container.get("MemberRepository");
-    return new AddTaskCommentUseCase(taskRepo, memberRepo);
-  });
-
-  container.register("GetTasksByEventUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    return new GetTasksByEventUseCase(taskRepo);
-  });
-
-  container.register("GetMyTasksUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    return new GetMyTasksUseCase(taskRepo);
-  });
-
-  // Weitere Use Cases
-  container.register("UnassignMemberUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new UnassignMemberUseCase(taskRepo, permissionService);
-  });
-
-  container.register("GetTasksByMemberUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    return new GetTasksByMemberUseCase(taskRepo);
-  });
-
-  container.register("CompleteTaskUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new CompleteTaskUseCase(taskRepo, permissionService);
-  });
-
-  container.register("BlockTaskUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new BlockTaskUseCase(taskRepo, permissionService);
+  // Context-specific Use Cases
+  container.register("GetTasksByPersonUseCase", () => {
+    return createGetTasksByPersonUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+    );
   });
 
   container.register("GetTasksByTeamUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    return new GetTasksByTeamUseCase(taskRepo);
+    return createGetTasksByTeamUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+    );
   });
 
-  container.register("CreateTaskFromTemplateUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new CreateTaskFromTemplateUseCase(taskRepo, permissionService);
+  container.register("GetTasksByEventUseCase", () => {
+    return createGetTasksByEventUseCase(
+      container.get("TaskRepository"),
+      container.get("EventRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+    );
   });
 
-  container.register("GetTaskCommentsUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    const permissionService = container.get("PermissionService");
-    return new GetTaskCommentsUseCase(taskRepo, permissionService);
+  // Workflow Use Cases
+  container.register("ChangeTaskStatusUseCase", () => {
+    return createChangeTaskStatusUseCase(
+      container.get("TaskRepository"),
+      container.get("TaskPermissionService"),
+      container.get("AuditLogService"),
+    );
   });
 
-  container.register("NotifyTaskAssigneesUseCase", () => {
-    const taskRepo = container.get("TaskRepository");
-    return new NotifyTaskAssigneesUseCase(taskRepo);
+  container.register("CompleteTaskUseCase", () => {
+    return createCompleteTaskUseCase(
+      container.get("TaskRepository"),
+      container.get("TaskPermissionService"),
+      container.get("AuditLogService"),
+    );
   });
 
-  // Controller - mit Factory Function
-  container.register("TaskController", () => {
-    const createTask = container.get("CreateTaskUseCase");
-    const updateTask = container.get("UpdateTaskUseCase");
-    const deleteTask = container.get("DeleteTaskUseCase");
-    const getTaskById = container.get("GetTaskByIdUseCase");
-    const getTasks = container.get("GetTasksUseCase");
-    const changeStatus = container.get("ChangeTaskStatusUseCase");
-    const assignTask = container.get("AssignTaskUseCase");
-    const addComment = container.get("AddTaskCommentUseCase");
-    const getTasksByEvent = container.get("GetTasksByEventUseCase");
-    const getMyTasks = container.get("GetMyTasksUseCase");
+  // Assignment Use Cases
+  container.register("AssignTaskUseCase", () => {
+    return createAssignTaskUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
+      container.get("TaskPermissionService"),
+      container.get("AuditLogService"),
+    );
+  });
 
-    return createTaskController(
-      createTask,
-      updateTask,
-      deleteTask,
-      getTaskById,
-      getTasks,
-      changeStatus,
-      assignTask,
-      addComment,
-      getTasksByEvent,
-      getMyTasks,
+  container.register("AddTaskCommentUseCase", () => {
+    return createAddTaskCommentUseCase(
+      container.get("TaskRepository"),
+      container.get("MemberRepository"),
     );
   });
 };

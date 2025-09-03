@@ -1,15 +1,17 @@
-// apps/api/src/infrastructure/repositories/MySQLTaskRepository.ts
-import type { Task, TaskContext } from "@/domain/entities/Task";
+// apps/api/src/infrastructure/repositories/MySQLTaskRepository.ts (vollständig)
+import type { Task, TaskMaterial } from "@/domain/entities/Task";
+import type { TaskComment } from "@/domain/entities/TaskComment";
 import type {
   ITaskRepository,
   TaskFilters,
-  TaskAuditLogEntry,
 } from "@/domain/repositories/ITaskRepository";
-import type { TaskAssignment } from "@/domain/entities/TaskAssignment";
-import type { TaskComment } from "@/domain/entities/TaskComment";
-import { MySQLConnection } from "./MySQLConnection";
 import { generateId } from "@faninitiative/shared";
+import { MySQLConnection } from "./MySQLConnection";
 
+
+/**
+ * MySQL Implementation des Task Repository
+ */
 export class MySQLTaskRepository implements ITaskRepository {
   constructor(private readonly db: MySQLConnection) {}
 
@@ -45,6 +47,21 @@ export class MySQLTaskRepository implements ITaskRepository {
       ],
     );
 
+    // Zuweisungen speichern
+    if (task.zugewiesenAn.length > 0) {
+      await this.assignMembers(id, task.zugewiesenAn, task.erstelltVon);
+    }
+
+    // Materialien speichern
+    if (task.materialien.length > 0) {
+      await this.saveMaterialien(id, task.materialien);
+    }
+
+    // Abhängigkeiten speichern
+    if (task.abhaengigVon?.length) {
+      await this.saveDependencies(id, task.abhaengigVon);
+    }
+
     return {
       ...task,
       id,
@@ -54,26 +71,38 @@ export class MySQLTaskRepository implements ITaskRepository {
   }
 
   async update(id: string, updates: Partial<Task>): Promise<Task> {
-    const fields = Object.keys(updates)
-      .filter(
-        (key) => !["id", "erstelltAm", "erstelltVon", "context"].includes(key),
-      )
-      .map((key) => `${this.camelToSnake(key)} = ?`)
-      .join(", ");
+    const updateFields: string[] = [];
+    const values: any[] = [];
 
-    const values = Object.entries(updates)
-      .filter(
-        ([key]) =>
-          !["id", "erstelltAm", "erstelltVon", "context"].includes(key),
-      )
-      .map(([_, value]) => value);
+    // Mapping der Update-Felder
+    const fieldMapping: Record<string, string> = {
+      titel: "titel",
+      beschreibung: "beschreibung",
+      verantwortlichId: "verantwortlich_id",
+      status: "status",
+      prioritaet: "prioritaet",
+      frist: "frist",
+      kategorie: "kategorie",
+      erledigtAm: "erledigt_am",
+      erledigtVon: "erledigt_von",
+    };
 
-    values.push(id);
+    Object.entries(updates).forEach(([key, value]) => {
+      if (fieldMapping[key]) {
+        updateFields.push(`${fieldMapping[key]} = ?`);
+        values.push(value);
+      }
+    });
 
-    await this.db.query(
-      `UPDATE tasks SET ${fields}, aktualisiert_am = NOW() WHERE id = ?`,
-      values,
-    );
+    if (updateFields.length > 0) {
+      updateFields.push("aktualisiert_am = NOW()");
+      values.push(id);
+
+      await this.db.query(
+        `UPDATE tasks SET ${updateFields.join(", ")} WHERE id = ?`,
+        values,
+      );
+    }
 
     const updated = await this.findById(id);
     if (!updated) throw new Error("Task not found after update");
@@ -83,24 +112,28 @@ export class MySQLTaskRepository implements ITaskRepository {
 
   async findById(id: string): Promise<Task | null> {
     const [row] = await this.db.query<any[]>(
-      `SELECT t.*,
-              GROUP_CONCAT(DISTINCT ta.mitglied_id) as zugewiesene_ids
+      `SELECT t.*
        FROM tasks t
-       LEFT JOIN task_assignments ta ON t.id = ta.task_id
-       WHERE t.id = ? AND t.geloescht = 0
-       GROUP BY t.id`,
+       WHERE t.id = ? AND t.geloescht = 0`,
       [id],
     );
 
-    return row ? this.mapRowToTask(row) : null;
+    if (!row) return null;
+
+    // Lade zugehörige Daten
+    const [zugewieseneAn, materialien, abhaengigVon] = await Promise.all([
+      this.getAssignedMembers(id),
+      this.getMaterialien(id),
+      this.getDependencies(id),
+    ]);
+
+    return this.mapRowToTask(row, zugewieseneAn, materialien, abhaengigVon);
   }
 
-  async findAll(filters?: TaskFilters): Promise<Task[]> {
+  async findAll(filters?: TaskFilters): Promise<ReadonlyArray<Task>> {
     let sql = `
-      SELECT t.*,
-             GROUP_CONCAT(DISTINCT ta.mitglied_id) as zugewiesene_ids
+      SELECT t.*
       FROM tasks t
-      LEFT JOIN task_assignments ta ON t.id = ta.task_id
       WHERE t.geloescht = 0
     `;
     const params: any[] = [];
@@ -133,7 +166,8 @@ export class MySQLTaskRepository implements ITaskRepository {
     }
 
     if (filters?.zugewiesenAn) {
-      sql += " AND ta.mitglied_id = ?";
+      sql +=
+        " AND EXISTS (SELECT 1 FROM task_assignments ta WHERE ta.task_id = t.id AND ta.mitglied_id = ?)";
       params.push(filters.zugewiesenAn);
     }
 
@@ -152,10 +186,26 @@ export class MySQLTaskRepository implements ITaskRepository {
       params.push(filters.kategorie);
     }
 
-    sql += " GROUP BY t.id ORDER BY t.prioritaet DESC, t.frist ASC";
+    if (filters?.istStandardaufgabe !== undefined) {
+      sql += " AND t.ist_standardaufgabe = ?";
+      params.push(filters.istStandardaufgabe);
+    }
+
+    sql += " ORDER BY t.prioritaet DESC, t.frist ASC";
 
     const rows = await this.db.query<any[]>(sql, params);
-    return rows.map((row) => this.mapRowToTask(row));
+
+    return Promise.all(
+      rows.map(async (row) => {
+        const [zugewiesenAn, materialien, abhaengigVon] = await Promise.all([
+          this.getAssignedMembers(row.id),
+          this.getMaterialien(row.id),
+          this.getDependencies(row.id),
+        ]);
+
+        return this.mapRowToTask(row, zugewiesenAn, materialien, abhaengigVon);
+      }),
+    );
   }
 
   async softDelete(id: string): Promise<void> {
@@ -167,7 +217,7 @@ export class MySQLTaskRepository implements ITaskRepository {
 
   async assignMembers(
     taskId: string,
-    memberIds: string[],
+    memberIds: ReadonlyArray<string>,
     assignedBy: string,
   ): Promise<void> {
     // Erst alle bestehenden löschen
@@ -195,29 +245,17 @@ export class MySQLTaskRepository implements ITaskRepository {
 
   async unassignMember(taskId: string, memberId: string): Promise<void> {
     await this.db.query(
-      `DELETE FROM task_assignments
-       WHERE task_id = ? AND mitglied_id = ?`,
+      `DELETE FROM task_assignments WHERE task_id = ? AND mitglied_id = ?`,
       [taskId, memberId],
     );
   }
 
-  async getAssignments(taskId: string): Promise<TaskAssignment[]> {
+  async getAssignedMembers(taskId: string): Promise<ReadonlyArray<string>> {
     const rows = await this.db.query<any[]>(
-      `SELECT ta.*,
-              CONCAT(m.vorname, ' ', m.nachname) as mitglied_name
-       FROM task_assignments ta
-       JOIN mitglieder m ON ta.mitglied_id = m.id
-       WHERE ta.task_id = ?`,
+      `SELECT mitglied_id FROM task_assignments WHERE task_id = ?`,
       [taskId],
     );
-
-    return rows.map((row) => ({
-      taskId: row.task_id,
-      mitgliedId: row.mitglied_id,
-      zugewiesenAm: new Date(row.zugewiesen_am),
-      zugewiesenVon: row.zugewiesen_von,
-      kommentar: row.kommentar,
-    }));
+    return rows.map((r) => r.mitglied_id);
   }
 
   async addComment(
@@ -247,14 +285,9 @@ export class MySQLTaskRepository implements ITaskRepository {
     };
   }
 
-  async getComments(taskId: string): Promise<TaskComment[]> {
+  async getComments(taskId: string): Promise<ReadonlyArray<TaskComment>> {
     const rows = await this.db.query<any[]>(
-      `SELECT tc.*,
-              CONCAT(m.vorname, ' ', m.nachname) as autor_name
-       FROM task_comments tc
-       JOIN mitglieder m ON tc.autor_id = m.id
-       WHERE tc.task_id = ?
-       ORDER BY tc.erstellt_am DESC`,
+      `SELECT * FROM task_comments WHERE task_id = ? ORDER BY erstellt_am DESC`,
       [taskId],
     );
 
@@ -270,60 +303,160 @@ export class MySQLTaskRepository implements ITaskRepository {
     }));
   }
 
-  async getTasksByEvent(eventId: string): Promise<Task[]> {
+  async getTasksByEvent(eventId: string): Promise<ReadonlyArray<Task>> {
     return this.findAll({
       contextType: "event",
       contextId: eventId,
     });
   }
 
-  async getTasksByTeam(teamId: string): Promise<Task[]> {
+  async getTasksByTeam(teamId: string): Promise<ReadonlyArray<Task>> {
     return this.findAll({
       contextType: "team",
       contextId: teamId,
     });
   }
 
-  async getMyTasks(memberId: string): Promise<Task[]> {
+  async getTasksByMember(memberId: string): Promise<ReadonlyArray<Task>> {
     const sql = `
-      SELECT DISTINCT t.*,
-             GROUP_CONCAT(DISTINCT ta.mitglied_id) as zugewiesene_ids
+      SELECT DISTINCT t.*
       FROM tasks t
-      LEFT JOIN task_assignments ta_all ON t.id = ta_all.task_id
-      LEFT JOIN task_assignments ta ON t.id = ta.task_id AND ta.mitglied_id = ?
+      LEFT JOIN task_assignments ta ON t.id = ta.task_id
       WHERE t.geloescht = 0
-      AND (t.verantwortlich_id = ? OR ta.mitglied_id = ?)
-      GROUP BY t.id
-      ORDER BY t.prioritaet DESC, t.frist ASC`;
+      AND (t.verantwortlich_id = ? OR ta.mitglied_id = ? OR t.erstellt_von = ?)
+      ORDER BY t.prioritaet DESC, t.frist ASC
+    `;
 
     const rows = await this.db.query<any[]>(sql, [
       memberId,
       memberId,
       memberId,
     ]);
-    return rows.map((row) => this.mapRowToTask(row));
-  }
 
-  async createAuditLog(entry: TaskAuditLogEntry): Promise<void> {
-    await this.db.query(
-      `INSERT INTO task_audit_log
-       (id, task_id, aktion, ausgefuehrt_von,
-        alte_werte, neue_werte, ip_adresse, user_agent, erstellt_am)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [
-        generateId(),
-        entry.taskId,
-        entry.aktion,
-        entry.ausgefuehrtVon,
-        entry.alteWerte ? JSON.stringify(entry.alteWerte) : null,
-        entry.neueWerte ? JSON.stringify(entry.neueWerte) : null,
-        entry.ipAdresse,
-        entry.userAgent,
-      ],
+    return Promise.all(
+      rows.map(async (row) => {
+        const [zugewiesenAn, materialien, abhaengigVon] = await Promise.all([
+          this.getAssignedMembers(row.id),
+          this.getMaterialien(row.id),
+          this.getDependencies(row.id),
+        ]);
+
+        return this.mapRowToTask(row, zugewiesenAn, materialien, abhaengigVon);
+      }),
     );
   }
 
-  private mapRowToTask(row: any): Task {
+  async getDependentTasks(taskId: string): Promise<ReadonlyArray<Task>> {
+    const sql = `
+      SELECT DISTINCT t.*
+      FROM tasks t
+      JOIN task_dependencies td ON t.id = td.task_id
+      WHERE td.abhaengig_von_id = ? AND t.geloescht = 0
+    `;
+
+    const rows = await this.db.query<any[]>(sql, [taskId]);
+
+    return Promise.all(
+      rows.map(async (row) => {
+        const [zugewiesenAn, materialien, abhaengigVon] = await Promise.all([
+          this.getAssignedMembers(row.id),
+          this.getMaterialien(row.id),
+          this.getDependencies(row.id),
+        ]);
+
+        return this.mapRowToTask(row, zugewiesenAn, materialien, abhaengigVon);
+      }),
+    );
+  }
+
+  async getBlockedTasks(taskId: string): Promise<ReadonlyArray<Task>> {
+    // Tasks die von dieser Task abhängen und noch nicht erledigt sind
+    const dependentTasks = await this.getDependentTasks(taskId);
+    const task = await this.findById(taskId);
+
+    if (!task || task.status === "erledigt") {
+      return [];
+    }
+
+    return dependentTasks.filter((t) => t.status !== "erledigt");
+  }
+
+  // Private Helper-Methoden
+  private async getMaterialien(
+    taskId: string,
+  ): Promise<ReadonlyArray<TaskMaterial>> {
+    const rows = await this.db.query<any[]>(
+      `SELECT * FROM task_materialien WHERE task_id = ? ORDER BY position`,
+      [taskId],
+    );
+
+    return rows.map((r) => ({
+      name: r.name,
+      menge: r.menge,
+      einheit: r.einheit,
+      beschreibung: r.beschreibung,
+      besorgt: Boolean(r.besorgt),
+      besorgtVon: r.besorgt_von,
+      besorgtAm: r.besorgt_am ? new Date(r.besorgt_am) : undefined,
+    }));
+  }
+
+  private async saveMaterialien(
+    taskId: string,
+    materialien: ReadonlyArray<TaskMaterial>,
+  ): Promise<void> {
+    if (materialien.length === 0) return;
+
+    const values = materialien.map((m, index) => [
+      taskId,
+      m.name,
+      m.menge,
+      m.einheit,
+      m.beschreibung,
+      m.besorgt,
+      m.besorgtVon,
+      m.besorgtAm,
+      index,
+    ]);
+
+    await this.db.query(
+      `INSERT INTO task_materialien
+       (task_id, name, menge, einheit, beschreibung, besorgt, besorgt_von, besorgt_am, position)
+       VALUES ?`,
+      [values],
+    );
+  }
+
+  private async getDependencies(
+    taskId: string,
+  ): Promise<ReadonlyArray<string>> {
+    const rows = await this.db.query<any[]>(
+      `SELECT abhaengig_von_id FROM task_dependencies WHERE task_id = ?`,
+      [taskId],
+    );
+    return rows.map((r) => r.abhaengig_von_id);
+  }
+
+  private async saveDependencies(
+    taskId: string,
+    dependencies: ReadonlyArray<string>,
+  ): Promise<void> {
+    if (dependencies.length === 0) return;
+
+    const values = dependencies.map((depId) => [taskId, depId]);
+
+    await this.db.query(
+      `INSERT INTO task_dependencies (task_id, abhaengig_von_id) VALUES ?`,
+      [values],
+    );
+  }
+
+  private mapRowToTask(
+    row: any,
+    zugewiesenAn: ReadonlyArray<string>,
+    materialien: ReadonlyArray<TaskMaterial>,
+    abhaengigVon: ReadonlyArray<string>,
+  ): Task {
     return {
       id: row.id,
       titel: row.titel,
@@ -333,14 +466,12 @@ export class MySQLTaskRepository implements ITaskRepository {
         id: row.context_id,
       },
       verantwortlichId: row.verantwortlich_id,
-      zugewiesenAn: row.zugewiesene_ids ? row.zugewiesene_ids.split(",") : [],
+      zugewiesenAn,
       status: row.status,
       prioritaet: row.prioritaet,
       frist: row.frist ? new Date(row.frist) : undefined,
-      materialien: row.materialien ? JSON.parse(row.materialien) : [],
-      abhaengigVon: row.abhaengig_von
-        ? JSON.parse(row.abhaengig_von)
-        : undefined,
+      materialien,
+      abhaengigVon: abhaengigVon.length > 0 ? abhaengigVon : undefined,
       istStandardaufgabe: Boolean(row.ist_standardaufgabe),
       kategorie: row.kategorie,
       erstelltVon: row.erstellt_von,
@@ -350,9 +481,5 @@ export class MySQLTaskRepository implements ITaskRepository {
       erledigtVon: row.erledigt_von,
       geloescht: Boolean(row.geloescht),
     };
-  }
-
-  private camelToSnake(str: string): string {
-    return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
   }
 }

@@ -48,7 +48,6 @@ export type CreateTaskUseCase = {
 export const createCreateTaskUseCase = (
   taskRepository: ITaskRepository,
   memberRepository: IMemberRepository,
-  eventRepository: IEventRepository,
   auditLogService: AuditLogService,
 ): CreateTaskUseCase => ({
   execute: async ({ data, userId, userRole, userName, context }) => {

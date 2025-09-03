@@ -7,8 +7,9 @@ import { createBenachrichtigung } from "@/domain/entities/Benachrichtigung";
 import {
   createNotFoundError,
   createPermissionError,
-  createBusinessError
+  createBusinessError,
 } from "@/application/dto/common";
+import { TaskPermissionService } from "@/application/services/TaskPermissionService";
 
 /**
  * Assign Task Parameters
@@ -42,22 +43,22 @@ export type AssignTaskUseCase = {
 export const createAssignTaskUseCase = (
   taskRepository: ITaskRepository,
   memberRepository: IMemberRepository,
-  benachrichtigungRepository: IBenachrichtigungRepository,
-  auditLogService: AuditLogService
+  taskPermissionService: TaskPermissionService,
+  auditLogService: AuditLogService,
 ): AssignTaskUseCase => ({
-  execute: async ({ taskId, memberIds, kommentar, userId, userRole, userName }) => {
+  execute: async (params) => {
     try {
       // 1. Task laden
-      const task = await taskRepository.findById(taskId);
+      const task = await taskRepository.findById(params.taskId);
       if (!task) {
         return {
           success: false,
-          error: createNotFoundError("Task", taskId),
+          error: createNotFoundError("Task", params.taskId),
         };
       }
 
       // 2. Berechtigungsprüfung
-      const canAssign = canAssignTask(task, userId, userRole);
+      const canAssign = canAssignTask(task, params.userId, params.userRole);
       if (!canAssign) {
         return {
           success: false,
@@ -67,7 +68,7 @@ export const createAssignTaskUseCase = (
 
       // 3. Mitglieder validieren
       const validMembers = [];
-      for (const memberId of memberIds) {
+      for (const memberId of params.memberIds) {
         const member = await memberRepository.findById(memberId);
         if (!member?.ist_aktiv) {
           return {
@@ -79,31 +80,32 @@ export const createAssignTaskUseCase = (
       }
 
       // 4. Zuweisungen durchführen
-      await taskRepository.assignMembers(taskId, memberIds, userId);
+      await taskRepository.assignMembers(params.taskId, params.memberIds, params.userId);
 
       // 5. System-Kommentar hinzufügen
-      const memberNames = validMembers.map(m => `${m.vorname} ${m.nachname}`);
+      const memberNames = validMembers.map((m) => `${m.vorname} ${m.nachname}`);
       const commentText = `Mitglieder zugewiesen: ${memberNames.join(", ")}${
-        kommentar ? `\n${kommentar}` : ""
+        params.kommentar ? `\n${params.kommentar}` : ""
       }`;
 
       await taskRepository.addComment({
-        taskId,
-        autorId: userId,
+        taskId: params.taskId,
+        autorId: params.userId,
         text: commentText,
-        erwaehntePersonen: memberIds,
+        erwaehntePersonen: params.memberIds,
       });
 
       // 6. Benachrichtigungen erstellen
       for (const member of validMembers) {
-        if (member.id !== userId) { // Nicht sich selbst benachrichtigen
+        if (member.id !== params.userId) {
+          // Nicht sich selbst benachrichtigen
           const benachrichtigung = createBenachrichtigung({
             empfaengerId: member.id,
             typ: "aufgabe_zugewiesen",
             titel: "Neue Aufgabe zugewiesen",
-            nachricht: `${userName || "Ein Teammitglied"} hat Ihnen die Aufgabe "${task.titel}" zugewiesen.`,
+            nachricht: `${params.userName || "Ein Teammitglied"} hat Ihnen die Aufgabe "${task.titel}" zugewiesen.`,
             kontextTyp: "task",
-            kontextId: taskId,
+            kontextId: params.taskId,
             prioritaet: task.prioritaet === "kritisch" ? "hoch" : "medium",
           });
 
@@ -130,7 +132,6 @@ export const createAssignTaskUseCase = (
         success: true,
         assignedCount: memberIds.length,
       };
-
     } catch (error) {
       console.error("AssignTaskUseCase error:", error);
       return {
@@ -141,7 +142,11 @@ export const createAssignTaskUseCase = (
   },
 });
 
-const canAssignTask = (task: any, userId: string, userRole: string): boolean => {
+const canAssignTask = (
+  task: any,
+  userId: string,
+  userRole: string,
+): boolean => {
   if (["ADMIN", "VORSTAND", "BEIRAT"].includes(userRole)) return true;
   return task.verantwortlichId === userId;
 };
